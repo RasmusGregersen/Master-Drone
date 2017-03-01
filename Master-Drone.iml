@@ -7,8 +7,8 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="libs" level="project" />
-    <orderEntry type="library" name="reflections" level="project" />
-    <orderEntry type="library" name="zxing" level="project" />
+    <orderEntry type="library" exported="" name="libs" level="project" />
+    <orderEntry type="library" exported="" name="reflections" level="project" />
+    <orderEntry type="library" exported="" name="zxing" level="project" />
   </component>
 </module>

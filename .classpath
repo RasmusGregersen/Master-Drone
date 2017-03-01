@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/libs"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/reflections"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/zxing"/>
+	<classpathentry kind="output" path="out/production/Master-Drone"/>
+</classpath>

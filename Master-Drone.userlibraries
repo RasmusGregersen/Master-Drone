@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<eclipse-userlibraries>
+  <library name="libs">
+    <archive path="C:/Users/Rasmus/IdeaProjects/Master-Drone/libs/core.jar" />
+    <archive path="C:/Users/Rasmus/IdeaProjects/Master-Drone/libs/core-3.2.1.jar" />
+    <archive path="C:/Users/Rasmus/IdeaProjects/Master-Drone/libs/opencv-320.jar" />
+    <archive path="C:/Users/Rasmus/IdeaProjects/Master-Drone/libs/yadrone_032.jar" />
+    <archive path="C:/Users/Rasmus/IdeaProjects/Master-Drone/libs/jcommon-1.0.16.jar" />
+    <archive path="C:/Users/Rasmus/IdeaProjects/Master-Drone/libs/commons-net-3.2.jar" />
+    <archive path="C:/Users/Rasmus/IdeaProjects/Master-Drone/libs/slf4j-api-1.7.2.jar" />
+    <archive path="C:/Users/Rasmus/IdeaProjects/Master-Drone/libs/jfreechart-1.0.13.jar" />
+    <archive path="C:/Users/Rasmus/IdeaProjects/Master-Drone/libs/slf4j-jdk14-1.7.2.jar" />
+    <archive path="C:/Users/Rasmus/IdeaProjects/Master-Drone/libs/xuggle-xuggler-5.4.jar" />
+  </library>
+  <library name="reflections">
+    <archive path="C:/Users/Rasmus/IdeaProjects/Master-Drone/libs/reflections/guava-11.0.2.jar" />
+    <archive path="C:/Users/Rasmus/IdeaProjects/Master-Drone/libs/reflections/javassist-3.16.1-GA.jar" />
+    <archive path="C:/Users/Rasmus/IdeaProjects/Master-Drone/libs/reflections/reflections-0.9.9-RC1.jar" />
+  </library>
+  <library name="zxing">
+    <archive path="C:/Users/Rasmus/IdeaProjects/Master-Drone/libs/zxing/core-2.2.jar" />
+    <archive path="C:/Users/Rasmus/IdeaProjects/Master-Drone/libs/zxing/javase-2.2.jar" />
+  </library>
+</eclipse-userlibraries>
+
