@@ -51,7 +51,7 @@ public class PaperChase
 	
 	public static void main(String[] args)
 	{
-		new de.yadrone.apps.paperchase.PaperChase();
+		new PaperChase();
 	}
 	
 }
