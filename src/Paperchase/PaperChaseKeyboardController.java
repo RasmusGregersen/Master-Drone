@@ -1,3 +1,5 @@
+package Paperchase;
+
 import de.yadrone.apps.controlcenter.plugins.keyboard.KeyboardCommandManager;
 import de.yadrone.base.IARDrone;
 
@@ -18,7 +20,7 @@ public class PaperChaseKeyboardController extends PaperChaseAbstractController
         keyboardCommandManager = new KeyboardCommandManager(drone);
 		
 		// CommandManager handles (keyboard) input and dispatches events to the drone		
-		System.out.println("PaperChaseKeyboardController: grab the whole keyboard input from now on ...");
+		System.out.println("Paperchase.PaperChaseKeyboardController: grab the whole keyboard input from now on ...");
 		KeyboardFocusManager manager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
         manager.addKeyEventDispatcher(keyEventDispatcher);
 	}
