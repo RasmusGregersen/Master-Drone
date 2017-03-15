@@ -1,3 +1,5 @@
+package Paperchase;
+
 import de.yadrone.base.ARDrone;
 import de.yadrone.base.IARDrone;
 import de.yadrone.base.command.VideoChannel;
@@ -10,7 +12,7 @@ public class PaperChase
 	public final static int TOLERANCE = 40;
 	
 	private IARDrone drone = null;
-	private PaperChaseAbstractController autoController;
+	private PaperChaseAutoController autoController;
 	private QRCodeScanner scanner = null;
 	
 	public PaperChase()
@@ -45,7 +47,7 @@ public class PaperChase
 		else
 		{
 			autoController.stopController();
-			scanner.removeListener(autoController); // only auto autoController registers as TagListener
+			scanner.removeListener(autoController); // only auto autoController registers as Paperchase.TagListener
 		}
 	}
 	

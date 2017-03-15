@@ -1,3 +1,5 @@
+package Paperchase;
+
 import com.google.zxing.Result;
 import com.google.zxing.ResultPoint;
 import de.yadrone.base.IARDrone;
