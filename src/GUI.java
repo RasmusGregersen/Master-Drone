@@ -1,5 +1,3 @@
-package Paperchase;
-
 import com.google.zxing.Result;
 import com.google.zxing.ResultPoint;
 import de.yadrone.base.IARDrone;
@@ -15,17 +13,17 @@ import java.awt.image.BufferedImage;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class PaperChaseGUI extends JFrame implements ImageListener, TagListener
+public class GUI extends JFrame implements ImageListener, TagListener
 {
-	private PaperChase main;
+	private MasterDrone main;
 	private IARDrone drone;
 
 	private BufferedImage image = null;
 	private Result result;
 	private String orientation;
 
-	private String[] shredsToFind = new String[] {"Shred 1", "Shred 2"};
-	private boolean[] shredsFound = new boolean[] {false, false};
+	private String[] ringsToFind = new String[] {"Ring 1", "Ring 2"};
+	private boolean[] ringsFound = new boolean[] {false, false};
 
 	private JPanel videoPanel;
 
@@ -35,16 +33,16 @@ public class PaperChaseGUI extends JFrame implements ImageListener, TagListener
 
 	private boolean gameOver = false;
 
-	public PaperChaseGUI(final IARDrone drone, PaperChase main)
+	public GUI(final IARDrone drone, MasterDrone main)
 	{
-		super("YADrone Paper Chase");
+		super("Master Drone");
 
 		this.main = main;
 		this.drone = drone;
 
 		createMenuBar();
 
-        setSize(PaperChase.IMAGE_WIDTH, PaperChase.IMAGE_HEIGHT);
+        setSize(MasterDrone.IMAGE_WIDTH, MasterDrone.IMAGE_HEIGHT);
         setVisible(true);
         setResizable(false);
 
@@ -56,8 +54,6 @@ public class PaperChaseGUI extends JFrame implements ImageListener, TagListener
 		});
 
         setLayout(new GridBagLayout());
-
-        add(createVideoPanel(), new GridBagConstraints(0, 0, 1, 2, 1, 1, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.BOTH, new Insets(0,0,0,0), 0, 0));
 
         // add listener to be notified once the drone takes off so that the game timer counter starts
         drone.getNavDataManager().addStateListener(new StateListener() {
@@ -81,7 +77,7 @@ public class PaperChaseGUI extends JFrame implements ImageListener, TagListener
 	{
 		JMenu options = new JMenu("Options");
 
-		final JCheckBoxMenuItem autoControlMenuItem = new JCheckBoxMenuItem("Auto-Control (experimental)");
+		final JCheckBoxMenuItem autoControlMenuItem = new JCheckBoxMenuItem("Start autonomous flight");
 		autoControlMenuItem.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e)
 			{
@@ -115,22 +111,22 @@ public class PaperChaseGUI extends JFrame implements ImageListener, TagListener
         			// draw "Shreds to find"
     				g.setColor(Color.RED);
     				g.setFont(tagFont);
-    				g.drawString("Shreds to find", 10, 20);
-    				for (int i=0; i < shredsToFind.length; i++)
+    				g.drawString("Rings to find", 10, 20);
+    				for (int i = 0; i < ringsToFind.length; i++)
     				{
-    					if (shredsFound[i])
+    					if (ringsFound[i])
     						g.setColor(Color.GREEN.darker());
     					else
     						g.setColor(Color.RED);
-    					g.drawString(shredsToFind[i], 30, 40 + (i*20));
+    					g.drawString(ringsToFind[i], 30, 40 + (i*20));
     				}
 
         			// draw tolerance field (rectangle)
         			g.setColor(Color.RED);
 
-    				int imgCenterX = PaperChase.IMAGE_WIDTH / 2;
-    				int imgCenterY = PaperChase.IMAGE_HEIGHT / 2;
-    				int tolerance = PaperChase.TOLERANCE;
+    				int imgCenterX = MasterDrone.IMAGE_WIDTH / 2;
+    				int imgCenterY = MasterDrone.IMAGE_HEIGHT / 2;
+    				int tolerance = MasterDrone.TOLERANCE;
 
     				g.drawPolygon(new int[] {imgCenterX-tolerance, imgCenterX+tolerance, imgCenterX+tolerance, imgCenterX-tolerance},
 						      		  new int[] {imgCenterY-tolerance, imgCenterY-tolerance, imgCenterY+tolerance, imgCenterY+tolerance}, 4);
@@ -163,7 +159,7 @@ public class PaperChaseGUI extends JFrame implements ImageListener, TagListener
         			// draw "Congrats" if all tags have been detected
         			if (gameOver)
         			{
-        				String str = "Congratulation !";
+        				String str = "All rings found!";
 
         				g.setColor(Color.GREEN.darker());
         				g.setFont(gameOverFont);
@@ -185,7 +181,7 @@ public class PaperChaseGUI extends JFrame implements ImageListener, TagListener
         			// draw "Waiting for video"
         			g.setColor(Color.RED);
     				g.setFont(tagFont);
-        			g.drawString("Waiting for Video ...", 10, 20);
+        			g.drawString("Waiting for VideoRecognition ...", 10, 20);
         		}
         	}
         };
@@ -198,32 +194,13 @@ public class PaperChaseGUI extends JFrame implements ImageListener, TagListener
 			}
 		});
 
-        videoPanel.setSize(PaperChase.IMAGE_WIDTH, PaperChase.IMAGE_HEIGHT);
-        videoPanel.setMinimumSize(new Dimension(PaperChase.IMAGE_WIDTH, PaperChase.IMAGE_HEIGHT));
-        videoPanel.setPreferredSize(new Dimension(PaperChase.IMAGE_WIDTH, PaperChase.IMAGE_HEIGHT));
-        videoPanel.setMaximumSize(new Dimension(PaperChase.IMAGE_WIDTH, PaperChase.IMAGE_HEIGHT));
+        videoPanel.setSize(MasterDrone.IMAGE_WIDTH, MasterDrone.IMAGE_HEIGHT);
+        videoPanel.setMinimumSize(new Dimension(MasterDrone.IMAGE_WIDTH, MasterDrone.IMAGE_HEIGHT));
+        videoPanel.setPreferredSize(new Dimension(MasterDrone.IMAGE_WIDTH, MasterDrone.IMAGE_HEIGHT));
+        videoPanel.setMaximumSize(new Dimension(MasterDrone.IMAGE_WIDTH, MasterDrone.IMAGE_HEIGHT));
         
         return videoPanel;
 	}
-	
-//	private JPanel createButtonPanel()
-//	{
-//		JPanel buttonPanel = new JPanel();
-//		
-//		JButton toggleCamButton = new JButton("Toggle Camera");
-//		toggleCamButton.addActionListener(new ActionListener() {
-//			
-//			@Override
-//			public void actionPerformed(ActionEvent e)
-//			{
-//				drone.toggleCamera();
-//			}
-//		});
-//		
-//		buttonPanel.add(toggleCamButton);
-//		
-//		return buttonPanel;
-//	}
 	
 	private long imageCount = 0;
 	
@@ -249,20 +226,20 @@ public class PaperChaseGUI extends JFrame implements ImageListener, TagListener
 			this.orientation = orientation + "�";
 			
 			// check if that's a tag (shred) which has not be seen before and mark it as 'found'
-			for (int i=0; i < shredsToFind.length; i++)
+			for (int i = 0; i < ringsToFind.length; i++)
 			{
-				if (shredsToFind[i].equals(result.getText()))
+				if (ringsToFind[i].equals(result.getText()))
 				{
-					shredsToFind[i] = shredsToFind[i] + " - " + gameTime;
-					shredsFound[i] = true;
+					ringsToFind[i] = ringsToFind[i] + " - " + gameTime;
+					ringsFound[i] = true;
 				}
 			}
 			
 			// now check if all shreds have been found and if so, set the gameOver flag
 			boolean isGameOver = true;
-			for (int i=0; i < shredsFound.length; i++)
+			for (int i = 0; i < ringsFound.length; i++)
 			{
-				if (shredsFound[i] == false)
+				if (ringsFound[i] == false)
 					isGameOver = false;
 			}
 			

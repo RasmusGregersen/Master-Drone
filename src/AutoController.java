@@ -1,5 +1,3 @@
-package Paperchase;
-
 import com.google.zxing.Result;
 import com.google.zxing.ResultPoint;
 import de.yadrone.base.IARDrone;
@@ -8,22 +6,22 @@ import de.yadrone.base.command.LEDAnimation;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class PaperChaseAutoController extends PaperChaseAbstractController implements TagListener
+public class AutoController extends AbstractController implements TagListener
 {
 	private final static int SPEED = 5;
 	private final static int SLEEP = 500;
-	
+
 	/* This list holds tag-IDs for all tags which have successfully been visited */
 	private ArrayList<String> tagVisitedList = new ArrayList<String>();
-	
+
 	private Result tag;
 	private float tagOrientation;
-	
-	public PaperChaseAutoController(IARDrone drone)
+
+	public AutoController(IARDrone drone)
 	{
 		super(drone);
 	}
-	
+
 	public void run()
 	{
 		while(!doStop) // control loop
@@ -32,7 +30,7 @@ public class PaperChaseAutoController extends PaperChaseAbstractController imple
 			{
 				if ((tag != null) && (System.currentTimeMillis() - tag.getTimestamp() > 500)) // reset if too old (and not updated)
 					tag = null;
-				
+
 				if ((tag == null) || hasTagBeenVisited())
 				{
 					strayAround();
@@ -43,7 +41,7 @@ public class PaperChaseAutoController extends PaperChaseAbstractController imple
 				}
 				else
 				{
-					System.out.println("Paperchase.PaperChaseAutoController: I do not know what to do ...");
+					System.out.println("AutoController: I do not know what to do ...");
 				}
 			}
 			catch(Exception exc)
@@ -57,39 +55,39 @@ public class PaperChaseAutoController extends PaperChaseAbstractController imple
 	{
 		if (result == null) // ToDo: do not call if no tag is present
 			return;
-		
-		System.out.println("Paperchase.PaperChaseAutoController: Tag found");
+
+		System.out.println("AutoController: Tag found");
 
 		tag = result;
 		tagOrientation = orientation;
 	}
-	
-	
+
+
 	private boolean isTagCentered()
 	{
 		if (tag == null)
 			return false;
-		
+
 		// a tag is centered if it is
-		// 1. if "Point 1" (on the tag the upper left point) is near the center of the camera  
+		// 1. if "Point 1" (on the tag the upper left point) is near the center of the camera
 		// 2. orientation is between 350 and 10 degrees
-		
-		int imgCenterX = PaperChase.IMAGE_WIDTH / 2;
-		int imgCenterY = PaperChase.IMAGE_HEIGHT / 2;
-		
+
+		int imgCenterX = MasterDrone.IMAGE_WIDTH / 2;
+		int imgCenterY = MasterDrone.IMAGE_HEIGHT / 2;
+
 		ResultPoint[] points = tag.getResultPoints();
-		boolean isCentered = ((points[1].getX() > (imgCenterX - PaperChase.TOLERANCE)) &&
-			(points[1].getX() < (imgCenterX + PaperChase.TOLERANCE)) &&
-			(points[1].getY() > (imgCenterY - PaperChase.TOLERANCE)) &&
-			(points[1].getY() < (imgCenterY + PaperChase.TOLERANCE)));
+		boolean isCentered = ((points[1].getX() > (imgCenterX - MasterDrone.TOLERANCE)) &&
+			(points[1].getX() < (imgCenterX + MasterDrone.TOLERANCE)) &&
+			(points[1].getY() > (imgCenterY - MasterDrone.TOLERANCE)) &&
+			(points[1].getY() < (imgCenterY + MasterDrone.TOLERANCE)));
 
 		boolean isOriented = ((tagOrientation < 10) || (tagOrientation > 350));
-			
-		System.out.println("Paperchase.PaperChaseAutoController: Tag centered ? " + isCentered + " Tag oriented ? " + isOriented);
-		
+
+		System.out.println("AutoController: Tag centered ? " + isCentered + " Tag oriented ? " + isOriented);
+
 		return isCentered && isOriented;
 	}
-	
+
 	private boolean hasTagBeenVisited()
 	{
 		synchronized(tag)
@@ -100,80 +98,80 @@ public class PaperChaseAutoController extends PaperChaseAbstractController imple
 					return true;
 			}
 		}
-		
+
 		return false;
 	}
-	
+
 	private void strayAround() throws InterruptedException
 	{
 		int direction = new Random().nextInt() % 4;
 		switch(direction)
 		{
-			case 0 : drone.getCommandManager().forward(SPEED); System.out.println("Paperchase.PaperChaseAutoController: Stray Around: FORWARD"); break;
-			case 1 : drone.getCommandManager().backward(SPEED); System.out.println("Paperchase.PaperChaseAutoController: Stray Around: BACKWARD");break;
-			case 2 : drone.getCommandManager().goLeft(SPEED); System.out.println("Paperchase.PaperChaseAutoController: Stray Around: LEFT"); break;
-			case 3 : drone.getCommandManager().goRight(SPEED); System.out.println("Paperchase.PaperChaseAutoController: Stray Around: RIGHT");break;
+			case 0 : drone.getCommandManager().forward(SPEED); System.out.println("AutoController: Stray Around: FORWARD"); break;
+			case 1 : drone.getCommandManager().backward(SPEED); System.out.println("AutoController: Stray Around: BACKWARD");break;
+			case 2 : drone.getCommandManager().goLeft(SPEED); System.out.println("AutoController: Stray Around: LEFT"); break;
+			case 3 : drone.getCommandManager().goRight(SPEED); System.out.println("AutoController: Stray Around: RIGHT");break;
 		}
-		
+
 		Thread.currentThread().sleep(SLEEP);
 	}
-	
+
 	private void centerTag() throws InterruptedException
 	{
 		String tagText;
 		ResultPoint[] points;
-		
+
 		synchronized(tag)
 		{
-			points = tag.getResultPoints();	
+			points = tag.getResultPoints();
 			tagText = tag.getText();
 		}
-		
-		int imgCenterX = PaperChase.IMAGE_WIDTH / 2;
-		int imgCenterY = PaperChase.IMAGE_HEIGHT / 2;
-		
+
+		int imgCenterX = MasterDrone.IMAGE_WIDTH / 2;
+		int imgCenterY = MasterDrone.IMAGE_HEIGHT / 2;
+
 		float x = points[1].getX();
 		float y = points[1].getY();
-		
+
 		if ((tagOrientation > 10) && (tagOrientation < 180))
 		{
-			System.out.println("Paperchase.PaperChaseAutoController: Spin left");
+			System.out.println("AutoController: Spin left");
 			drone.getCommandManager().spinLeft(SPEED * 2);
 			Thread.currentThread().sleep(SLEEP);
 		}
 		else if ((tagOrientation < 350) && (tagOrientation > 180))
 		{
-			System.out.println("Paperchase.PaperChaseAutoController: Spin right");
+			System.out.println("AutoController: Spin right");
 			drone.getCommandManager().spinRight(SPEED * 2);
 			Thread.currentThread().sleep(SLEEP);
 		}
-		else if (x < (imgCenterX - PaperChase.TOLERANCE))
+		else if (x < (imgCenterX - MasterDrone.TOLERANCE))
 		{
-			System.out.println("Paperchase.PaperChaseAutoController: Go left");
+			System.out.println("AutoController: Go left");
 			drone.getCommandManager().goLeft(SPEED);
 			Thread.currentThread().sleep(SLEEP);
 		}
-		else if (x > (imgCenterX + PaperChase.TOLERANCE))
+		else if (x > (imgCenterX + MasterDrone.TOLERANCE))
 		{
-			System.out.println("Paperchase.PaperChaseAutoController: Go right");
+			System.out.println("AutoController: Go right");
 			drone.getCommandManager().goRight(SPEED);
 			Thread.currentThread().sleep(SLEEP);
 		}
-		else if (y < (imgCenterY - PaperChase.TOLERANCE))
+		else if (y < (imgCenterY - MasterDrone.TOLERANCE))
 		{
-			System.out.println("Paperchase.PaperChaseAutoController: Go forward");
+			System.out.println("AutoController: Go forward");
 			drone.getCommandManager().forward(SPEED);
 			Thread.currentThread().sleep(SLEEP);
 		}
-		else if (y > (imgCenterY + PaperChase.TOLERANCE))
+		else if (y > (imgCenterY + MasterDrone.TOLERANCE))
 		{
-			System.out.println("Paperchase.PaperChaseAutoController: Go backward");
+			System.out.println("AutoController: Go backward");
 			drone.getCommandManager().backward(SPEED);
 			Thread.currentThread().sleep(SLEEP);
 		}
 		else
 		{
-			System.out.println("Paperchase.PaperChaseAutoController: Tag centered");
+			System.out.println("AutoController: Tag centered");
 			drone.getCommandManager().setLedsAnimation(LEDAnimation.BLINK_GREEN, 10, 5);
 			
 			tagVisitedList.add(tagText);

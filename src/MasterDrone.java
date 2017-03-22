@@ -1,34 +1,34 @@
-package Paperchase;
-
 import de.yadrone.base.ARDrone;
 import de.yadrone.base.IARDrone;
+import de.yadrone.base.command.H264;
 import de.yadrone.base.command.VideoChannel;
+import de.yadrone.base.command.VideoCodec;
 
-public class PaperChase 
+public class MasterDrone
 {
-	public final static int IMAGE_WIDTH = 640; // 640 or 1280
-	public final static int IMAGE_HEIGHT = 360; // 360 or 720
+	public final static int IMAGE_WIDTH = 640;
+	public final static int IMAGE_HEIGHT = 360;
 	
 	public final static int TOLERANCE = 40;
 	
 	private IARDrone drone = null;
-	private PaperChaseAutoController autoController;
+	private AutoController autoController;
 	private QRCodeScanner scanner = null;
 	
-	public PaperChase()
+	public MasterDrone()
 	{
 		drone = new ARDrone();
 		drone.start();
 		drone.getCommandManager().setVideoChannel(VideoChannel.HORI);
-		
-		PaperChaseGUI gui = new PaperChaseGUI(drone, this);
+
+		GUI gui = new GUI(drone, this);
 		
 		// keyboard controller is always enabled and cannot be disabled (for safety reasons)
-		PaperChaseKeyboardController keyboardController = new PaperChaseKeyboardController(drone);
+		KeyboardController keyboardController = new KeyboardController(drone);
 		keyboardController.start();
 		
 		// auto controller is instantiated, but not started
-		autoController = new PaperChaseAutoController(drone);
+		autoController = new AutoController(drone);
 		
 		scanner = new QRCodeScanner();
 		scanner.addListener(gui);
@@ -47,13 +47,13 @@ public class PaperChase
 		else
 		{
 			autoController.stopController();
-			scanner.removeListener(autoController); // only auto autoController registers as Paperchase.TagListener
+			scanner.removeListener(autoController); // only auto autoController registers as TagListener
 		}
 	}
 	
 	public static void main(String[] args)
 	{
-		new PaperChase();
+		new MasterDrone();
 	}
 	
 }
