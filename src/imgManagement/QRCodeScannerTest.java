@@ -20,6 +20,7 @@ class Controller implements TagListener {
 			System.out.println("No tag result!");
 			return; 
 		}
+		System.out.print("orientation: "+orientation + ". ");
 		System.out.println("Tag found: "+ result.getText());			
 	}
 }

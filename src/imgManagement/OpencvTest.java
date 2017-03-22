@@ -4,6 +4,7 @@ import java.awt.FlowLayout;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -16,8 +17,11 @@ import org.opencv.imgproc.Imgproc;
 
 public class OpencvTest {
 	
-	private static String imgLoc = "assets/circles.jpg";
-
+	private static String imgLoc = "assets/hoop.jpg";
+	private static final double DP = 1.1; // Basicly tolerence
+	private static final int MIN_DIST = 50; // Minimum distance between center points
+	private static final int BLUR = 9; // Blur amount, removes noise - must be uneven
+	
 	public static void main(String[] args) {
 		// Load libs
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
@@ -67,6 +71,10 @@ public class OpencvTest {
 	}
 	
 
+	/**
+	 * Detects and shows circles in an image
+	 * @param image The image to detect circles on and display.
+	 */
 	public static void circleTest(Mat image) {
 		Mat output = image.clone();
 		Mat gray = image.clone();
@@ -75,7 +83,9 @@ public class OpencvTest {
 		
 		// Detect circles
 		Mat circles = new Mat();
-		Imgproc.HoughCircles(gray, circles, Imgproc.CV_HOUGH_GRADIENT,1.3, 50);
+		Size s = new Size(BLUR,BLUR);
+		Imgproc.GaussianBlur(gray, gray, s, 2);
+		Imgproc.HoughCircles(gray, circles, Imgproc.CV_HOUGH_GRADIENT, DP, MIN_DIST);
 		if (!circles.empty()){
 			System.out.println("#rows "+ circles.rows() +", #cols: "+ circles.cols());
 			Point point;
