@@ -1,13 +1,13 @@
 import com.google.zxing.Result;
 import de.yadrone.base.IARDrone;
 
-public abstract class PaperChaseAbstractController extends Thread implements TagListener
+public abstract class AbstractController extends Thread implements TagListener
 {
 	protected boolean doStop = false;
 
 	protected IARDrone drone;
 	
-	public PaperChaseAbstractController(IARDrone drone)
+	public AbstractController(IARDrone drone)
 	{
 		this.drone = drone;
 	}
