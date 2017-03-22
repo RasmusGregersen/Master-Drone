@@ -23,7 +23,8 @@ public class OpencvTest {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 		// Load image
 		Mat img = loadImg();
-		circleTest(img);
+		if (img != null)
+			circleTest(img);
 	}
 	
 	
@@ -35,7 +36,7 @@ public class OpencvTest {
 		Mat image;
 		image = Imgcodecs.imread(imgLoc, Imgcodecs.IMREAD_COLOR);
 		if (image.empty()){
-			System.out.println("Empty image!");
+			System.out.println("Couldn't load image!");
 			return null;
 		} else
 		return image;
