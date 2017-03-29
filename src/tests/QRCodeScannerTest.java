@@ -41,9 +41,19 @@ public class QRCodeScannerTest {
 		
 		// Send some images
 		BufferedImage img = null;
-		String[] images = {"assets/qr.jpg","assets/qr2.jpg","assets/qr3.jpg",
-				"assets/qr4.jpg","assets/qr5.jpg","assets/demo1.jpg","assets/demo2.jpg"
-				,"assets/demo3.jpg","assets/demo4.jpg"};
+		String[] images = {
+				"assets/qr.jpg",
+				"assets/qr2.jpg",
+				"assets/qr3.jpg",
+				"assets/qr4.jpg",
+				"assets/qr5.jpg",
+				"assets/demo1.jpg",
+				"assets/demo2.jpg",
+				"assets/demo3.jpg",
+				"assets/demo4.jpg",
+				"assets/ny_demo1.jpg",
+				"assets/ny_demo2.jpg"};
+		long time = System.currentTimeMillis();
 		for (String file : images) {
 			try {
 				System.out.print(file + ": ");
@@ -53,6 +63,7 @@ public class QRCodeScannerTest {
 			} catch (IOException e) {
 			}
 		}
+		System.out.println("Time taken: " + (System.currentTimeMillis() - time) + " ms.");
 		
 	}
 }

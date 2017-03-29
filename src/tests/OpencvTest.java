@@ -18,20 +18,26 @@ import org.opencv.imgproc.Imgproc;
 import imgManagement.CircleFinder;
 
 public class OpencvTest {
-	private static final boolean testAll = false;
+	private static final boolean testAll = true;
 	
 	public static void main(String[] args) {
 		// Load libs
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 		
-		String[] images = {"assets/demo1.jpg","assets/demo2.jpg"
-				,"assets/demo3.jpg","assets/demo4.jpg"};
+		String[] images = {
+				"assets/demo1.jpg",
+				"assets/demo2.jpg",
+				"assets/demo3.jpg",
+				"assets/demo4.jpg",
+				"assets/ny_demo1.jpg",
+				"assets/ny_demo2.jpg"
+				};
 		if (testAll){
 			for (String img : images) 
 				findCircleTest(img);
 			
 		} else
-			findCircleTest("assets/circles.jpg");
+			findCircleTest("assets/demo3.jpg");
 	}
 	
 	public static void findCircleTest(String imgLoc){
