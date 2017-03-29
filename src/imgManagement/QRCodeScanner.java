@@ -2,8 +2,12 @@ package imgManagement;
 
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
+import com.google.zxing.BarcodeFormat;
 import com.google.zxing.BinaryBitmap;
+import com.google.zxing.DecodeHintType;
 import com.google.zxing.LuminanceSource;
 import com.google.zxing.ReaderException;
 import com.google.zxing.Result;
@@ -43,6 +47,9 @@ public class QRCodeScanner implements ImageListener {
 
 		// decode the QR code
 		QRCodeReader reader = new QRCodeReader();
+		
+		Map<DecodeHintType,BarcodeFormat> readerHint = new HashMap();
+		readerHint.put(DecodeHintType.valueOf("POSSIBLE_FORMATS"), BarcodeFormat.QR_CODE);
 
 		double theta = Double.NaN;
 		try
@@ -79,7 +86,7 @@ public class QRCodeScanner implements ImageListener {
 			// no code found.
 			scanResult = null;
 		}
-
+		
 		// inform all listeners
 		for (int i=0; i < listener.size(); i++)
 			listener.get(i).onTag(scanResult, (float)theta);

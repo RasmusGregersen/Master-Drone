@@ -28,7 +28,10 @@ class Controller implements TagListener {
 			return; 
 		}
 		System.out.print("orientation: "+orientation + ". ");
-		System.out.println("Tag found: "+ result.getText());			
+		System.out.print("Tag found: "+ result.getText());	
+		for (ResultPoint p : result.getResultPoints())
+			System.out.print(" " + p);
+		System.out.println();
 	}
 }
 
@@ -52,7 +55,9 @@ public class QRCodeScannerTest {
 				"assets/demo3.jpg",
 				"assets/demo4.jpg",
 				"assets/ny_demo1.jpg",
-				"assets/ny_demo2.jpg"};
+				"assets/ny_demo2.jpg",
+				"assets/ny_demo3.jpg",
+				"assets/ny_demo4.jpg",};
 		long time = System.currentTimeMillis();
 		for (String file : images) {
 			try {
