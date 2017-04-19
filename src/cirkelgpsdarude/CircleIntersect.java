@@ -16,6 +16,9 @@ public class CircleIntersect {
     }
 
     public CircleIntersect() {
+
+        long start = System.currentTimeMillis();
+
         double x0 = 5;
         double y0 = 12;
         double x1 = 8;
@@ -24,7 +27,6 @@ public class CircleIntersect {
         double y2 = 12;
         double dronex = 3;
         double droney = 3;
-
 
         circleTest(x0, y0, x1, y1, x2, y2, dronex, droney);
 
@@ -37,12 +39,12 @@ public class CircleIntersect {
         System.out.println(a[1]);
         System.out.println(a[2]);
 
-        System.out.println(circleIntercept(a,b,x1,y1)[0]);
-        System.out.println(circleIntercept(a,b,x1,y1)[1]);
+        double interceptCord[] = circleIntercept(a,b,x1,y1);
 
+        System.out.println(interceptCord[0] + ", " + interceptCord[1]);
 
-
-
+        long elapsedTime = System.currentTimeMillis() - start;
+        System.out.println(elapsedTime);
     }
 
     public void circleTest(double x1, double y1, double x2, double y2, double x3, double y3, double dronex, double droney) {
