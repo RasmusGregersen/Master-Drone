@@ -4,6 +4,8 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Random;
 
+import org.opencv.core.Mat;
+
 import com.google.zxing.Result;
 import com.google.zxing.ResultPoint;
 
@@ -192,5 +194,17 @@ public class MainDroneController extends AbstractController implements TagListen
 			System.out.printf("Circle %d: (%d,%d) r = %f.\n", i, circles[i].x, circles[i].y, circles[i].getRadius());
 		}
 		
+	}
+	/**
+	 * Same as above, used for testing
+	 * @param image
+	 */
+	public void imageUpdated(Mat image) {		
+		if ((imageCount++ % frameSkip) != 0)
+			return;
+		Circle[] circles = CircleFinder.findCircles(image);
+		for(int i = 0; i < circles.length; i++){
+			System.out.printf("Circle %d: (%d,%d) r = %f.\n", i, circles[i].x, circles[i].y, circles[i].getRadius());
+		}
 	}
 }

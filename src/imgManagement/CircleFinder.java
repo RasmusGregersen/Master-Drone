@@ -35,7 +35,7 @@ public class CircleFinder {
 		Size imgSize = new Size(0,0);
 		if (image.size().height > 1200)
 			Imgproc.resize(image, image, imgSize, 0.5,0.5,1);
-		System.out.println(image.size());
+		//System.out.println(image.size());
 		Mat output = image.clone();
 		Mat gray = image.clone();
 		// Get the gray img
