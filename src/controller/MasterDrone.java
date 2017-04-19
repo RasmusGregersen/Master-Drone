@@ -25,9 +25,9 @@ public class MasterDrone {
 		keyboardController.start();
 
 		droneController = new MainDroneController(drone);
-
+		drone.getVideoManager().addImageListener(droneController);
+		
 		scanner = new QRCodeScanner();
-
 		drone.getVideoManager().addImageListener(scanner);
 	}
 
