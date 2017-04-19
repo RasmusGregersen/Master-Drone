@@ -26,6 +26,11 @@ public class Circle {
 		this.r = (double) r;
 	}
 	
+	
+	/**
+	 * Retrieves a point object. x and y are obtainable with getPoint().x and getPoint().y
+	 * @return {@link Point}
+	 */
 	public Point getPoint(){
 		return new Point(this.x, this.y);
 	}
