@@ -5,12 +5,13 @@ import org.opencv.core.Core;
 import de.yadrone.base.ARDrone;
 import de.yadrone.base.IARDrone;
 import de.yadrone.base.command.VideoChannel;
+import de.yadrone.base.command.VideoCodec;
 import imgManagement.QRCodeScanner;
 
 public class MasterDrone {
 
-	public final static int IMAGE_WIDTH = 640;
-	public final static int IMAGE_HEIGHT = 360;
+	public final static int IMAGE_WIDTH = 1280;
+	public final static int IMAGE_HEIGHT = 720;
 
 	public final static int TOLERANCE = 40;
 
@@ -23,6 +24,7 @@ public class MasterDrone {
 		drone = new ARDrone();
 		drone.start();
 		drone.getCommandManager().setVideoChannel(VideoChannel.VERT);
+		drone.getCommandManager().setConfigurationIds().setVideoCodec(VideoCodec.H264_720P);
 		
 		GUI gui = new GUI(drone, this);
 
@@ -34,6 +36,7 @@ public class MasterDrone {
 		
 		scanner = new QRCodeScanner();
 		scanner.addListener(droneController);
+		scanner.addListener(gui);
 		drone.getVideoManager().addImageListener(gui);
 		drone.getVideoManager().addImageListener(scanner);
 	}
