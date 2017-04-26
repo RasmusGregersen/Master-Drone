@@ -22,6 +22,8 @@ public class OpenCVImageTest {
 	private static Mat hierarchy;
 	
 	public static void main(String[] args) {
+		System.out.println(System.getProperty("java.library.path"));
+
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 		Mat image;
 		image = Imgcodecs.imread(imgName, Imgcodecs.IMREAD_COLOR);
