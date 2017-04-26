@@ -33,9 +33,12 @@ public class KeyboardController extends AbstractController
     	
     	public boolean dispatchKeyEvent(KeyEvent e)
 		{
+    		System.out.println("Key registered");
 			if (e.getID() == KeyEvent.KEY_PRESSED) 
 			{
                 keyboardCommandManager.keyPressed(e);
+				// TODO For now any key command just kills the drone
+				//drone.reset();
             } 
 			else if (e.getID() == KeyEvent.KEY_RELEASED) 
             {

@@ -1,5 +1,7 @@
 package controller;
 
+import org.opencv.core.Core;
+
 import de.yadrone.base.ARDrone;
 import de.yadrone.base.IARDrone;
 import de.yadrone.base.command.VideoChannel;
@@ -17,9 +19,12 @@ public class MasterDrone {
 	private QRCodeScanner scanner = null;
 
 	public MasterDrone() {
+		
 		drone = new ARDrone();
 		drone.start();
-		drone.getCommandManager().setVideoChannel(VideoChannel.HORI);
+		drone.getCommandManager().setVideoChannel(VideoChannel.VERT);
+		
+		GUI gui = new GUI(drone, this);
 
 		KeyboardController keyboardController = new KeyboardController(drone);
 		keyboardController.start();
@@ -28,6 +33,8 @@ public class MasterDrone {
 		drone.getVideoManager().addImageListener(droneController);
 		
 		scanner = new QRCodeScanner();
+		scanner.addListener(droneController);
+		drone.getVideoManager().addImageListener(gui);
 		drone.getVideoManager().addImageListener(scanner);
 	}
 
@@ -44,6 +51,7 @@ public class MasterDrone {
 
 	// Main program start
 	public static void main(String[] args) {
+		System.loadLibrary(Core.NATIVE_LIBRARY_NAME); // Load OpenCV
 		new MasterDrone();
 	}
 

@@ -69,7 +69,7 @@ public class MainDroneController extends AbstractController implements TagListen
 		if (result == null) // ToDo: do not call if no tag is present
 			return;
 
-		System.out.println("AutoController: Tag found");
+		System.out.println("AutoController: Tag found" + result.getText() + ", " + orientation);
 
 		tag = result;
 		tagOrientation = orientation;
@@ -191,7 +191,7 @@ public class MainDroneController extends AbstractController implements TagListen
 			return;
 		Circle[] circles = CircleFinder.findCircles(image);
 		for(int i = 0; i < circles.length; i++){
-			System.out.printf("Circle %d: (%d,%d) r = %f.\n", i, circles[i].x, circles[i].y, circles[i].getRadius());
+			System.out.printf("Circle %d: (%f,%f) r = %f. %n", i, circles[i].x, circles[i].y, circles[i].getRadius());
 		}
 		
 	}
