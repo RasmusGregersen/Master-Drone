@@ -1,16 +1,11 @@
 package tests;
 import com.google.zxing.*;
-import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
-import com.google.zxing.common.HybridBinarizer;
-import de.yadrone.base.video.ImageListener;
 import imgManagement.QRCodeScanner;
 import imgManagement.TagListener;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-
 import javax.imageio.ImageIO;
 
 /**

@@ -1,5 +1,9 @@
 package imgManagement;
 
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
+
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
@@ -25,13 +29,13 @@ public class CircleFinder {
 	/**
 	 * Detects circles in an image
 	 * @param image The image to detect circles on and display.
-	 * @return Circle[] An array containing the data from the found circles.
+	 * @return {@link Circle}[] An array containing the data from the found circles.
 	 */
 	public static Circle[] findCircles(Mat image) {
 		Size imgSize = new Size(0,0);
 		if (image.size().height > 1200)
 			Imgproc.resize(image, image, imgSize, 0.5,0.5,1);
-		System.out.println(image.size());
+		//System.out.println(image.size());
 		Mat output = image.clone();
 		Mat gray = image.clone();
 		// Get the gray img
@@ -52,6 +56,18 @@ public class CircleFinder {
 		}
 		
 		return ret;
+	}
+	
+	/**
+	 * Same as {@link CircleFinder#findCircles}, except it takes a BufferedImage as argument.
+	 * @param bi {@link BufferedImage}
+	 * @return {@link Circle}[] Same as {@link CircleFinder#findCircles}
+	 */
+	public static Circle[] findCircles(BufferedImage bi){
+		 Mat mat = new Mat(bi.getHeight(), bi.getWidth(), CvType.CV_8UC3);
+		  byte[] data = ((DataBufferByte) bi.getRaster().getDataBuffer()).getData();
+		  mat.put(0, 0, data);
+		  return findCircles(mat);
 	}
 	
 	/**
