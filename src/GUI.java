@@ -54,6 +54,8 @@ public class GUI extends JFrame implements ImageListener, TagListener
 		});
 
         setLayout(new GridBagLayout());
+        
+        add(createVideoPanel(), new GridBagConstraints(0, 0, 1, 2, 1, 1, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.BOTH, new Insets(0,0,0,0), 0, 0));
 
         // add listener to be notified once the drone takes off so that the game timer counter starts
         drone.getNavDataManager().addStateListener(new StateListener() {
@@ -69,8 +71,7 @@ public class GUI extends JFrame implements ImageListener, TagListener
 
 			public void controlStateChanged(ControlState state) { }
 		});
-
-        pack();
+        pack(); 
 	}
 
 	private void createMenuBar()
@@ -97,6 +98,10 @@ public class GUI extends JFrame implements ImageListener, TagListener
 	{
 		videoPanel = new JPanel() {
 
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
 			private Font tagFont = new Font("SansSerif", Font.BOLD, 14);
 			private Font timeFont = new Font("SansSerif", Font.BOLD, 18);
 			private Font gameOverFont = new Font("SansSerif", Font.BOLD, 36);
