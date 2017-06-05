@@ -6,6 +6,8 @@ import de.yadrone.base.navdata.ControlState;
 import de.yadrone.base.navdata.DroneState;
 import de.yadrone.base.navdata.StateListener;
 import de.yadrone.base.video.ImageListener;
+import imgManagement.Circle;
+import imgManagement.CircleFinder;
 import imgManagement.TagListener;
 
 import javax.swing.*;
@@ -23,6 +25,7 @@ public class GUI extends JFrame implements ImageListener, TagListener
 	private BufferedImage image = null;
 	private Result result;
 	private String orientation;
+	private Circle[] circles;
 
 	private String[] ringsToFind = new String[] {"Ring 1", "Ring 2"};
 	private boolean[] ringsFound = new boolean[] {false, false};
@@ -161,6 +164,15 @@ public class GUI extends JFrame implements ImageListener, TagListener
         				{
         					result = null;
         				}
+        			}
+        			
+        			// Draw circles
+        			circles = CircleFinder.findCircles(image);
+        			for(Circle c : circles){
+        				g.setColor(Color.RED);
+        				g.drawRect((int)c.x, (int)c.y, 10, 10);
+        				g.setColor(Color.BLUE);
+        				g.drawOval((int)(c.x - c.r), (int) (c.y - c.r), (int)(2*c.r), (int)(2*c.r));
         			}
 
         			// draw "Congrats" if all tags have been detected

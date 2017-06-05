@@ -1,5 +1,9 @@
 package controller;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
+
 import org.opencv.core.Core;
 
 import de.yadrone.base.ARDrone;
@@ -10,8 +14,8 @@ import imgManagement.QRCodeScanner;
 
 public class MasterDrone {
 
-	public final static int IMAGE_WIDTH = 1280;
-	public final static int IMAGE_HEIGHT = 720;
+	public final static int IMAGE_WIDTH = 1280/2;
+	public final static int IMAGE_HEIGHT = 720/2;
 
 	public final static int TOLERANCE = 40;
 
@@ -23,14 +27,12 @@ public class MasterDrone {
 		
 		drone = new ARDrone();
 		drone.start();
-		drone.getCommandManager().setVideoChannel(VideoChannel.VERT);
-		drone.getCommandManager().setConfigurationIds().setVideoCodec(VideoCodec.H264_720P);
-		
+		drone.getCommandManager().setVideoChannel(VideoChannel.HORI);
+		//drone.getCommandManager().setConfigurationIds().setVideoCodec(VideoCodec.H264_720P);
 		GUI gui = new GUI(drone, this);
 
 		KeyboardController keyboardController = new KeyboardController(drone);
 		keyboardController.start();
-
 		droneController = new MainDroneController(drone);
 		drone.getVideoManager().addImageListener(droneController);
 		
@@ -53,8 +55,10 @@ public class MasterDrone {
 	}
 
 	// Main program start
-	public static void main(String[] args) {
+	public static void main(String[] args) throws FileNotFoundException {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME); // Load OpenCV
+		PrintStream out = new PrintStream(new FileOutputStream("output.txt"));
+		//System.setOut(out);
 		new MasterDrone();
 	}
 
