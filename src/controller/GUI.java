@@ -2,9 +2,7 @@ package controller;
 import com.google.zxing.Result;
 import com.google.zxing.ResultPoint;
 import de.yadrone.base.IARDrone;
-import de.yadrone.base.navdata.ControlState;
-import de.yadrone.base.navdata.DroneState;
-import de.yadrone.base.navdata.StateListener;
+import de.yadrone.base.navdata.BatteryListener;
 import de.yadrone.base.video.ImageListener;
 import imgManagement.Circle;
 import imgManagement.CircleFinder;
@@ -14,11 +12,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
-import java.util.Timer;
-import java.util.TimerTask;
 
-public class GUI extends JFrame implements ImageListener, TagListener
-{
+public class GUI extends JFrame implements ImageListener, TagListener {
 	private MasterDrone main;
 	private IARDrone drone;
 
@@ -27,23 +22,16 @@ public class GUI extends JFrame implements ImageListener, TagListener
 	private String orientation;
 	private Circle[] circles;
 
-	private String[] ringsToFind = new String[] {"Ring 1", "Ring 2"};
-	private boolean[] ringsFound = new boolean[] {false, false};
-
 	private JPanel videoPanel;
+	private int batterypercentage;
 
-	private Timer timer = new Timer();
-	private long gameStartTimestamp = System.currentTimeMillis();
-	private String gameTime = "0:00";
-
-	private boolean gameOver = false;
-
-	public GUI(final IARDrone drone, MasterDrone main)
-	{
+	public GUI(final IARDrone drone, MasterDrone main) {
 		super("Master Drone");
 
 		this.main = main;
 		this.drone = drone;
+
+		batteryListener();
 
 		createMenuBar();
 
@@ -61,26 +49,10 @@ public class GUI extends JFrame implements ImageListener, TagListener
         setLayout(new GridBagLayout());
         
         add(createVideoPanel(), new GridBagConstraints(0, 0, 1, 2, 1, 1, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.BOTH, new Insets(0,0,0,0), 0, 0));
-
-        // add listener to be notified once the drone takes off so that the game timer counter starts
-        drone.getNavDataManager().addStateListener(new StateListener() {
-
-			public void stateChanged(DroneState state)
-			{
-				if (state.isFlying())
-				{
-					startGameTimeCounter();
-					drone.getNavDataManager().removeStateListener(this);
-				}
-			}
-
-			public void controlStateChanged(ControlState state) { }
-		});
         pack(); 
 	}
 
-	private void createMenuBar()
-	{
+	private void createMenuBar() {
 		JMenu options = new JMenu("Options");
 
 		final JCheckBoxMenuItem autoControlMenuItem = new JCheckBoxMenuItem("Start autonomous flight");
@@ -99,12 +71,11 @@ public class GUI extends JFrame implements ImageListener, TagListener
 		setJMenuBar(menuBar);
 	}
 
-	private JPanel createVideoPanel()
-	{
+	private JPanel createVideoPanel() {
 		videoPanel = new JPanel() {
 
 			/**
-			 * 
+			 *
 			 */
 			private static final long serialVersionUID = 1L;
 			private Font tagFont = new Font("SansSerif", Font.BOLD, 14);
@@ -118,18 +89,17 @@ public class GUI extends JFrame implements ImageListener, TagListener
         			// now draw the camera image
         			g.drawImage(image, 0, 0, image.getWidth(), image.getHeight(), null);
 
-        			// draw "Shreds to find"
-    				g.setColor(Color.RED);
-    				g.setFont(tagFont);
-    				g.drawString("Rings to find", 10, 20);
-    				for (int i = 0; i < ringsToFind.length; i++)
-    				{
-    					if (ringsFound[i])
-    						g.setColor(Color.GREEN.darker());
-    					else
-    						g.setColor(Color.RED);
-    					g.drawString(ringsToFind[i], 30, 40 + (i*20));
-    				}
+        			// draw the battery percentage
+					if(batterypercentage>50) {
+						g.setColor(Color.GREEN);
+						g.setFont(tagFont);
+					}
+					else {
+						g.setColor(Color.RED);
+						g.setFont(tagFont);
+					}
+
+					g.drawString("Battery: "+batterypercentage+"%", 0, 15);
 
         			// draw tolerance field (rectangle)
         			g.setColor(Color.RED);
@@ -165,7 +135,7 @@ public class GUI extends JFrame implements ImageListener, TagListener
         					result = null;
         				}
         			}
-        			
+
         			// Draw circles
         			circles = CircleFinder.findCircles(image);
         			for(Circle c : circles){
@@ -174,26 +144,6 @@ public class GUI extends JFrame implements ImageListener, TagListener
         				g.setColor(Color.BLUE);
         				g.drawOval((int)(c.x - c.r), (int) (c.y - c.r), (int)(2*c.r), (int)(2*c.r));
         			}
-
-        			// draw "Congrats" if all tags have been detected
-        			if (gameOver)
-        			{
-        				String str = "All rings found!";
-
-        				g.setColor(Color.GREEN.darker());
-        				g.setFont(gameOverFont);
-
-        				FontMetrics metrics = g.getFontMetrics(gameOverFont);
-        				int hgt = metrics.getHeight();
-        				int adv = metrics.stringWidth(str);
-
-        				g.drawString(str, (getWidth() / 2) - (adv / 2), (getHeight() / 2) - (hgt / 2) - 50); // draw text centered
-        			}
-
-        			// draw the time
-    				g.setColor(Color.RED);
-    				g.setFont(timeFont);
-    				g.drawString(gameTime, getWidth() - 50, 20);
         		}
         		else
         		{
@@ -222,9 +172,22 @@ public class GUI extends JFrame implements ImageListener, TagListener
 	}
 	
 	private long imageCount = 0;
-	
-	public void imageUpdated(BufferedImage newImage)
-    {
+
+	private void batteryListener() {
+		drone.getNavDataManager().addBatteryListener(new BatteryListener() {
+
+			public void batteryLevelChanged(int percentage)
+			{
+				batterypercentage = percentage;
+			}
+
+			@Override
+			public void voltageChanged(int vbat_raw) {
+			}
+		});
+	}
+
+	public void imageUpdated(BufferedImage newImage) {
 		if ((++imageCount % 2) == 0)
 			return;
 		
@@ -236,61 +199,12 @@ public class GUI extends JFrame implements ImageListener, TagListener
 			}
 		});
     }
-	
-	public void onTag(Result result, float orientation)
-	{
-		if (result != null)
-		{
+
+	@Override
+	public void onTag(Result result, float v) {
+		if (result != null) {
 			this.result = result;
 			this.orientation = orientation + "�";
-			
-			// check if that's a tag (shred) which has not be seen before and mark it as 'found'
-			for (int i = 0; i < ringsToFind.length; i++)
-			{
-				if (ringsToFind[i].equals(result.getText()))
-				{
-					ringsToFind[i] = ringsToFind[i] + " - " + gameTime;
-					ringsFound[i] = true;
-				}
-			}
-			
-			// now check if all shreds have been found and if so, set the gameOver flag
-			boolean isGameOver = true;
-			for (int i = 0; i < ringsFound.length; i++)
-			{
-				if (ringsFound[i] == false)
-					isGameOver = false;
-			}
-			
-			if (isGameOver) // all shreds found ?
-			{
-				gameOver = true;
-				stopGameTimeCounter();
-			}
 		}
-	}
-	
-	private void startGameTimeCounter()
-	{
-		gameStartTimestamp = System.currentTimeMillis();
-		
-		TimerTask timerTask = new TimerTask() {
-
-			public void run()
-			{
-				long time = System.currentTimeMillis() - gameStartTimestamp;
-				
-				int minutes = (int)(time / (60 * 1000));
-				int seconds = (int)((time / 1000) % 60);
-				gameTime = String.format("%d:%02d", minutes, seconds);
-			}
-		};
-		
-		timer.schedule(timerTask, 0, 1000);		
-	}
-	
-	private void stopGameTimeCounter()
-	{
-		timer.cancel();
 	}
 }
