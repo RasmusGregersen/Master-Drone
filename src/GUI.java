@@ -1,6 +1,7 @@
 import com.google.zxing.Result;
 import com.google.zxing.ResultPoint;
 import de.yadrone.base.IARDrone;
+import de.yadrone.base.navdata.BatteryListener;
 import de.yadrone.base.navdata.ControlState;
 import de.yadrone.base.navdata.DroneState;
 import de.yadrone.base.navdata.StateListener;
@@ -10,8 +11,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class GUI extends JFrame implements ImageListener, TagListener
 {
@@ -22,16 +21,9 @@ public class GUI extends JFrame implements ImageListener, TagListener
 	private Result result;
 	private String orientation;
 
-	private String[] ringsToFind = new String[] {"Ring 1", "Ring 2"};
-	private boolean[] ringsFound = new boolean[] {false, false};
+	private int batterypercentage;
 
 	private JPanel videoPanel;
-
-	private Timer timer = new Timer();
-	private long gameStartTimestamp = System.currentTimeMillis();
-	private String gameTime = "0:00";
-
-	private boolean gameOver = false;
 
 	public GUI(final IARDrone drone, MasterDrone main)
 	{
@@ -39,6 +31,8 @@ public class GUI extends JFrame implements ImageListener, TagListener
 
 		this.main = main;
 		this.drone = drone;
+
+		batteryListener();
 
 		createMenuBar();
 
@@ -64,7 +58,6 @@ public class GUI extends JFrame implements ImageListener, TagListener
 			{
 				if (state.isFlying())
 				{
-					startGameTimeCounter();
 					drone.getNavDataManager().removeStateListener(this);
 				}
 			}
@@ -94,6 +87,22 @@ public class GUI extends JFrame implements ImageListener, TagListener
 		setJMenuBar(menuBar);
 	}
 
+	private void batteryListener(){
+		drone.getNavDataManager().addBatteryListener(new BatteryListener() {
+
+			public void batteryLevelChanged(int percentage)
+			{
+				batterypercentage = percentage;
+			}
+
+			@Override
+			public void voltageChanged(int vbat_raw) {
+				// TODO Auto-generated method stub
+
+			}
+		});
+	}
+
 	private JPanel createVideoPanel()
 	{
 		videoPanel = new JPanel() {
@@ -113,18 +122,17 @@ public class GUI extends JFrame implements ImageListener, TagListener
         			// now draw the camera image
         			g.drawImage(image, 0, 0, image.getWidth(), image.getHeight(), null);
 
-        			// draw "Shreds to find"
-    				g.setColor(Color.RED);
-    				g.setFont(tagFont);
-    				g.drawString("Rings to find", 10, 20);
-    				for (int i = 0; i < ringsToFind.length; i++)
-    				{
-    					if (ringsFound[i])
-    						g.setColor(Color.GREEN.darker());
-    					else
-    						g.setColor(Color.RED);
-    					g.drawString(ringsToFind[i], 30, 40 + (i*20));
-    				}
+					// draw battery procentage
+					if(batterypercentage>50) {
+						g.setColor(Color.GREEN);
+						g.setFont(tagFont);
+					}
+					else {
+						g.setColor(Color.RED);
+						g.setFont(tagFont);
+					}
+
+					g.drawString("Battery: "+batterypercentage+"%", 0, 15);
 
         			// draw tolerance field (rectangle)
         			g.setColor(Color.RED);
@@ -154,32 +162,7 @@ public class GUI extends JFrame implements ImageListener, TagListener
         				g.setFont(tagFont);
         				g.drawString(result.getText(), (int)a.getX(), (int)a.getY());
         				g.drawString(orientation, (int)a.getX(), (int)a.getY() + 20);
-
-        				if ((System.currentTimeMillis() - result.getTimestamp()) > 1000)
-        				{
-        					result = null;
-        				}
         			}
-
-        			// draw "Congrats" if all tags have been detected
-        			if (gameOver)
-        			{
-        				String str = "All rings found!";
-
-        				g.setColor(Color.GREEN.darker());
-        				g.setFont(gameOverFont);
-
-        				FontMetrics metrics = g.getFontMetrics(gameOverFont);
-        				int hgt = metrics.getHeight();
-        				int adv = metrics.stringWidth(str);
-
-        				g.drawString(str, (getWidth() / 2) - (adv / 2), (getHeight() / 2) - (hgt / 2) - 50); // draw text centered
-        			}
-
-        			// draw the time
-    				g.setColor(Color.RED);
-    				g.setFont(timeFont);
-    				g.drawString(gameTime, getWidth() - 50, 20);
         		}
         		else
         		{
@@ -229,54 +212,6 @@ public class GUI extends JFrame implements ImageListener, TagListener
 		{
 			this.result = result;
 			this.orientation = orientation + "�";
-			
-			// check if that's a tag (shred) which has not be seen before and mark it as 'found'
-			for (int i = 0; i < ringsToFind.length; i++)
-			{
-				if (ringsToFind[i].equals(result.getText()))
-				{
-					ringsToFind[i] = ringsToFind[i] + " - " + gameTime;
-					ringsFound[i] = true;
-				}
-			}
-			
-			// now check if all shreds have been found and if so, set the gameOver flag
-			boolean isGameOver = true;
-			for (int i = 0; i < ringsFound.length; i++)
-			{
-				if (ringsFound[i] == false)
-					isGameOver = false;
-			}
-			
-			if (isGameOver) // all shreds found ?
-			{
-				gameOver = true;
-				stopGameTimeCounter();
-			}
 		}
-	}
-	
-	private void startGameTimeCounter()
-	{
-		gameStartTimestamp = System.currentTimeMillis();
-		
-		TimerTask timerTask = new TimerTask() {
-
-			public void run()
-			{
-				long time = System.currentTimeMillis() - gameStartTimestamp;
-				
-				int minutes = (int)(time / (60 * 1000));
-				int seconds = (int)((time / 1000) % 60);
-				gameTime = String.format("%d:%02d", minutes, seconds);
-			}
-		};
-		
-		timer.schedule(timerTask, 0, 1000);		
-	}
-	
-	private void stopGameTimeCounter()
-	{
-		timer.cancel();
 	}
 }
