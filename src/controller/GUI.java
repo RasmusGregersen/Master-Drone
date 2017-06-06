@@ -204,7 +204,7 @@ public class GUI extends JFrame implements ImageListener, TagListener {
 	public void onTag(Result result, float v) {
 		if (result != null) {
 			this.result = result;
-			this.orientation = orientation + "�";
+			this.orientation = v + " deg";
 		}
 	}
 }
