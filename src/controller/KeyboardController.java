@@ -1,6 +1,9 @@
 package controller;
 import de.yadrone.apps.controlcenter.plugins.keyboard.KeyboardCommandManagerAlternative;
 import de.yadrone.base.IARDrone;
+import de.yadrone.base.command.CalibrationCommand;
+import de.yadrone.base.command.Device;
+import de.yadrone.base.command.HoverCommand;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -33,10 +36,19 @@ public class KeyboardController extends AbstractController
     	
     	public boolean dispatchKeyEvent(KeyEvent e)
 		{
-    		System.out.println("Key registered");
 			if (e.getID() == KeyEvent.KEY_PRESSED) 
 			{
-                keyboardCommandManager.keyPressed(e);
+				System.out.println("Key registered: " + e.getKeyChar());
+				if (e.getKeyCode() == KeyEvent.VK_C){
+					drone.getCommandManager().setCommand(new CalibrationCommand(Device.MAGNETOMETER));
+					System.out.println("AutoController: Calibrate");
+				} else if (e.getKeyCode() == KeyEvent.VK_H) {
+					drone.getCommandManager().hover().doFor(500);
+					System.out.println("Hover command!!");
+				}
+					
+				else
+					keyboardCommandManager.keyPressed(e);
 				// TODO For now any key command just kills the drone
 				//drone.reset();
             } 

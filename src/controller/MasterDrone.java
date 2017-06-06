@@ -8,6 +8,8 @@ import org.opencv.core.Core;
 
 import de.yadrone.base.ARDrone;
 import de.yadrone.base.IARDrone;
+import de.yadrone.base.command.FlyingMode;
+import de.yadrone.base.command.VideoBitRateMode;
 import de.yadrone.base.command.VideoChannel;
 import de.yadrone.base.command.VideoCodec;
 import imgManagement.QRCodeScanner;
@@ -28,7 +30,12 @@ public class MasterDrone {
 		drone = new ARDrone();
 		drone.start();
 		drone.getCommandManager().setVideoChannel(VideoChannel.HORI);
-		//drone.getCommandManager().setConfigurationIds().setVideoCodec(VideoCodec.H264_720P);
+		drone.getCommandManager().setConfigurationIds().setVideoCodec(VideoCodec.H264_360P);
+		drone.getCommandManager().setEnableCombinedYaw(true);
+		//drone.getCommandManager().setVideoCodecFps(5);
+		
+//		drone.getCommandManager().setVideoBitrate(1024);
+//		drone.getCommandManager().setVideoBitrateControl(VideoBitRateMode.MANUAL);
 		GUI gui = new GUI(drone, this);
 
 		KeyboardController keyboardController = new KeyboardController(drone);
@@ -37,10 +44,12 @@ public class MasterDrone {
 		drone.getVideoManager().addImageListener(droneController);
 		
 		scanner = new QRCodeScanner();
-		scanner.addListener(droneController);
 		scanner.addListener(gui);
 		drone.getVideoManager().addImageListener(gui);
 		drone.getVideoManager().addImageListener(scanner);
+		
+		drone.getCommandManager().setFlyingMode(FlyingMode.HOVER_ON_TOP_OF_ROUNDEL);
+		//drone.getCommandManager().setFlyingMode(FlyingMode.HOVER_ON_TOP_OF_ORIENTED_ROUNDEL);
 	}
 
 	public void enableAutoControl(boolean enable) {
@@ -58,7 +67,7 @@ public class MasterDrone {
 	public static void main(String[] args) throws FileNotFoundException {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME); // Load OpenCV
 		PrintStream out = new PrintStream(new FileOutputStream("output.txt"));
-		//System.setOut(out);
+		System.setOut(out);
 		new MasterDrone();
 	}
 
