@@ -2,9 +2,11 @@ package controller;
 
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Random;
 
 import org.opencv.core.Mat;
+import org.opencv.core.Point;
 
 import com.google.zxing.Result;
 import com.google.zxing.ResultPoint;
@@ -15,6 +17,7 @@ import de.yadrone.base.video.ImageListener;
 import imgManagement.Circle;
 import imgManagement.CircleFinder;
 import imgManagement.TagListener;
+import utils.WallCoordinatesReader;
 
 /**
  * Main drone controller.
@@ -26,9 +29,11 @@ public class MainDroneController extends AbstractController implements TagListen
 
 	private final static int SPEED = 5;
 	private final static int SLEEP = 500;
+	private final static int doFor = 30; // How long (ms) to run commands for.
+	private final static int maxHeight = 3000; // Maximum height in millimeters
 	
 	private long imageCount = 0;
-	private final int frameSkip = 2; // Skip every n frames. Must be > 0. 1 == no skip.
+	private final int frameSkip = 4; // Skip every n frames. Must be > 0. 1 == no skip.
 
 	/*
 	 * This list holds tag-IDs for all tags which have successfully been visited
@@ -36,10 +41,20 @@ public class MainDroneController extends AbstractController implements TagListen
 	private ArrayList<String> tagVisitedList = new ArrayList<String>();
 
 	private Result tag;
+	private Result lastTag;
 	private float tagOrientation;
+	private ArrayList<String> ports = new ArrayList<String>();
+	private HashMap<String, Point> wallMarks;
+	private Circle[] circles;
+	private int nextPort = 3;
 
 	public MainDroneController(IARDrone drone) {
 		super(drone);
+		drone.getCommandManager().setMaxAltitude(maxHeight);
+		// Init ports list
+		for (int i = 0; i <= 7; i++)
+			ports.add("P.0" + i);
+		wallMarks = WallCoordinatesReader.read();
 	}
 
 	@Override
@@ -48,16 +63,51 @@ public class MainDroneController extends AbstractController implements TagListen
 		{
 			try {
 				// reset if too old (and not updated)
-				if ((tag != null) && (System.currentTimeMillis() - tag.getTimestamp() > 500))
+				if ((tag != null) && (System.currentTimeMillis() - tag.getTimestamp() > 500)){
+					lastTag = tag;
 					tag = null;
-
-				if ((tag == null) || hasTagBeenVisited()) {
-					strayAround();
-				} else if (!isTagCentered()) { // tag visible, but not centered
-					centerTag();
-				} else {
-					System.out.println("AutoController: I do not know what to do ...");
 				}
+				if (circles.length > 0) {
+					if (!isCircleCentered())						
+						centerCircle();
+					else
+						goThroughPort();
+				} else {
+						Thread.currentThread();
+						Thread.sleep(SLEEP);
+				}
+//				if (tag != null && lastTag != null && ports.get(nextPort).equals(lastTag.getText())) { // We haven't gone through this port
+//					// Check for circles
+//					if (circles.length > 0) {
+//						if (isCircleCentered())
+//							goThroughPort();
+//						else
+//							centerCircle();
+//						
+//					} else if (!isTagCentered()) { // tag visible, but not centered
+//						centerTag();
+//					}
+//					else
+//					{ // Try to reduce the angle to the tag
+//						// TODO
+//						System.out.println("AutoController.centerCircle: Go up");
+//						drone.getCommandManager().up(SPEED).doFor(doFor * 2);
+//						Thread.currentThread();
+//						Thread.sleep(SLEEP);
+//						//strayAround();
+//					}
+//				} else if ((tag == null) || hasTagBeenVisited()) {
+//					strayAround();
+//				} else if (tag != null && wallMarks.containsKey(tag.getText())) {
+//					// We found a wall mark tag, continue looking around
+//					strayAround();
+//				
+//				} else {
+//					System.out.println("AutoController: I do not know what to do ...");
+//					drone.getCommandManager().doFor(doFor);
+//					Thread.currentThread();
+//					Thread.sleep(SLEEP);
+//				}
 			} catch (Exception exc) {
 				exc.printStackTrace();
 			}
@@ -69,7 +119,7 @@ public class MainDroneController extends AbstractController implements TagListen
 		if (result == null) // ToDo: do not call if no tag is present
 			return;
 
-		System.out.println("AutoController: Tag found");
+		System.out.println("AutoController: Tag found " + result.getText() + ", " + orientation);
 
 		tag = result;
 		tagOrientation = orientation;
@@ -110,29 +160,56 @@ public class MainDroneController extends AbstractController implements TagListen
 
 		return false;
 	}
+	
+	int strayMode = 0;
 
 	private void strayAround() throws InterruptedException {
-		int direction = new Random().nextInt() % 4;
-		switch (direction) {
+//		if (strayMode == 0) {
+//			Thread.currentThread();
+//			Thread.sleep(SLEEP);
+//			return;
+//			}
+		switch(strayMode) {
 		case 0:
-			drone.getCommandManager().forward(SPEED);
-			System.out.println("AutoController: Stray Around: FORWARD");
-			break;
+//			System.out.println("AutoController: Fly up");
+//			drone.getCommandManager().up(SPEED * 2);
+			strayMode++;
+			//break;
 		case 1:
-			drone.getCommandManager().backward(SPEED);
-			System.out.println("AutoController: Stray Around: BACKWARD");
+			System.out.println("AutoController: Stray Around: Spin right");
+			drone.getCommandManager().spinRight(SPEED * 3).doFor(doFor*3);
+			strayMode++;
 			break;
 		case 2:
-			drone.getCommandManager().goLeft(SPEED);
-			System.out.println("AutoController: Stray Around: LEFT");
+			System.out.println("AutoController: Stray Around: Spin left");
+			drone.getCommandManager().spinLeft(SPEED * 3).doFor(doFor*3);
+			strayMode++;
 			break;
 		case 3:
-			drone.getCommandManager().goRight(SPEED);
-			System.out.println("AutoController: Stray Around: RIGHT");
-			break;
+			int direction = new Random().nextInt() % 4;
+			switch (direction) {
+			case 0:
+				System.out.println("AutoController: Stray Around: FORWARD");
+				drone.getCommandManager().forward(SPEED).doFor(doFor);
+				break;
+			case 1:
+				System.out.println("AutoController: Stray Around: BACKWARD");
+				drone.getCommandManager().backward(SPEED).doFor(doFor);
+				break;
+			case 2:
+				System.out.println("AutoController: Stray Around: LEFT");
+				drone.getCommandManager().goLeft(SPEED).doFor(doFor);
+				break;
+			case 3:
+				System.out.println("AutoController: Stray Around: RIGHT");
+				drone.getCommandManager().goRight(SPEED).doFor(doFor);
+				break;				
+			}
+			strayMode = 3;
 		}
 
-		Thread.currentThread().sleep(SLEEP);
+		Thread.currentThread();
+		Thread.sleep(SLEEP);
 	}
 
 	private void centerTag() throws InterruptedException {
@@ -147,39 +224,124 @@ public class MainDroneController extends AbstractController implements TagListen
 		int imgCenterX = MasterDrone.IMAGE_WIDTH / 2;
 		int imgCenterY = MasterDrone.IMAGE_HEIGHT / 2;
 
-		float x = points[1].getX();
+		float x = (points[1].getX() + points[2].getX()) / 2; // True middle
+		//float x = points[1].getX();
 		float y = points[1].getY();
 
-		if ((tagOrientation > 10) && (tagOrientation < 180)) {
-			System.out.println("AutoController: Spin left");
-			drone.getCommandManager().spinLeft(SPEED * 2);
-			Thread.currentThread().sleep(SLEEP);
-		} else if ((tagOrientation < 350) && (tagOrientation > 180)) {
-			System.out.println("AutoController: Spin right");
-			drone.getCommandManager().spinRight(SPEED * 2);
-			Thread.currentThread().sleep(SLEEP);
-		} else if (x < (imgCenterX - MasterDrone.TOLERANCE)) {
-			System.out.println("AutoController: Go left");
-			drone.getCommandManager().goLeft(SPEED);
-			Thread.currentThread().sleep(SLEEP);
+//		if ((tagOrientation > 10) && (tagOrientation < 180)) {
+//			System.out.println("AutoController: Spin left");
+//			drone.getCommandManager().spinLeft(SPEED * 2);
+//			Thread.currentThread();
+//			Thread.sleep(SLEEP);
+//		} else if ((tagOrientation < 350) && (tagOrientation > 180)) {
+//			System.out.println("AutoController: Spin right");
+//			drone.getCommandManager().spinRight(SPEED * 2);
+//			Thread.currentThread();
+//			Thread.sleep(SLEEP);
+		//} else 
+			if (x < (imgCenterX - MasterDrone.TOLERANCE)) {
+			System.out.println("AutoController: Center Tag: Go left");
+			drone.getCommandManager().goLeft(SPEED).doFor(doFor);
+			Thread.currentThread();
+			Thread.sleep(SLEEP);
 		} else if (x > (imgCenterX + MasterDrone.TOLERANCE)) {
-			System.out.println("AutoController: Go right");
-			drone.getCommandManager().goRight(SPEED);
-			Thread.currentThread().sleep(SLEEP);
+			System.out.println("AutoController: Center Tag: Go right");
+			drone.getCommandManager().goRight(SPEED).doFor(doFor);
+			Thread.currentThread();
+			Thread.sleep(SLEEP);
 		} else if (y < (imgCenterY - MasterDrone.TOLERANCE)) {
-			System.out.println("AutoController: Go forward");
-			drone.getCommandManager().forward(SPEED);
-			Thread.currentThread().sleep(SLEEP);
+			System.out.println("AutoController: Center Tag: Go up");
+			drone.getCommandManager().up(SPEED).doFor(doFor * 2);
+			Thread.currentThread();
+			Thread.sleep(SLEEP);
 		} else if (y > (imgCenterY + MasterDrone.TOLERANCE)) {
-			System.out.println("AutoController: Go backward");
-			drone.getCommandManager().backward(SPEED);
-			Thread.currentThread().sleep(SLEEP);
+			System.out.println("AutoController: Center Tag: Go down");
+			drone.getCommandManager().down(SPEED).doFor(doFor);
+			Thread.currentThread();
+			Thread.sleep(SLEEP);
 		} else {
 			System.out.println("AutoController: Tag centered");
 			drone.getCommandManager().setLedsAnimation(LEDAnimation.BLINK_GREEN, 10, 5);
 
 			tagVisitedList.add(tagText);
 		}
+	}
+	
+	/**
+	 * Centers a circle's midpoint
+	 */
+	void centerCircle() throws InterruptedException {
+		int imgCenterX = MasterDrone.IMAGE_WIDTH / 2;
+		int imgCenterY = MasterDrone.IMAGE_HEIGHT / 2;
+		if (circles.length > 0) { 
+			// We have more than one circle, figure out which one is correct
+			for (Circle c : circles){
+				// Assume the radius has to be at least 10% of the image height to be valid
+				if (c.getRadius() >= MasterDrone.IMAGE_HEIGHT / 10){
+					// Now do the centering
+					if (c.x < (imgCenterX - MasterDrone.TOLERANCE)){
+						System.out.println("AutoController.centerCircle: Go left");
+						drone.getCommandManager().goLeft(SPEED).doFor(doFor);
+						Thread.currentThread();
+						Thread.sleep(SLEEP);
+					} else if (c.x > (imgCenterX + MasterDrone.TOLERANCE)) {
+						System.out.println("AutoController.centerCircle: Go right");
+						drone.getCommandManager().goRight(SPEED).doFor(doFor);
+						Thread.currentThread();
+						Thread.sleep(SLEEP);
+					} else if (c.y < (imgCenterY - MasterDrone.TOLERANCE)){
+						System.out.println("AutoController.centerCircle: Go up");
+						drone.getCommandManager().up(SPEED).doFor(doFor * 2);
+						Thread.currentThread();
+						Thread.sleep(SLEEP);
+					} else if (c.y > (imgCenterY + MasterDrone.TOLERANCE)){
+						System.out.println("AutoController.centerCircle: Go down");
+						drone.getCommandManager().down(SPEED).doFor(doFor);
+						Thread.currentThread();
+						Thread.sleep(SLEEP);
+					} else {
+						System.out.println("AutoController.centerCircle: Circle centered.");
+					}
+				}
+			}
+		}
+	}
+	
+	Boolean isCircleCentered() {
+		Boolean ret = false;
+		int imgCenterX = MasterDrone.IMAGE_WIDTH / 2;
+		int imgCenterY = MasterDrone.IMAGE_HEIGHT / 2;
+		
+		if (circles.length > 0)  // Same deal as centerCircle()
+			for (Circle c : circles)
+				if (c.getRadius() >= MasterDrone.IMAGE_HEIGHT / 10)
+					ret = ((c.x > (imgCenterX - MasterDrone.TOLERANCE))
+							&& (c.x < (imgCenterX + MasterDrone.TOLERANCE))
+							&& (c.y > (imgCenterY - MasterDrone.TOLERANCE))
+							&& (c.y < (imgCenterY + MasterDrone.TOLERANCE)));		
+		return ret;
+	}
+	
+	/**
+	 * Fly's the drone through the currently centered port.
+	 * This just flies the drone forward until the circle is no longer visible,
+	 * i.e. until we're through
+	 * @throws InterruptedException 
+	 */
+	void goThroughPort() throws InterruptedException{
+		System.out.println("AutoController: Going through port " + nextPort);
+//		while(true) {
+//			if (!isCircleCentered())
+//				break;
+//			drone.getCommandManager().forward(SPEED);
+//			Thread.currentThread();
+//			Thread.sleep(SLEEP);
+//		}
+//		// TODO Here we assume we're so close to the circle that we no longer see it
+//		// so fly forward
+		drone.getCommandManager().forward(SPEED).doFor(doFor*3);
+		Thread.currentThread();
+		Thread.sleep(SLEEP);
 	}
 
 	/**
@@ -189,10 +351,10 @@ public class MainDroneController extends AbstractController implements TagListen
 		// This check is meant to skip every n'th frame from a video stream
 		if ((imageCount++ % frameSkip) != 0)
 			return;
-		Circle[] circles = CircleFinder.findCircles(image);
-		for(int i = 0; i < circles.length; i++){
-			System.out.printf("Circle %d: (%d,%d) r = %f.\n", i, circles[i].x, circles[i].y, circles[i].getRadius());
-		}
+		circles = CircleFinder.findCircles(image);
+//		for(int i = 0; i < circles.length; i++){
+//			System.out.printf("Circle %d: (%f,%f) r = %f. %n", i, circles[i].x, circles[i].y, circles[i].getRadius());
+//		}
 		
 	}
 	/**
@@ -202,7 +364,7 @@ public class MainDroneController extends AbstractController implements TagListen
 	public void imageUpdated(Mat image) {		
 		if ((imageCount++ % frameSkip) != 0)
 			return;
-		Circle[] circles = CircleFinder.findCircles(image);
+		circles = CircleFinder.findCircles(image);
 		for(int i = 0; i < circles.length; i++){
 			System.out.printf("Circle %d: (%d,%d) r = %f.\n", i, circles[i].x, circles[i].y, circles[i].getRadius());
 		}
