@@ -8,8 +8,11 @@ import org.opencv.core.Core;
 
 import de.yadrone.base.ARDrone;
 import de.yadrone.base.IARDrone;
+import de.yadrone.base.command.FlyingMode;
+import de.yadrone.base.command.VideoBitRateMode;
 import de.yadrone.base.command.VideoChannel;
 import de.yadrone.base.command.VideoCodec;
+import de.yadrone.base.navdata.AttitudeListener;
 import imgManagement.QRCodeScanner;
 
 public class MasterDrone {
@@ -28,7 +31,28 @@ public class MasterDrone {
 		drone = new ARDrone();
 		drone.start();
 		drone.getCommandManager().setVideoChannel(VideoChannel.HORI);
-		//drone.getCommandManager().setConfigurationIds().setVideoCodec(VideoCodec.H264_720P);
+		drone.getCommandManager().setConfigurationIds().setVideoCodec(VideoCodec.H264_360P);
+		//drone.getCommandManager().setEnableCombinedYaw(true);
+		//drone.getCommandManager().setVideoCodecFps(5);
+		
+		drone.getCommandManager().setVideoBitrateControl(VideoBitRateMode.MANUAL);
+		drone.getCommandManager().setVideoBitrate(1024);
+		drone.getNavDataManager().addAttitudeListener(new AttitudeListener() {
+
+			public void attitudeUpdated(float pitch, float roll, float yaw)
+			{
+				//droneYaw = yaw/1000;
+			}
+
+			@Override
+			public void attitudeUpdated(float pitch, float roll) {
+			}
+
+			@Override
+			public void windCompensation(float pitch, float roll) {
+
+			}
+		});
 		GUI gui = new GUI(drone, this);
 
 		KeyboardController keyboardController = new KeyboardController(drone);
@@ -37,10 +61,12 @@ public class MasterDrone {
 		drone.getVideoManager().addImageListener(droneController);
 		
 		scanner = new QRCodeScanner();
-		scanner.addListener(droneController);
 		scanner.addListener(gui);
 		drone.getVideoManager().addImageListener(gui);
 		drone.getVideoManager().addImageListener(scanner);
+		
+		drone.getCommandManager().setFlyingMode(FlyingMode.HOVER_ON_TOP_OF_ROUNDEL);
+		//drone.getCommandManager().setFlyingMode(FlyingMode.HOVER_ON_TOP_OF_ORIENTED_ROUNDEL);
 	}
 
 	public void enableAutoControl(boolean enable) {
