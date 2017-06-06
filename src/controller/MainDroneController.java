@@ -67,45 +67,47 @@ public class MainDroneController extends AbstractController implements TagListen
 					lastTag = tag;
 					tag = null;
 				}
-//				if (circles.length > 0) {
-//					if (!isCircleCentered())						
-//						centerCircle();
+				if (circles.length > 0) {
+					if (!isCircleCentered())						
+						centerCircle();
+					else
+						goThroughPort();
+				} else {
+						Thread.currentThread();
+						Thread.sleep(SLEEP);
+				}
+//				if (tag != null && lastTag != null && ports.get(nextPort).equals(lastTag.getText())) { // We haven't gone through this port
+//					// Check for circles
+//					if (circles.length > 0) {
+//						if (isCircleCentered())
+//							goThroughPort();
+//						else
+//							centerCircle();
+//						
+//					} else if (!isTagCentered()) { // tag visible, but not centered
+//						centerTag();
+//					}
 //					else
-//						System.out.println("AutoController: Circle Centered!");
-//				}
-//			else {
+//					{ // Try to reduce the angle to the tag
+//						// TODO
+//						System.out.println("AutoController.centerCircle: Go up");
+//						drone.getCommandManager().up(SPEED).doFor(doFor * 2);
+//						Thread.currentThread();
+//						Thread.sleep(SLEEP);
+//						//strayAround();
+//					}
+//				} else if ((tag == null) || hasTagBeenVisited()) {
+//					strayAround();
+//				} else if (tag != null && wallMarks.containsKey(tag.getText())) {
+//					// We found a wall mark tag, continue looking around
+//					strayAround();
+//				
+//				} else {
+//					System.out.println("AutoController: I do not know what to do ...");
+//					drone.getCommandManager().doFor(doFor);
 //					Thread.currentThread();
 //					Thread.sleep(SLEEP);
 //				}
-				if (tag != null && lastTag != null && ports.get(nextPort).equals(lastTag.getText())) { // We haven't gone through this port
-					// Check for circles
-					if (circles.length > 0) {
-						if (isCircleCentered())
-							goThroughPort();
-						else
-							centerCircle();
-						
-					} else if (!isTagCentered()) { // tag visible, but not centered
-						centerTag();
-					}
-					else
-					{ // Try to reduce the angle to the tag
-						// TODO
-						System.out.println("AutoController.centerCircle: Go up");
-						drone.getCommandManager().up(SPEED).doFor(doFor * 2);
-						Thread.currentThread();
-						Thread.sleep(SLEEP);
-						//strayAround();
-					}
-				} else if ((tag == null) || hasTagBeenVisited()) {
-					strayAround();
-				} else if (tag != null && wallMarks.containsKey(tag.getText())) {
-					// We found a wall mark tag, continue looking around
-					strayAround();
-				
-				} else {
-					System.out.println("AutoController: I do not know what to do ...");
-				}
 			} catch (Exception exc) {
 				exc.printStackTrace();
 			}
@@ -337,7 +339,7 @@ public class MainDroneController extends AbstractController implements TagListen
 //		}
 //		// TODO Here we assume we're so close to the circle that we no longer see it
 //		// so fly forward
-		drone.getCommandManager().forward(SPEED * 2).doFor(doFor * 2);
+		drone.getCommandManager().forward(SPEED).doFor(doFor*3);
 		Thread.currentThread();
 		Thread.sleep(SLEEP);
 	}

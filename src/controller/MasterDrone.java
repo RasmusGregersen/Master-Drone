@@ -12,6 +12,7 @@ import de.yadrone.base.command.FlyingMode;
 import de.yadrone.base.command.VideoBitRateMode;
 import de.yadrone.base.command.VideoChannel;
 import de.yadrone.base.command.VideoCodec;
+import de.yadrone.base.navdata.AttitudeListener;
 import imgManagement.QRCodeScanner;
 
 public class MasterDrone {
@@ -31,11 +32,27 @@ public class MasterDrone {
 		drone.start();
 		drone.getCommandManager().setVideoChannel(VideoChannel.HORI);
 		drone.getCommandManager().setConfigurationIds().setVideoCodec(VideoCodec.H264_360P);
-		drone.getCommandManager().setEnableCombinedYaw(true);
+		//drone.getCommandManager().setEnableCombinedYaw(true);
 		//drone.getCommandManager().setVideoCodecFps(5);
 		
-//		drone.getCommandManager().setVideoBitrate(1024);
-//		drone.getCommandManager().setVideoBitrateControl(VideoBitRateMode.MANUAL);
+		drone.getCommandManager().setVideoBitrateControl(VideoBitRateMode.MANUAL);
+		drone.getCommandManager().setVideoBitrate(1024);
+		drone.getNavDataManager().addAttitudeListener(new AttitudeListener() {
+
+			public void attitudeUpdated(float pitch, float roll, float yaw)
+			{
+				//droneYaw = yaw/1000;
+			}
+
+			@Override
+			public void attitudeUpdated(float pitch, float roll) {
+			}
+
+			@Override
+			public void windCompensation(float pitch, float roll) {
+
+			}
+		});
 		GUI gui = new GUI(drone, this);
 
 		KeyboardController keyboardController = new KeyboardController(drone);
@@ -67,7 +84,7 @@ public class MasterDrone {
 	public static void main(String[] args) throws FileNotFoundException {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME); // Load OpenCV
 		PrintStream out = new PrintStream(new FileOutputStream("output.txt"));
-		System.setOut(out);
+		//System.setOut(out);
 		new MasterDrone();
 	}
 
