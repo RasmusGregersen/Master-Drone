@@ -38,20 +38,14 @@ public class MasterDrone {
 		drone.getCommandManager().setVideoBitrateControl(VideoBitRateMode.MANUAL);
 		drone.getCommandManager().setVideoBitrate(1024);
 		drone.getNavDataManager().addAttitudeListener(new AttitudeListener() {
-
-			public void attitudeUpdated(float pitch, float roll, float yaw)
-			{
+			public void attitudeUpdated(float pitch, float roll, float yaw){
 				//droneYaw = yaw/1000;
 			}
+			@Override
+			public void attitudeUpdated(float pitch, float roll) {}
 
 			@Override
-			public void attitudeUpdated(float pitch, float roll) {
-			}
-
-			@Override
-			public void windCompensation(float pitch, float roll) {
-
-			}
+			public void windCompensation(float pitch, float roll) {}
 		});
 		GUI gui = new GUI(drone, this);
 

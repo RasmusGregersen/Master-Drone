@@ -27,10 +27,12 @@ import utils.WallCoordinatesReader;
  */
 public class MainDroneController extends AbstractController implements TagListener, ImageListener {
 
-	private final static int SPEED = 5;
+	private final static int SPEED = 4;
 	private final static int SLEEP = 500;
-	private final static int doFor = 30; // How long (ms) to run commands for.
+	private final static int doFor = 20; // How long (ms) to run commands for.
 	private final static int maxHeight = 3000; // Maximum height in millimeters
+	private static int leftRightDiv = 10;
+	private static int leftRightAdd = 5;
 	
 	private long imageCount = 0;
 	private final int frameSkip = 4; // Skip every n frames. Must be > 0. 1 == no skip.
@@ -119,7 +121,7 @@ public class MainDroneController extends AbstractController implements TagListen
 		if (result == null) // ToDo: do not call if no tag is present
 			return;
 
-		System.out.println("AutoController: Tag found " + result.getText() + ", " + orientation);
+		//System.out.println("AutoController: Tag found " + result.getText() + ", " + orientation);
 
 		tag = result;
 		tagOrientation = orientation;
@@ -280,23 +282,30 @@ public class MainDroneController extends AbstractController implements TagListen
 				if (c.getRadius() >= MasterDrone.IMAGE_HEIGHT / 10){
 					// Now do the centering
 					if (c.x < (imgCenterX - MasterDrone.TOLERANCE)){
-						System.out.println("AutoController.centerCircle: Go left");
-						drone.getCommandManager().goLeft(SPEED).doFor(doFor);
+						System.out.println("AutoController.centerCircle: Go left " + Math.abs(c.x- imgCenterX + MasterDrone.TOLERANCE)/leftRightDiv + leftRightAdd);
+						drone.getCommandManager().goLeft(SPEED).doFor((long) (Math.abs(c.x- imgCenterX + MasterDrone.TOLERANCE)/leftRightDiv + leftRightAdd));
+						drone.getCommandManager().hover().doFor(100);
 						Thread.currentThread();
 						Thread.sleep(SLEEP);
 					} else if (c.x > (imgCenterX + MasterDrone.TOLERANCE)) {
-						System.out.println("AutoController.centerCircle: Go right");
-						drone.getCommandManager().goRight(SPEED).doFor(doFor);
+						System.out.println("AutoController.centerCircle: Go right " + Math.abs(c.x- imgCenterX + MasterDrone.TOLERANCE)/leftRightDiv + leftRightAdd);
+						drone.getCommandManager().goRight(SPEED).doFor((long) (Math.abs(c.x- imgCenterX + MasterDrone.TOLERANCE)/leftRightDiv + leftRightAdd));
+						drone.getCommandManager().hover().doFor(100);
 						Thread.currentThread();
 						Thread.sleep(SLEEP);
 					} else if (c.y < (imgCenterY - MasterDrone.TOLERANCE)){
 						System.out.println("AutoController.centerCircle: Go up");
-						drone.getCommandManager().up(SPEED).doFor(doFor * 2);
+						drone.getCommandManager().up(SPEED).doFor(doFor * 3);
 						Thread.currentThread();
 						Thread.sleep(SLEEP);
 					} else if (c.y > (imgCenterY + MasterDrone.TOLERANCE)){
 						System.out.println("AutoController.centerCircle: Go down");
-						drone.getCommandManager().down(SPEED).doFor(doFor);
+						drone.getCommandManager().down(SPEED).doFor(doFor * 3);
+						Thread.currentThread();
+						Thread.sleep(SLEEP);
+					} else if (c.r < 160) { // Fly closer
+						System.out.println("AutoController.centerCircle: Go forward, radius: " + c.r);
+						drone.getCommandManager().forward(SPEED).doFor(doFor);
 						Thread.currentThread();
 						Thread.sleep(SLEEP);
 					} else {
@@ -339,7 +348,7 @@ public class MainDroneController extends AbstractController implements TagListen
 //		}
 //		// TODO Here we assume we're so close to the circle that we no longer see it
 //		// so fly forward
-		drone.getCommandManager().forward(SPEED).doFor(doFor*3);
+		drone.getCommandManager().forward(SPEED*8).doFor(doFor*2);
 		Thread.currentThread();
 		Thread.sleep(SLEEP);
 	}
