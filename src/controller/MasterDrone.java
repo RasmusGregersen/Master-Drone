@@ -13,6 +13,7 @@ import de.yadrone.base.command.VideoBitRateMode;
 import de.yadrone.base.command.VideoChannel;
 import de.yadrone.base.command.VideoCodec;
 import de.yadrone.base.navdata.AttitudeListener;
+import imgManagement.CircleFinder;
 import imgManagement.QRCodeScanner;
 
 public class MasterDrone {
@@ -52,12 +53,16 @@ public class MasterDrone {
 		KeyboardController keyboardController = new KeyboardController(drone);
 		keyboardController.start();
 		droneController = new MainDroneController(drone);
-		drone.getVideoManager().addImageListener(droneController);
 		
 		scanner = new QRCodeScanner();
 		scanner.addListener(gui);
 		drone.getVideoManager().addImageListener(gui);
 		drone.getVideoManager().addImageListener(scanner);
+		CircleFinder cf = new CircleFinder();
+		drone.getVideoManager().addImageListener(cf);
+		
+		cf.addListener(droneController);
+		cf.addListener(gui);		
 		
 		drone.getCommandManager().setFlyingMode(FlyingMode.HOVER_ON_TOP_OF_ROUNDEL);
 		//drone.getCommandManager().setFlyingMode(FlyingMode.HOVER_ON_TOP_OF_ORIENTED_ROUNDEL);

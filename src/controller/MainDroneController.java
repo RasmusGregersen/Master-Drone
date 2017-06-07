@@ -1,11 +1,9 @@
 package controller;
 
-import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 
-import org.opencv.core.Mat;
 import org.opencv.core.Point;
 
 import com.google.zxing.Result;
@@ -13,9 +11,9 @@ import com.google.zxing.ResultPoint;
 
 import de.yadrone.base.IARDrone;
 import de.yadrone.base.command.LEDAnimation;
-import de.yadrone.base.video.ImageListener;
 import imgManagement.Circle;
 import imgManagement.CircleFinder;
+import imgManagement.CircleListener;
 import imgManagement.TagListener;
 import utils.WallCoordinatesReader;
 
@@ -25,7 +23,7 @@ import utils.WallCoordinatesReader;
  * @author Nichlas N. Pilemand
  *
  */
-public class MainDroneController extends AbstractController implements TagListener, ImageListener {
+public class MainDroneController extends AbstractController implements TagListener, CircleListener {
 
 	private final static int SPEED = 4;
 	private final static int SLEEP = 500;
@@ -34,8 +32,7 @@ public class MainDroneController extends AbstractController implements TagListen
 	private static int leftRightDiv = 10;
 	private static int leftRightAdd = 5;
 	
-	private long imageCount = 0;
-	private final int frameSkip = 4; // Skip every n frames. Must be > 0. 1 == no skip.
+
 
 	/*
 	 * This list holds tag-IDs for all tags which have successfully been visited
@@ -354,28 +351,10 @@ public class MainDroneController extends AbstractController implements TagListen
 	}
 
 	/**
-	 * Takes images from the drone and feeds them to {@link CircleFinder}.
+	 * Takes circles from {@link CircleFinder}.
 	 */
-	public void imageUpdated(BufferedImage image) {
-		// This check is meant to skip every n'th frame from a video stream
-		if ((imageCount++ % frameSkip) != 0)
-			return;
-		circles = CircleFinder.findCircles(image);
-//		for(int i = 0; i < circles.length; i++){
-//			System.out.printf("Circle %d: (%f,%f) r = %f. %n", i, circles[i].x, circles[i].y, circles[i].getRadius());
-//		}
-		
-	}
-	/**
-	 * Same as above, used for testing
-	 * @param image
-	 */
-	public void imageUpdated(Mat image) {		
-		if ((imageCount++ % frameSkip) != 0)
-			return;
-		circles = CircleFinder.findCircles(image);
-		for(int i = 0; i < circles.length; i++){
-			System.out.printf("Circle %d: (%d,%d) r = %f.\n", i, circles[i].x, circles[i].y, circles[i].getRadius());
-		}
+	@Override
+	public void circlesUpdated(Circle[] circles) {
+		this.circles = circles;		
 	}
 }
