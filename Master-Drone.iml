@@ -20,7 +20,7 @@
       <src_folder value="file://$MODULE_DIR$/src" expected_position="1" />
     </src_description>
   </component>
-  <component name="NewModuleRootManager" inherit-compiler-output="false">
+  <component name="NewModuleRootManager">
     <output url="file://$MODULE_DIR$/out/production/Master-Drone" />
     <exclude-output />
     <content url="file://$MODULE_DIR$">
@@ -29,143 +29,19 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="libs" level="project" />
-    <orderEntry type="library" name="reflections" level="project" />
-    <orderEntry type="library" name="zxing" level="project" />
-    <orderEntry type="module-library">
-      <library name="commons-net-3.2.jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/libs/commons-net-3.2.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="core-3.2.1.jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/libs/core-3.2.1.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="core.jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/libs/core.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="jcommon-1.0.16.jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/libs/jcommon-1.0.16.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="jfreechart-1.0.13.jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/libs/jfreechart-1.0.13.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="opencv-320.jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/libs/opencv-320.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="slf4j-api-1.7.2.jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/libs/slf4j-api-1.7.2.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="slf4j-jdk14-1.7.2.jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/libs/slf4j-jdk14-1.7.2.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="xuggle-xuggler-5.4.jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/libs/xuggle-xuggler-5.4.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="yadrone_032.jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/libs/yadrone_032.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="guava-11.0.2.jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/libs/reflections/guava-11.0.2.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="javassist-3.16.1-GA.jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/libs/reflections/javassist-3.16.1-GA.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="reflections-0.9.9-RC1.jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/libs/reflections/reflections-0.9.9-RC1.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="core-2.2.jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/libs/zxing/core-2.2.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="javase-2.2.jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/libs/zxing/javase-2.2.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
+    <orderEntry type="library" name="commons-net-3.2" level="project" />
+    <orderEntry type="library" name="core" level="project" />
+    <orderEntry type="library" name="core-3.2.1" level="project" />
+    <orderEntry type="library" name="jcommon-1.0.16" level="project" />
+    <orderEntry type="library" name="jfreechart-1.0.13" level="project" />
+    <orderEntry type="library" name="opencv-320" level="project" />
+    <orderEntry type="library" name="slf4j-api-1.7.2" level="project" />
+    <orderEntry type="library" name="slf4j-jdk14-1.7.2" level="project" />
+    <orderEntry type="library" name="xuggle-xuggler-5.4" level="project" />
+    <orderEntry type="library" name="javase-2.2" level="project" />
+    <orderEntry type="library" name="core-2.2" level="project" />
+    <orderEntry type="library" name="reflections-0.9.9-RC1" level="project" />
+    <orderEntry type="library" name="javassist-3.16.1-GA" level="project" />
+    <orderEntry type="library" name="guava-11.0.2" level="project" />
   </component>
 </module>
