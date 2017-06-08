@@ -6,6 +6,7 @@ import de.yadrone.base.navdata.BatteryListener;
 import de.yadrone.base.video.ImageListener;
 import imgManagement.Circle;
 import imgManagement.CircleFinder;
+import imgManagement.CircleListener;
 import imgManagement.TagListener;
 
 import javax.swing.*;
@@ -13,7 +14,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 
-public class GUI extends JFrame implements ImageListener, TagListener {
+public class GUI extends JFrame implements ImageListener, TagListener, CircleListener {
 	private MasterDrone main;
 	private IARDrone drone;
 
@@ -137,7 +138,6 @@ public class GUI extends JFrame implements ImageListener, TagListener {
         			}
 
         			// Draw circles
-        			circles = CircleFinder.findCircles(image);
         			for(Circle c : circles){
         				g.setColor(Color.RED);
         				g.drawRect((int)c.x, (int)c.y, 10, 10);
@@ -206,5 +206,10 @@ public class GUI extends JFrame implements ImageListener, TagListener {
 			this.result = result;
 			this.orientation = v + " deg";
 		}
+	}
+
+	@Override
+	public void circlesUpdated(Circle[] circles) {
+		this.circles = circles;		
 	}
 }

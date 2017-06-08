@@ -2,6 +2,7 @@ package imgManagement;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
+import java.util.ArrayList;
 
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -11,15 +12,22 @@ import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
+import de.yadrone.base.video.ImageListener;
+
 /**
  * Finds circles in an image.
  * @author Nichlas N. Pilemand 
  */
-public class CircleFinder {
+public class CircleFinder implements ImageListener {
 	
 	private static final double DP = 1.1; // Basicly tolerence
 	private static final int MIN_DIST = 50; // Minimum distance between center points
 	private static final int BLUR = 9; // Blur amount, removes noise - must be uneven
+	
+	private long imageCount = 0;
+	private final int frameSkip = 5; // Only check every n frames. Must be > 0. 1 == no skip.
+	
+	private ArrayList<CircleListener> listeners = new ArrayList<CircleListener>();
 	
 	public CircleFinder() {
 		// Probably not needed
@@ -83,6 +91,25 @@ public class CircleFinder {
 			return null;
 		} else
 		return image;
+	}
+
+
+	@Override
+	public void imageUpdated(BufferedImage img) {
+		// We don't need to find circles in every frame
+		if ((imageCount++ % frameSkip) != 0)
+			return;
+		Circle[] circles = findCircles(img);
+		for (CircleListener listener : listeners)
+			listener.circlesUpdated(circles);
+	}
+	
+	public void addListener(CircleListener listener) {
+		this.listeners.add(listener);
+	}
+	
+	public void removeListener(CircleListener listener) {
+		this.listeners.remove(listener);
 	}
 
 }
