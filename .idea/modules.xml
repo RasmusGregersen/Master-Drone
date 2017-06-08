@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Master-Drone.iml" filepath="$PROJECT_DIR$/Master-Drone.iml" />
-      <module fileurl="file://$PROJECT_DIR$/src/yadrone/yadrone.iml" filepath="$PROJECT_DIR$/src/yadrone/yadrone.iml" />
     </modules>
   </component>
 </project>

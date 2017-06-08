@@ -43,6 +43,5 @@
     <orderEntry type="library" name="reflections-0.9.9-RC1" level="project" />
     <orderEntry type="library" name="javassist-3.16.1-GA" level="project" />
     <orderEntry type="library" name="guava-11.0.2" level="project" />
-    <orderEntry type="module" module-name="yadrone" />
   </component>
 </module>
