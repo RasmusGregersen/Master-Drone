@@ -324,7 +324,8 @@ public class MainDroneController extends AbstractController implements TagListen
 					ret = ((c.x > (imgCenterX - MasterDrone.TOLERANCE))
 							&& (c.x < (imgCenterX + MasterDrone.TOLERANCE))
 							&& (c.y > (imgCenterY - MasterDrone.TOLERANCE))
-							&& (c.y < (imgCenterY + MasterDrone.TOLERANCE)));		
+							&& (c.y < (imgCenterY + MasterDrone.TOLERANCE))
+							&& (c.r < 160));
 		return ret;
 	}
 	
