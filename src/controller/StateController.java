@@ -9,90 +9,89 @@ public class StateController {
 
     private IARDrone drone;
 
-    public enum command{
+    public enum Command {
         TakeOff,Hover,QRSearch,QRFound,QRValidate,SearchForCircle,CircleFound,Centralize,FlyThrough,UpdateGate,Finish
     }
 
-    public command state;
+    public Command state;
 
 
-    private void commands(command command){
+    private void commands(Command command){
         switch(command){
-            case TakeOff: TakeOff();
+            case TakeOff: takeOff();
                 break;
-            case Hover: Hover();
+            case Hover: hover();
                 break;
-            case QRSearch: QRSearch();
+            case QRSearch: qRSearch();
                 break;
-            case QRFound: QRFound();
+            case QRFound: qRFound();
                 break;
-            case QRValidate: QRValidate();
+            case QRValidate: qRValidate();
                 break;
-            case SearchForCircle: SearchForCircle();
+            case SearchForCircle: searchForCircle();
                 break;
-            case CircleFound: CircleFound();
+            case CircleFound: circleFound();
                 break;
-            case Centralize: Centralize();
+            case Centralize: centralize();
                 break;
-            case FlyThrough: FlyThrough();
+            case FlyThrough: flyThrough();
                 break;
-            case UpdateGate: UpdateGate();
+            case UpdateGate: updateGate();
                 break;
-            case Finish: Finish();
+            case Finish: finish();
                 break;
         }
     }
 
 
-    public void TakeOff(){
+    public void takeOff(){
         System.out.println("TakeOff");
         drone.takeOff();
-
+        state = Command.Hover;
     }
 
 
-    public void Hover() {
+    public void hover() {
         System.out.println("Hover");
         drone.hover();
     }
 
 
-    public void QRSearch() {
+    public void qRSearch() {
         System.out.println("QRSearch");
 
     }
 
-    public void QRFound() {
+    public void qRFound() {
         System.out.println("QRSearch");
     }
 
-    public void QRValidate() {
+    public void qRValidate() {
         System.out.println("QRValidate");
     }
 
-    public void SearchForCircle() {
+    public void searchForCircle() {
         System.out.println("SearchForCircle");
     }
 
-    public void CircleFound() {
+    public void circleFound() {
         System.out.println("CircleFound");
     }
 
-    public void Centralize() {
+    public void centralize() {
         System.out.println("Centralize");
     }
 
-    public void FlyThrough() {
+    public void flyThrough() {
         System.out.println("FlyThrough");
     }
 
-    public void UpdateGate() {
+    public void updateGate() {
         System.out.println("UpdateGate");
     }
 
-    public void Finish() {
+    public void finish() {
         System.out.println("Finish");
        drone.landing();
-
     }
 }
