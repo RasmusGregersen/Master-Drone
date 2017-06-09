@@ -63,17 +63,16 @@ public class MainDroneController extends AbstractController implements TagListen
 		while (!doStop) // control loop
 		{
 			try {
+				// reset if too old (and not updated)
+				if ((tag != null) && (System.currentTimeMillis() - tag.getTimestamp() > 500)){
+					tag = null;
+				}
 				sc.commands(sc.state);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 
 //			try {
-//				// reset if too old (and not updated)
-//				if ((tag != null) && (System.currentTimeMillis() - tag.getTimestamp() > 500)){
-//					lastTag = tag;
-//					tag = null;
-//				}
 //				if (circles.length > 0) {
 //					if (!isCircleCentered())						
 //						centerCircle();
@@ -299,8 +298,8 @@ public class MainDroneController extends AbstractController implements TagListen
 		
 		if (circles.length > 0)  // Same deal as centerCircle()
 			for (Circle c : circles)
-				if (c.getRadius() >= MasterDrone.IMAGE_HEIGHT / 10)
-					ret = ((c.x > (imgCenterX - MasterDrone.TOLERANCE))
+				if (c.getRadius() >= MasterDrone.IMAGE_HEIGHT / 10) 
+					return ret = ((c.x > (imgCenterX - MasterDrone.TOLERANCE))
 							&& (c.x < (imgCenterX + MasterDrone.TOLERANCE))
 							&& (c.y > (imgCenterY - MasterDrone.TOLERANCE))
 							&& (c.y < (imgCenterY + MasterDrone.TOLERANCE))
