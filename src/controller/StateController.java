@@ -31,17 +31,17 @@ public class StateController {
                 break;
             case Hover: hover();
                 break;
-            case QRSearching: qRSearch();
+            case QRSearching: qRSearch(); // Hannibal
                 break;
-            case QRFound: qRValidate();
+            case QRFound: qRValidate(); // Nichlas
                 break;
             case QRValidated: qRCentralizing();
                 break;
             case QRCentralized: searchForCircle();
                 break;
-            case CircleFound: centralize();
+            case CircleFound: centralize(); // Lars
                 break;
-            case DroneCentralized: flyThrough();
+            case DroneCentralized: flyThrough(); // David
                 break;
             case FlownThrough: updateGate();
                 break;
