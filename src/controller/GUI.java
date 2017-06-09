@@ -138,12 +138,13 @@ public class GUI extends JFrame implements ImageListener, TagListener, CircleLis
         			}
 
         			// Draw circles
-        			for(Circle c : circles){
-        				g.setColor(Color.RED);
-        				g.drawRect((int)c.x, (int)c.y, 10, 10);
-        				g.setColor(Color.BLUE);
-        				g.drawOval((int)(c.x - c.r), (int) (c.y - c.r), (int)(2*c.r), (int)(2*c.r));
-        			}
+					if (circles != null)
+						for(Circle c : circles){
+							g.setColor(Color.RED);
+							g.drawRect((int)c.x, (int)c.y, 10, 10);
+							g.setColor(Color.BLUE);
+							g.drawOval((int)(c.x - c.r), (int) (c.y - c.r), (int)(2*c.r), (int)(2*c.r));
+						}
         		}
         		else
         		{
