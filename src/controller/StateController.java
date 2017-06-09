@@ -3,9 +3,6 @@ package controller;
 import de.yadrone.base.IARDrone;
 import imgManagement.Circle;
 
-import javax.xml.bind.SchemaOutputResolver;
-import java.util.Random;
-
 import com.google.zxing.Result;
 import com.google.zxing.ResultPoint;
 
@@ -16,7 +13,7 @@ public class StateController {
 
 
     public enum Command {
-        ReadyForTakeOff,Hover,QRSearching,QRCheck,QRValidated,QRCentralized,CircleFound,DroneCentralized,FlownThrough, Finished
+        ReadyForTakeOff,Hover,QRSearching, QRValidate, QRCentralize, searchForCircle,CircleFound, FlyThrough, Updategate, Finish
     }
 
     public Command state;
@@ -41,19 +38,19 @@ public class StateController {
                 break;
             case QRSearching: qRSearch(); // Hannibal
                 break;
-            case QRCheck: qRValidate(); // Nichlas
+            case QRValidate: qRValidate(); // Nichlas
                 break;
-            case QRValidated: qRCentralizing(); // Nichlas
+            case QRCentralize: qRCentralizing(); // Nichlas
                 break;
-            case QRCentralized: searchForCircle(); //David
+            case searchForCircle: searchForCircle(); //David
                 break;
-            case CircleFound: centralize(); // Lars
+            case CircleFound: circleFound(); // Lars
                 break;
-            case DroneCentralized: flyThrough(); // David
+            case FlyThrough: flyThrough(); // David
                 break;
-            case FlownThrough: updateGate();
+            case Updategate: updateGate();
                 break;
-            case Finished: finish();
+            case Finish: finish();
                 break;
         }
     }
@@ -115,7 +112,7 @@ public class StateController {
                 break;
         }
         MainDroneController.sleep(200);
-        state = Command.QRCheck;
+        state = Command.QRValidate;
     }
 
     
@@ -131,7 +128,7 @@ public class StateController {
     	// The scanned QR is the next port we need
     	if (controller.getPorts().get(nextPort).equals(tag.getText())) {
     		System.out.println("Validated port: " + tag.getText());
-    		this.state = Command.QRValidated;    		
+    		this.state = Command.QRCentralize;
     	} else {
     		System.out.println("Not validated port: " + tag.getText());
     		this.state = Command.QRSearching;
@@ -190,7 +187,7 @@ public class StateController {
 			MainDroneController.sleep(SLEEP);
 		} else {
 			System.out.println("AutoController: Tag centered");
-			this.state = Command.QRCentralized;
+			this.state = Command.searchForCircle;
 		}
     }
 
@@ -209,7 +206,7 @@ public class StateController {
         }
     }
 
-    public void centralize() throws InterruptedException {
+    public void circleFound() throws InterruptedException {
         //Centralize drone in front of circle
         System.out.println("State: Centralize - ");
         int imgCenterX = MasterDrone.IMAGE_WIDTH / 2;
@@ -219,7 +216,7 @@ public class StateController {
             for (Circle c : controller.getCircles()){
             	if (c.getRadius() >= MasterDrone.IMAGE_HEIGHT / 10) {
             		if (controller.isCircleCentered()) {
-            			this.state = Command.DroneCentralized;
+            			this.state = Command.FlyThrough;
             			return;
             		}
 	                float leftRightSpeed = (float) ((c.x - imgCenterX) / 10) / 100.0f;
@@ -232,7 +229,7 @@ public class StateController {
             }
         }
         else {
-            state = Command.QRCentralized;
+            state = Command.searchForCircle;
         }
     }
 
@@ -243,7 +240,7 @@ public class StateController {
         drone.getCommandManager().hover();
         MainDroneController.sleep(1500);
         System.out.println("Returning to Hover State");
-        state = Command.FlownThrough;
+        state = Command.Updategate;
     }
 
     public void updateGate() {
@@ -256,7 +253,7 @@ public class StateController {
         //Changing state to finishing or searching for next tag depending on port state
         if(nextPort>maxPorts) {
         	System.out.println("setting state to finish");
-        	this.state=Command.Finished;
+        	this.state=Command.Finish;
         }
         else {
         	System.out.println("setting state hover");

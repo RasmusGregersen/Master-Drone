@@ -63,7 +63,7 @@ public class MasterDrone {
 		drone.getVideoManager().addImageListener(cf);
 		
 		cf.addListener(droneController);
-		cf.addListener(gui);		
+		cf.addListener(gui);
 		
 		drone.getCommandManager().setFlyingMode(FlyingMode.HOVER_ON_TOP_OF_ROUNDEL);
 		//drone.getCommandManager().setFlyingMode(FlyingMode.HOVER_ON_TOP_OF_ORIENTED_ROUNDEL);
