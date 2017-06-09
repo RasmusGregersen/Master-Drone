@@ -1,6 +1,7 @@
 package controller;
 
 import de.yadrone.base.IARDrone;
+import imgManagement.Circle;
 
 import javax.xml.bind.SchemaOutputResolver;
 
@@ -27,7 +28,7 @@ public class StateController {
     }
 
 
-    public void commands(Command command){
+    public void commands(Command command) throws InterruptedException {
         switch(command){
             case ReadyForTakeOff: takeOff();
                 break;
@@ -121,13 +122,28 @@ public class StateController {
         //TODO: Check if circle is found and transit state, otherwise back to search.
     }
 
-    public void centralize() {
+    public void centralize() throws InterruptedException {
         //Centralize drone in front of circle
         System.out.println("Centralize");
-        //TODO: Implement centralizing
-
-        //Check if drone is centralized and transit state or move back to searching.
-        //TODO: Check if drone i centralized, otherwise change state to circle search
+        int imgCenterX = MasterDrone.IMAGE_WIDTH / 2;
+        int imgCenterY = MasterDrone.IMAGE_HEIGHT / 2;
+        if (controller.getCircles().length > 0) {
+            // We have more than one circle, figure out which one is correct
+            for (Circle c : controller.getCircles()){
+                float leftRightSpeed = (float) ((imgCenterX-c.x)/10+5)/100.0f;
+                float forwardSpeed = (float) ((c.r-150)/10)/100.0f;
+                float upDownSpeed = (float) ((c.y-imgCenterY)/10+5)/100.0f;
+                drone.getCommandManager().move(leftRightSpeed, forwardSpeed, upDownSpeed, 0f).doFor(30);
+                Thread.sleep(30);
+                if ((c.x > (imgCenterX - MasterDrone.TOLERANCE))
+                        && (c.x < (imgCenterX + MasterDrone.TOLERANCE))
+                        && (c.y > (imgCenterY - MasterDrone.TOLERANCE))
+                        && (c.y < (imgCenterY + MasterDrone.TOLERANCE))
+                        && (c.r >= 160)) {
+                    state = Command.DroneCentralized;
+                }
+            }
+        }
     }
 
     public void flyThrough() {
