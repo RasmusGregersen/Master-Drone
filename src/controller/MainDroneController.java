@@ -114,6 +114,27 @@ public class MainDroneController extends AbstractController implements TagListen
 
 	}
 
+	ArrayList<String> getTagVisitedList() {
+		return tagVisitedList;
+	}
+
+	Result getTag() {
+		return tag;
+	}
+
+	ArrayList<String> getPorts() {
+		return ports;
+	}
+
+	HashMap<String, Point> getWallMarks() {
+		return wallMarks;
+	}
+
+	Circle[] getCircles() {
+		return circles;
+	}
+
+
 	public void onTag(Result result, float orientation) {
 		if (result == null) // ToDo: do not call if no tag is present
 			return;
