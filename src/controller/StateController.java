@@ -21,6 +21,7 @@ public class StateController {
     private MainDroneController controller;
     
     private int nextPort = 0; // Consider handling this in MainDronController
+    private final int maxPorts = 5;
     
     public StateController(MainDroneController mc, IARDrone drone) {
     	this.controller = mc;
@@ -160,11 +161,19 @@ public class StateController {
 
     public void updateGate() {
         //Changing which QR tag to search for next
-        System.out.println("UpdateGate");
-        //TODO: Implement port state changer
+    	nextPort++;
+    	
+        System.out.println("UpdateGate: next port is " + nextPort);
 
         //Changing state to finishing or searching for next tag depending on port state
-        //TODO: Implement update gate and transit state
+        if(nextPort>maxPorts) {
+        	System.out.println("setting state to finish");
+        	this.state=Command.Finished;
+        }
+        else {
+        	System.out.println("setting state hover");
+        	this.state=Command.Hover;
+        }
     }
 
     public void finish() {
