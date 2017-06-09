@@ -5,6 +5,9 @@ import imgManagement.Circle;
 
 import javax.xml.bind.SchemaOutputResolver;
 
+import com.google.zxing.Result;
+import com.google.zxing.ResultPoint;
+
 /**
  * Created by Dave on 07/06/2017.
  */
@@ -12,7 +15,7 @@ public class StateController {
 
 
     public enum Command {
-        ReadyForTakeOff,Hover,QRSearching,QRFound,QRValidated,QRCentralized,CircleFound,DroneCentralized,FlownThrough, Finished
+        ReadyForTakeOff,Hover,QRSearching,QRCheck,QRValidated,QRCentralized,CircleFound,DroneCentralized,FlownThrough, Finished
     }
 
     public Command state;
@@ -37,9 +40,9 @@ public class StateController {
                 break;
             case QRSearching: qRSearch(); // Hannibal
                 break;
-            case QRFound: qRValidate(); // Nichlas
+            case QRCheck: qRValidate(); // Nichlas
                 break;
-            case QRValidated: qRCentralizing();
+            case QRValidated: qRCentralizing(); // Nichlas
                 break;
             case QRCentralized: searchForCircle();
                 break;
@@ -89,14 +92,20 @@ public class StateController {
 
     public void qRValidate() {
     	System.out.print("State: QRValidate: ");
-    	if (controller.getTag() == null ) {
-    		System.out.println("no tag");
-    		this.state = Command.QRSearching;
-    	}
-    	// The scanned QR is the next port we need
-    	if (controller.getPorts().get(nextPort).equals(controller.getTag().getText())) {
-    		System.out.println("Validated port: " + nextPort);
-    		this.state = Command.QRValidated;    		
+    	Result tag = controller.getTag();
+    	synchronized(tag) {
+	    	if (tag == null ) {
+	    		System.out.println("no tag");
+	    		this.state = Command.QRSearching;
+	    	}
+	    	// The scanned QR is the next port we need
+	    	if (controller.getPorts().get(nextPort).equals(tag.getText())) {
+	    		System.out.println("Validated port: " + tag.getText());
+	    		this.state = Command.QRValidated;    		
+	    	} else {
+	    		System.out.println("Not validated port: " + tag.getText());
+	    		this.state = Command.QRSearching;
+	    	}
     	}
     }
     
@@ -105,13 +114,64 @@ public class StateController {
     
     
 
-    public void qRCentralizing() {
+    public void qRCentralizing() throws InterruptedException {
         //Centralize QR tag method
-        System.out.println("QRcentralizing");
-        //TODO: Implement method to centralize QR tag
+        System.out.print("State: QRcentralizing - ");
+        Result tag = controller.getTag();
+        if (tag == null) {
+        	System.out.println("no tag, back to searching");
+        	this.state = Command.QRSearching;
+        	return;
+        }
+        final int SPEED = 5;
+        final int SLEEP = 500;
+        ResultPoint[] points;
+		synchronized (tag) {
+			points = tag.getResultPoints();
+		}
 
-        //If succesfully centralized, transit otherwise move back to searching
-        //TODO: Implement check otherwise move back to search
+		int imgCenterX = MasterDrone.IMAGE_WIDTH / 2;
+		int imgCenterY = MasterDrone.IMAGE_HEIGHT / 2;
+
+		float x = (points[1].getX() + points[2].getX()) / 2; // True middle
+		float y = points[1].getY();
+
+//		if ((tagOrientation > 10) && (tagOrientation < 180)) {
+//			System.out.println("AutoController: Spin left");
+//			drone.getCommandManager().spinLeft(SPEED * 2);
+//			Thread.currentThread();
+//			Thread.sleep(SLEEP);
+//		} else if ((tagOrientation < 350) && (tagOrientation > 180)) {
+//			System.out.println("AutoController: Spin right");
+//			drone.getCommandManager().spinRight(SPEED * 2);
+//			Thread.currentThread();
+//			Thread.sleep(SLEEP);
+		//} else 
+		if (x < (imgCenterX - MasterDrone.TOLERANCE)) {
+			System.out.println("AutoController: Center Tag: Go left");
+			drone.getCommandManager().goLeft(SPEED).doFor(30);
+			Thread.currentThread();
+			Thread.sleep(SLEEP);				
+		} else if (x > (imgCenterX + MasterDrone.TOLERANCE)) {
+			System.out.println("AutoController: Center Tag: Go right");
+			drone.getCommandManager().goRight(SPEED).doFor(30);
+			Thread.currentThread();
+			Thread.sleep(SLEEP);
+		} else if (y < (imgCenterY - MasterDrone.TOLERANCE)) {
+			System.out.println("AutoController: Center Tag: Go up");
+			drone.getCommandManager().up(SPEED * 2).doFor(60);
+			Thread.currentThread();
+			Thread.sleep(SLEEP);
+		} else if (y > (imgCenterY + MasterDrone.TOLERANCE)) {
+			System.out.println("AutoController: Center Tag: Go down");
+			drone.getCommandManager().down(SPEED * 2).doFor(60);
+			Thread.currentThread();
+			Thread.sleep(SLEEP);
+		} else {
+			System.out.println("AutoController: Tag centered");
+			drone.getCommandManager().setLedsAnimation(LEDAnimation.BLINK_GREEN, 10, 5);
+			this.state = Command.QRCentralized;
+		}
     }
 
     public void searchForCircle() {
