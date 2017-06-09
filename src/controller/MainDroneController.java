@@ -2,8 +2,6 @@ package controller;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Random;
-
 import org.opencv.core.Point;
 
 import com.google.zxing.Result;
@@ -63,10 +61,13 @@ public class MainDroneController extends AbstractController implements TagListen
 	public void run() {
 		sc.state = Command.ReadyForTakeOff;
 		while (!doStop) // control loop
-			sc.commands(sc.state);
 		{
+			try {
+				sc.commands(sc.state);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 
-			sc.commands(sc.state);
 //			try {
 //				// reset if too old (and not updated)
 //				if ((tag != null) && (System.currentTimeMillis() - tag.getTimestamp() > 500)){
@@ -187,57 +188,7 @@ public class MainDroneController extends AbstractController implements TagListen
 
 		return false;
 	}
-	
-	int strayMode = 0;
 
-	private void strayAround() throws InterruptedException {
-//		if (strayMode == 0) {
-//			Thread.currentThread();
-//			Thread.sleep(SLEEP);
-//			return;
-//			}
-		switch(strayMode) {
-		case 0:
-//			System.out.println("AutoController: Fly up");
-//			drone.getCommandManager().up(SPEED * 2);
-			strayMode++;
-			//break;
-		case 1:
-			System.out.println("AutoController: Stray Around: Spin right");
-			drone.getCommandManager().spinRight(SPEED * 3).doFor(doFor*3);
-			strayMode++;
-			break;
-		case 2:
-			System.out.println("AutoController: Stray Around: Spin left");
-			drone.getCommandManager().spinLeft(SPEED * 3).doFor(doFor*3);
-			strayMode++;
-			break;
-		case 3:
-			int direction = new Random().nextInt() % 4;
-			switch (direction) {
-			case 0:
-				System.out.println("AutoController: Stray Around: FORWARD");
-				drone.getCommandManager().forward(SPEED).doFor(doFor);
-				break;
-			case 1:
-				System.out.println("AutoController: Stray Around: BACKWARD");
-				drone.getCommandManager().backward(SPEED).doFor(doFor);
-				break;
-			case 2:
-				System.out.println("AutoController: Stray Around: LEFT");
-				drone.getCommandManager().goLeft(SPEED).doFor(doFor);
-				break;
-			case 3:
-				System.out.println("AutoController: Stray Around: RIGHT");
-				drone.getCommandManager().goRight(SPEED).doFor(doFor);
-				break;				
-			}
-			strayMode = 3;
-		}
-
-		Thread.currentThread();
-		Thread.sleep(SLEEP);
-	}
 
 	private void centerTag() throws InterruptedException {
 		String tagText;

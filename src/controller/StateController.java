@@ -4,6 +4,7 @@ import de.yadrone.base.IARDrone;
 import imgManagement.Circle;
 
 import javax.xml.bind.SchemaOutputResolver;
+import java.util.Random;
 
 import com.google.zxing.Result;
 import com.google.zxing.ResultPoint;
@@ -44,7 +45,7 @@ public class StateController {
                 break;
             case QRValidated: qRCentralizing(); // Nichlas
                 break;
-            case QRCentralized: searchForCircle();
+            case QRCentralized: searchForCircle(); //David
                 break;
             case CircleFound: centralize(); // Lars
                 break;
@@ -76,18 +77,46 @@ public class StateController {
         state = Command.QRSearching;
     }
 
+    int strayMode = 0;
 
-    public void qRSearch() {
+    public void qRSearch() throws InterruptedException {
+
+        int SPEED = 4;
+        int doFor = 20;
+
         //Searching method
         System.out.println("QRSearch");
         //TODO: Implement qRSearch method
 
-        //Check conditions
-        //TODO: Implement check to see if QR tag is found. Keep looking or transit state
+        switch(strayMode) {
+            case 0:
+                System.out.println("AutoController: Stray Around: Spin right, Case: 0");
+                drone.getCommandManager().spinRight(SPEED * 3).doFor(doFor);
+                strayMode++;
+                break;
+            case 1:
+                System.out.println("AutoController: Stray Around: Go up, Spin right, Case: 1");
+                drone.getCommandManager().up(SPEED).doFor(doFor);
+                drone.getCommandManager().spinRight(SPEED * 3).doFor(doFor);
+                strayMode++;
+                break;
+            case 2:
+                System.out.println("AutoController: Stray Around: Go down, Spin right, Case: 2");
+                drone.getCommandManager().up(SPEED).doFor(doFor);
+                drone.getCommandManager().spinRight(SPEED * 3).doFor(doFor);
+                strayMode++;
+                break;
+            case 3:
+                System.out.println("AutoController: Stray Around: Spin right, Case: 3");
+                drone.getCommandManager().spinRight(SPEED * 3).doFor(doFor);
+                strayMode = 0;
+                break;
+        }
+        Thread.currentThread();
+        Thread.sleep(doFor+10);
+        state = Command.QRFound;
     }
-    
-    
-    
+
     
 
     public void qRValidate() {
@@ -108,11 +137,7 @@ public class StateController {
 	    	}
     	}
     }
-    
-    
-    
-    
-    
+
 
     public void qRCentralizing() throws InterruptedException {
         //Centralize QR tag method
@@ -195,7 +220,8 @@ public class StateController {
                 float forwardSpeed = (float) ((c.r-150)/10)/100.0f;
                 float upDownSpeed = (float) ((c.y-imgCenterY)/10+5)/100.0f;
                 drone.getCommandManager().move(leftRightSpeed, forwardSpeed, upDownSpeed, 0f).doFor(30);
-                Thread.currentThread().sleep(30);
+                Thread.currentThread();
+                Thread.sleep(30);
                 if ((c.x > (imgCenterX - MasterDrone.TOLERANCE))
                         && (c.x < (imgCenterX + MasterDrone.TOLERANCE))
                         && (c.y > (imgCenterY - MasterDrone.TOLERANCE))
