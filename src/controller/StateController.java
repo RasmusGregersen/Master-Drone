@@ -39,9 +39,9 @@ public class StateController {
                 break;
             case QRFound: qRValidate(); // Nichlas
                 break;
-            case QRValidated: qRCentralizing();
+            case QRValidated: qRCentralizing(); //TODO: Still needs to decide wether flying for QR's or Circles.
                 break;
-            case QRCentralized: searchForCircle();
+            case QRCentralized: searchForCircle(); //David
                 break;
             case CircleFound: centralize(); // Lars
                 break;
@@ -75,7 +75,7 @@ public class StateController {
 
     int strayMode = 0;
 
-    public void qRSearch() {
+    public void qRSearch() throws InterruptedException {
 
         int SPEED = 4;
         int doFor = 20;
@@ -108,12 +108,11 @@ public class StateController {
                 strayMode = 0;
                 break;
         }
-
+        Thread.currentThread();
+        Thread.sleep(doFor+10);
         state = Command.QRFound;
     }
-    
-    
-    
+
     
 
     public void qRValidate() {
@@ -128,11 +127,7 @@ public class StateController {
     		this.state = Command.QRValidated;    		
     	}
     }
-    
-    
-    
-    
-    
+
 
     public void qRCentralizing() {
         //Centralize QR tag method
@@ -164,6 +159,7 @@ public class StateController {
                 float forwardSpeed = (float) ((c.r-150)/10)/100.0f;
                 float upDownSpeed = (float) ((c.y-imgCenterY)/10+5)/100.0f;
                 drone.getCommandManager().move(leftRightSpeed, forwardSpeed, upDownSpeed, 0f).doFor(30);
+                Thread.currentThread();
                 Thread.sleep(30);
                 if ((c.x > (imgCenterX - MasterDrone.TOLERANCE))
                         && (c.x < (imgCenterX + MasterDrone.TOLERANCE))
