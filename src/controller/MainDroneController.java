@@ -351,7 +351,7 @@ public class MainDroneController extends AbstractController implements TagListen
 							&& (c.x < (imgCenterX + MasterDrone.TOLERANCE))
 							&& (c.y > (imgCenterY - MasterDrone.TOLERANCE))
 							&& (c.y < (imgCenterY + MasterDrone.TOLERANCE))
-							&& (c.r < 160));
+							&& (c.r >= 160));
 		return ret;
 	}
 	
@@ -363,6 +363,12 @@ public class MainDroneController extends AbstractController implements TagListen
 	 */
 	void goThroughPort() throws InterruptedException{
 		System.out.println("AutoController: Going through port " + nextPort);
+		if (circles.length > 0)
+			for (Circle c: circles)
+				if (c.getRadius() >= MasterDrone.IMAGE_HEIGHT / 10) {
+					System.out.println("Radius: " + c.r);
+					break;
+				}
 //		while(true) {
 //			if (!isCircleCentered())
 //				break;
@@ -372,7 +378,7 @@ public class MainDroneController extends AbstractController implements TagListen
 //		}
 //		// TODO Here we assume we're so close to the circle that we no longer see it
 //		// so fly forward
-		drone.getCommandManager().forward(SPEED*8).doFor(doFor*2);
+		drone.getCommandManager().forward(SPEED*4).doFor(doFor*2);
 		Thread.currentThread();
 		Thread.sleep(SLEEP);
 	}
