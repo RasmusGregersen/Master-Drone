@@ -61,10 +61,12 @@ public class MainDroneController extends AbstractController implements TagListen
 	public void run() {
 		sc.state = Command.ReadyForTakeOff;
 		while (!doStop) // control loop
-			sc.commands(sc.state);
 		{
-
-			sc.commands(sc.state);
+			try {
+				sc.commands(sc.state);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 
 //			try {
 //				// reset if too old (and not updated)
