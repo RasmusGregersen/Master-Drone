@@ -28,7 +28,7 @@ public class StateController {
     }
 
 
-    public void commands(Command command){
+    public void commands(Command command) throws InterruptedException {
         switch(command){
             case ReadyForTakeOff: takeOff();
                 break;
@@ -144,7 +144,6 @@ public class StateController {
                 }
             }
         }
-        commands(state);
     }
 
     public void flyThrough() {
