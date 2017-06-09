@@ -116,11 +116,31 @@ public class StateController {
 
     public void flyThrough() {
         //Flying through the ring
-        System.out.println("FlyThrough");
-        //TODO: Implement flythrough
+        System.out.println("AutoController: Going through port " + controller.getPorts());
+        drone.getCommandManager().forward(50).doFor(1500);
+        drone.getCommandManager().hover().doFor()
 
         //Updating port to search for and transit state
         //TODO: Transit state
+
+        System.out.println("AutoController: Going through port " + controller.getPorts());
+//		while(true) {
+//			if (!isCircleCentered())
+//				break;
+//			drone.getCommandManager().forward(SPEED);
+//			Thread.currentThread();
+//			Thread.sleep(SLEEP);
+//		}
+//		// TODO Here we assume we're so close to the circle that we no longer see it
+//		// so fly forward
+        drone.getCommandManager().forward(SPEED*8).doFor(doFor*2);
+        Thread.currentThread();
+        Thread.sleep(SLEEP);
+
+
+
+
+
     }
 
     public void updateGate() {
