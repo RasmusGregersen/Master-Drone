@@ -134,7 +134,7 @@ public class StateController {
                 float forwardSpeed = (float) ((c.r-150)/10)/100.0f;
                 float upDownSpeed = (float) ((c.y-imgCenterY)/10+5)/100.0f;
                 drone.getCommandManager().move(leftRightSpeed, forwardSpeed, upDownSpeed, 0f).doFor(30);
-                Thread.sleep(30);
+                Thread.currentThread().sleep(30);
                 if ((c.x > (imgCenterX - MasterDrone.TOLERANCE))
                         && (c.x < (imgCenterX + MasterDrone.TOLERANCE))
                         && (c.y > (imgCenterY - MasterDrone.TOLERANCE))
@@ -143,6 +143,9 @@ public class StateController {
                     state = Command.DroneCentralized;
                 }
             }
+        }
+        else {
+            state = Command.QRCentralized;
         }
     }
 
