@@ -43,8 +43,8 @@ public class KeyboardController extends AbstractController
 					drone.getCommandManager().setCommand(new CalibrationCommand(Device.MAGNETOMETER));
 					System.out.println("AutoController: Calibrate");
 				} else if (e.getKeyCode() == KeyEvent.VK_H) {
-					drone.getCommandManager().hover().doFor(500);
-					System.out.println("Hover command!!");
+					drone.getCommandManager().move(-4/100.0f, -4/100.0f, 20/100.0f, 0).doFor(100);
+					System.out.println("Testing MoveCommand!!");
 				}
 					
 				else
