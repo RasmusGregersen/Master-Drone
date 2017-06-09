@@ -33,6 +33,7 @@ public class MasterDrone {
 		drone.start();
 		drone.getCommandManager().setVideoChannel(VideoChannel.HORI);
 		drone.getCommandManager().setConfigurationIds().setVideoCodec(VideoCodec.H264_360P);
+		drone.getCommandManager().setNavDataDemo(true);
 		//drone.getCommandManager().setEnableCombinedYaw(true);
 		//drone.getCommandManager().setVideoCodecFps(5);
 		
