@@ -63,6 +63,7 @@ public class MainDroneController extends AbstractController implements TagListen
 		while (!doStop) // control loop
 			sc.commands(sc.state);
 		{
+
 			sc.commands(sc.state);
 
 //			try {
