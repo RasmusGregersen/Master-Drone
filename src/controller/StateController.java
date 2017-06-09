@@ -3,6 +3,7 @@ package controller;
 import de.yadrone.base.IARDrone;
 
 import javax.xml.bind.SchemaOutputResolver;
+import java.util.Random;
 
 /**
  * Created by Dave on 07/06/2017.
@@ -68,11 +69,26 @@ public class StateController {
         state = Command.QRSearching;
     }
 
-
     public void qRSearch() {
+
+        int SPEED = 4;
+        int doFor = 20;
+
         //Searching method
         System.out.println("QRSearch");
         //TODO: Implement qRSearch method
+
+        int strayMode = 0;
+
+        switch(strayMode) {
+            case 0:
+                System.out.println("AutoController: Stray Around: Spin right");
+                drone.getCommandManager().spinRight(SPEED * 3).doFor(doFor);
+                strayMode++;
+                break;
+        }
+
+        state = Command.QRFound;
 
         //Check conditions
         //TODO: Implement check to see if QR tag is found. Keep looking or transit state
