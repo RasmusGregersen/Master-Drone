@@ -19,6 +19,8 @@ public class StateController {
     private IARDrone drone;
     private MainDroneController controller;
     
+    private int nextPort = 0; // Consider handling this in MainDronController
+    
     public StateController(MainDroneController mc, IARDrone drone) {
     	this.controller = mc;
     	this.drone = drone;
@@ -55,6 +57,7 @@ public class StateController {
         //Takeoff
         System.out.println("ReadyForTakeOff");
         drone.takeOff();
+        
         //Check conditions and transit to next state
         state = Command.Hover;
     }
@@ -77,15 +80,28 @@ public class StateController {
         //Check conditions
         //TODO: Implement check to see if QR tag is found. Keep looking or transit state
     }
+    
+    
+    
+    
 
     public void qRValidate() {
-        //Validate QR method
-        System.out.println("QRValidation");
-        //TODO: Implement method to validate QR tag
-
-        //Check if validated and transit state
-        //TODO: Implement to check if validated and transit state. Otherwise move back to searching
+    	System.out.print("State: QRValidate: ");
+    	if (controller.getTag() == null ) {
+    		System.out.println("no tag");
+    		this.state = Command.QRSearching;
+    	}
+    	// The scanned QR is the next port we need
+    	if (controller.getPorts().get(nextPort).equals(controller.getTag().getText())) {
+    		System.out.println("Validated port: " + nextPort);
+    		this.state = Command.QRValidated;    		
+    	}
     }
+    
+    
+    
+    
+    
 
     public void qRCentralizing() {
         //Centralize QR tag method
