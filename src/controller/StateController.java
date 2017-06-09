@@ -32,17 +32,17 @@ public class StateController {
                 break;
             case Hover: hover();
                 break;
-            case QRSearching: qRSearch();
+            case QRSearching: qRSearch(); // Hannibal
                 break;
-            case QRFound: qRValidate();
+            case QRFound: qRValidate(); // Nichlas
                 break;
             case QRValidated: qRCentralizing();
                 break;
             case QRCentralized: searchForCircle();
                 break;
-            case CircleFound: centralize();
+            case CircleFound: centralize(); // Lars
                 break;
-            case DroneCentralized: flyThrough();
+            case DroneCentralized: flyThrough(); // David
                 break;
             case FlownThrough: updateGate();
                 break;
@@ -69,6 +69,8 @@ public class StateController {
         state = Command.QRSearching;
     }
 
+    int strayMode = 0;
+
     public void qRSearch() {
 
         int SPEED = 4;
@@ -78,20 +80,32 @@ public class StateController {
         System.out.println("QRSearch");
         //TODO: Implement qRSearch method
 
-        int strayMode = 0;
-
         switch(strayMode) {
             case 0:
-                System.out.println("AutoController: Stray Around: Spin right");
+                System.out.println("AutoController: Stray Around: Spin right, Case: 0");
                 drone.getCommandManager().spinRight(SPEED * 3).doFor(doFor);
                 strayMode++;
+                break;
+            case 1:
+                System.out.println("AutoController: Stray Around: Go up, Spin right, Case: 1");
+                drone.getCommandManager().up(SPEED).doFor(doFor);
+                drone.getCommandManager().spinRight(SPEED * 3).doFor(doFor);
+                strayMode++;
+                break;
+            case 2:
+                System.out.println("AutoController: Stray Around: Go down, Spin right, Case: 2");
+                drone.getCommandManager().up(SPEED).doFor(doFor);
+                drone.getCommandManager().spinRight(SPEED * 3).doFor(doFor);
+                strayMode++;
+                break;
+            case 3:
+                System.out.println("AutoController: Stray Around: Spin right, Case: 3");
+                drone.getCommandManager().spinRight(SPEED * 3).doFor(doFor);
+                strayMode = 0;
                 break;
         }
 
         state = Command.QRFound;
-
-        //Check conditions
-        //TODO: Implement check to see if QR tag is found. Keep looking or transit state
     }
 
     public void qRValidate() {
