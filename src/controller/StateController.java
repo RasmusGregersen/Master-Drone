@@ -161,7 +161,6 @@ public class StateController {
     	nextPort++;
     	
         System.out.println("UpdateGate: next port is " + nextPort);
-        //TODO: Implement port state changer
 
         //Changing state to finishing or searching for next tag depending on port state
         if(nextPort>maxPorts) {
@@ -172,7 +171,6 @@ public class StateController {
         	System.out.println("setting state hover");
         	this.state=Command.Hover;
         }
-        //TODO: Implement update gate and transit state
     }
 
     public void finish() {
