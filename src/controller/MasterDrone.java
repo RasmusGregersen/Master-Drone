@@ -31,14 +31,12 @@ public class MasterDrone {
 		
 		drone = new ARDrone();
 		drone.start();
-		drone.getCommandManager().setVideoChannel(VideoChannel.HORI);
 		drone.getCommandManager().setConfigurationIds().setVideoCodec(VideoCodec.H264_360P);
-		drone.getCommandManager().setNavDataDemo(true);
-		//drone.getCommandManager().setEnableCombinedYaw(true);
-		//drone.getCommandManager().setVideoCodecFps(5);
-		
 		drone.getCommandManager().setVideoBitrateControl(VideoBitRateMode.MANUAL);
 		drone.getCommandManager().setVideoBitrate(1024);
+		drone.getCommandManager().setVideoChannel(VideoChannel.HORI);
+		drone.getCommandManager().setNavDataDemo(true);
+		
 		drone.getNavDataManager().addAttitudeListener(new AttitudeListener() {
 			public void attitudeUpdated(float pitch, float roll, float yaw){
 				//droneYaw = yaw/1000;

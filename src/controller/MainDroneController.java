@@ -49,7 +49,7 @@ public class MainDroneController extends AbstractController implements TagListen
 
 	public MainDroneController(IARDrone drone) {
 		super(drone);
-		sc = new StateController(this, drone);
+		
 		drone.getCommandManager().setMaxAltitude(maxHeight);
 		// Init ports list
 		for (int i = 0; i <= 7; i++)
@@ -59,7 +59,8 @@ public class MainDroneController extends AbstractController implements TagListen
 
 	@Override
 	public void run() {
-		sc.state = Command.ReadyForTakeOff;
+		sc = new StateController(this, drone);
+		sc.state = Command.CircleFound;
 		while (!doStop) // control loop
 		{
 			try {
