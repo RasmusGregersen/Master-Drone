@@ -9,16 +9,23 @@ import javax.xml.bind.SchemaOutputResolver;
  */
 public class StateController {
 
-    private IARDrone drone;
 
     public enum Command {
         ReadyForTakeOff,Hover,QRSearching,QRFound,QRValidated,QRCentralized,CircleFound,DroneCentralized,FlownThrough, Finished
     }
 
     public Command state;
+    
+    private IARDrone drone;
+    private MainDroneController controller;
+    
+    public StateController(MainDroneController mc, IARDrone drone) {
+    	this.controller = mc;
+    	this.drone = drone;
+    }
 
 
-    private void commands(Command command){
+    public void commands(Command command){
         switch(command){
             case ReadyForTakeOff: takeOff();
                 break;
@@ -50,7 +57,6 @@ public class StateController {
         drone.takeOff();
         //Check conditions and transit to next state
         state = Command.Hover;
-        commands(state);
     }
 
 
@@ -60,7 +66,6 @@ public class StateController {
         drone.hover();
         //Check conditions and transit to next state
         state = Command.QRSearching;
-        commands(state);
     }
 
 
@@ -71,7 +76,6 @@ public class StateController {
 
         //Check conditions
         //TODO: Implement check to see if QR tag is found. Keep looking or transit state
-        commands(state);
     }
 
     public void qRValidate() {
@@ -81,7 +85,6 @@ public class StateController {
 
         //Check if validated and transit state
         //TODO: Implement to check if validated and transit state. Otherwise move back to searching
-        commands(state);
     }
 
     public void qRCentralizing() {
