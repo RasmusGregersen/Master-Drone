@@ -91,14 +91,20 @@ public class StateController {
 
     public void qRValidate() {
     	System.out.print("State: QRValidate: ");
-    	if (controller.getTag() == null ) {
-    		System.out.println("no tag");
-    		this.state = Command.QRSearching;
-    	}
-    	// The scanned QR is the next port we need
-    	if (controller.getPorts().get(nextPort).equals(controller.getTag().getText())) {
-    		System.out.println("Validated port: " + nextPort);
-    		this.state = Command.QRValidated;    		
+    	Result tag = controller.getTag();
+    	synchronized(tag) {
+	    	if (tag == null ) {
+	    		System.out.println("no tag");
+	    		this.state = Command.QRSearching;
+	    	}
+	    	// The scanned QR is the next port we need
+	    	if (controller.getPorts().get(nextPort).equals(tag.getText())) {
+	    		System.out.println("Validated port: " + tag.getText());
+	    		this.state = Command.QRValidated;    		
+	    	} else {
+	    		System.out.println("Not validated port: " + tag.getText());
+	    		this.state = Command.QRSearching;
+	    	}
     	}
     }
     
