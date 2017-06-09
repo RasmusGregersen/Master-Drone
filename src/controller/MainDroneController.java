@@ -9,6 +9,7 @@ import org.opencv.core.Point;
 import com.google.zxing.Result;
 import com.google.zxing.ResultPoint;
 
+import controller.StateController.Command;
 import de.yadrone.base.IARDrone;
 import de.yadrone.base.command.LEDAnimation;
 import imgManagement.Circle;
@@ -46,9 +47,11 @@ public class MainDroneController extends AbstractController implements TagListen
 	private HashMap<String, Point> wallMarks;
 	private Circle[] circles;
 	private int nextPort = 3;
+	private StateController sc;
 
 	public MainDroneController(IARDrone drone) {
 		super(drone);
+		sc = new StateController(this, drone);
 		drone.getCommandManager().setMaxAltitude(maxHeight);
 		// Init ports list
 		for (int i = 0; i <= 7; i++)
@@ -58,23 +61,25 @@ public class MainDroneController extends AbstractController implements TagListen
 
 	@Override
 	public void run() {
+		sc.state = Command.ReadyForTakeOff;
 		while (!doStop) // control loop
+			sc.commands(sc.state);
 		{
-			try {
-				// reset if too old (and not updated)
-				if ((tag != null) && (System.currentTimeMillis() - tag.getTimestamp() > 500)){
-					lastTag = tag;
-					tag = null;
-				}
-				if (circles.length > 0) {
-					if (!isCircleCentered())						
-						centerCircle();
-					else
-						goThroughPort();
-				} else {
-						Thread.currentThread();
-						Thread.sleep(SLEEP);
-				}
+//			try {
+//				// reset if too old (and not updated)
+//				if ((tag != null) && (System.currentTimeMillis() - tag.getTimestamp() > 500)){
+//					lastTag = tag;
+//					tag = null;
+//				}
+//				if (circles.length > 0) {
+//					if (!isCircleCentered())						
+//						centerCircle();
+//					else
+//						goThroughPort();
+//				} else {
+//						Thread.currentThread();
+//						Thread.sleep(SLEEP);
+//				}
 //				if (tag != null && lastTag != null && ports.get(nextPort).equals(lastTag.getText())) { // We haven't gone through this port
 //					// Check for circles
 //					if (circles.length > 0) {
@@ -107,9 +112,9 @@ public class MainDroneController extends AbstractController implements TagListen
 //					Thread.currentThread();
 //					Thread.sleep(SLEEP);
 //				}
-			} catch (Exception exc) {
-				exc.printStackTrace();
-			}
+//			} catch (Exception exc) {
+//				exc.printStackTrace();
+//			}
 		}
 
 	}
