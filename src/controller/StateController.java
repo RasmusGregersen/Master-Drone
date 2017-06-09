@@ -61,18 +61,20 @@ public class StateController {
 
     public void takeOff(){
         //Takeoff
-        System.out.println("ReadyForTakeOff");
+        System.out.println("State: ReadyForTakeOff");
         drone.takeOff();
-        
+        drone.getCommandManager().forward(1).doFor(10);     
         //Check conditions and transit to next state
         state = Command.Hover;
     }
 
 
-    public void hover() {
+    public void hover() throws InterruptedException {
         //Hover method
-        System.out.println("Hover");
-        drone.hover();
+        System.out.println("State: Hover");
+        drone.getCommandManager().hover().doFor(500);
+        Thread.currentThread();
+		Thread.sleep(550);
         //Check conditions and transit to next state
         state = Command.QRSearching;
     }
@@ -85,7 +87,7 @@ public class StateController {
         int doFor = 20;
 
         //Searching method
-        System.out.println("QRSearch");
+        System.out.println("State: QRSearch");
         //TODO: Implement qRSearch method
 
         switch(strayMode) {
@@ -114,7 +116,7 @@ public class StateController {
         }
         Thread.currentThread();
         Thread.sleep(doFor+10);
-        state = Command.QRFound;
+        state = Command.QRCheck;
     }
 
     
@@ -194,32 +196,27 @@ public class StateController {
 			Thread.sleep(SLEEP);
 		} else {
 			System.out.println("AutoController: Tag centered");
-			drone.getCommandManager().setLedsAnimation(LEDAnimation.BLINK_GREEN, 10, 5);
 			this.state = Command.QRCentralized;
 		}
     }
 
     public void searchForCircle() {
         //Increase altitude and search for the circle
-        System.out.println("SearchForCircle");
-        if (controller.getCircles().length > 1) {
+        System.out.print("State: SearchForCircle - ");
+        if (controller.getCircles().length >= 1) {
             System.out.println("Circle found!");
             this.state = Command.CircleFound;
         }
         else {
+        	// TODO Needs to actually FIND the circle
             System.out.println("Returning TO QR SEARCH!");
             this.state = Command.QRSearching;
         }
-
-
-
-        //Check if circle found and transit state
-        //TODO: Check if circle is found and transit state, otherwise back to search.
     }
 
     public void centralize() throws InterruptedException {
         //Centralize drone in front of circle
-        System.out.println("Centralize");
+        System.out.println("State: Centralize - ");
         int imgCenterX = MasterDrone.IMAGE_WIDTH / 2;
         int imgCenterY = MasterDrone.IMAGE_HEIGHT / 2;
         if (controller.getCircles().length > 0) {
@@ -237,6 +234,7 @@ public class StateController {
                         && (c.y < (imgCenterY + MasterDrone.TOLERANCE))
                         && (c.r >= 160)) {
                     state = Command.DroneCentralized;
+                    
                 }
             }
         }
@@ -246,6 +244,7 @@ public class StateController {
     }
 
     public void flyThrough() {
+    	System.out.print("State: flyThrough - ");
         System.out.println("AutoController: Going through port " + nextPort);
         drone.getCommandManager().forward(50).doFor(1500);
         drone.getCommandManager().hover().doFor(1200);
@@ -260,6 +259,7 @@ public class StateController {
     }
 
     public void updateGate() {
+    	System.out.println("State: updateGate");
         //Changing which QR tag to search for next
     	nextPort++;
     	
@@ -277,7 +277,7 @@ public class StateController {
     }
 
     public void finish() {
-        System.out.println("Finish");
+        System.out.println("State: Finish");
        drone.landing();
     }
 }
