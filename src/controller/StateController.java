@@ -202,7 +202,16 @@ public class StateController {
     public void searchForCircle() {
         //Increase altitude and search for the circle
         System.out.println("SearchForCircle");
-        //TODO: Implement method to find circle
+        if (controller.getCircles().length > 1) {
+            System.out.println("Circle found!");
+            this.state = Command.CircleFound;
+        }
+        else {
+            System.out.println("Returning TO QR SEARCH!");
+            this.state = Command.QRSearching;
+        }
+
+
 
         //Check if circle found and transit state
         //TODO: Check if circle is found and transit state, otherwise back to search.
@@ -237,12 +246,17 @@ public class StateController {
     }
 
     public void flyThrough() {
-        //Flying through the ring
-        System.out.println("FlyThrough");
-        //TODO: Implement flythrough
-
-        //Updating port to search for and transit state
-        //TODO: Transit state
+        System.out.println("AutoController: Going through port " + nextPort);
+        drone.getCommandManager().forward(50).doFor(1500);
+        drone.getCommandManager().hover().doFor(1200);
+        Thread.currentThread();
+        try {
+            Thread.sleep(500);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        System.out.println("Returning to Hover State");
+        state = Command.Hover;
     }
 
     public void updateGate() {
