@@ -1,11 +1,5 @@
 package controller;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.PrintStream;
-
-import org.opencv.core.Core;
-
 import de.yadrone.base.ARDrone;
 import de.yadrone.base.IARDrone;
 import de.yadrone.base.command.FlyingMode;
@@ -15,6 +9,11 @@ import de.yadrone.base.command.VideoCodec;
 import de.yadrone.base.navdata.AttitudeListener;
 import imgManagement.CircleFinder;
 import imgManagement.QRCodeScanner;
+import org.opencv.core.Core;
+
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
 
 public class MasterDrone {
 
@@ -65,6 +64,10 @@ public class MasterDrone {
 		
 		drone.getCommandManager().setFlyingMode(FlyingMode.HOVER_ON_TOP_OF_ROUNDEL);
 		//drone.getCommandManager().setFlyingMode(FlyingMode.HOVER_ON_TOP_OF_ORIENTED_ROUNDEL);
+	}
+
+	public MainDroneController getDroneController() {
+		return droneController;
 	}
 
 	public void enableAutoControl(boolean enable) {

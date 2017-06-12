@@ -1,13 +1,9 @@
 package controller;
 
-import de.yadrone.base.IARDrone;
-import imgManagement.Circle;
-
-import javax.xml.bind.SchemaOutputResolver;
-import java.util.Random;
-
 import com.google.zxing.Result;
 import com.google.zxing.ResultPoint;
+import de.yadrone.base.IARDrone;
+import imgManagement.Circle;
 
 /**
  * Created by Dave on 07/06/2017..

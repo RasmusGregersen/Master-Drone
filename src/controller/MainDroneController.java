@@ -1,12 +1,7 @@
 package controller;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import org.opencv.core.Point;
-
 import com.google.zxing.Result;
 import com.google.zxing.ResultPoint;
-
 import controller.StateController.Command;
 import de.yadrone.base.IARDrone;
 import de.yadrone.base.command.LEDAnimation;
@@ -14,7 +9,11 @@ import imgManagement.Circle;
 import imgManagement.CircleFinder;
 import imgManagement.CircleListener;
 import imgManagement.TagListener;
+import org.opencv.core.Point;
 import utils.WallCoordinatesReader;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Main drone controller.
@@ -46,11 +45,15 @@ public class MainDroneController extends AbstractController implements TagListen
 	private HashMap<String, Point> wallMarks;
 	private Circle[] circles;
 	private int nextPort = 3;
+
+	public StateController getSc() {
+		return sc;
+	}
+
 	private StateController sc;
 
 	public MainDroneController(IARDrone drone) {
 		super(drone);
-		
 		drone.getCommandManager().setMaxAltitude(maxHeight);
 		drone.getCommandManager().setMinAltitude(minHeight);
 		// Init ports list

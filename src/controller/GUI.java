@@ -5,7 +5,6 @@ import de.yadrone.base.IARDrone;
 import de.yadrone.base.navdata.BatteryListener;
 import de.yadrone.base.video.ImageListener;
 import imgManagement.Circle;
-import imgManagement.CircleFinder;
 import imgManagement.CircleListener;
 import imgManagement.TagListener;
 
@@ -129,6 +128,15 @@ public class GUI extends JFrame implements ImageListener, TagListener, CircleLis
 
 					g.drawString("Battery: "+batterypercentage+"%", 0, 15);
 
+					// draw current state
+					if (main.getDroneController().getSc() != null)
+						g.drawString("State: " + main.getDroneController().getSc().state.toString(), 0, 40);
+					else
+						g.drawString("State: Waiting for AutoController...", 0, 40);
+
+					// draw circle status
+					g.drawString("Circles remaining: " + main.getDroneController().getPorts().size(), 0, 65);
+
         			// draw tolerance field (rectangle)
         			g.setColor(Color.RED);
 
@@ -190,7 +198,6 @@ public class GUI extends JFrame implements ImageListener, TagListener, CircleLis
 				drone.toggleCamera();
 			}
 		});
-
         videoPanel.setSize(MasterDrone.IMAGE_WIDTH, MasterDrone.IMAGE_HEIGHT);
         videoPanel.setMinimumSize(new Dimension(MasterDrone.IMAGE_WIDTH, MasterDrone.IMAGE_HEIGHT));
         videoPanel.setPreferredSize(new Dimension(MasterDrone.IMAGE_WIDTH, MasterDrone.IMAGE_HEIGHT));
