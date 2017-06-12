@@ -26,8 +26,8 @@ public class MainDroneController extends AbstractController implements TagListen
 	private final static int SPEED = 4;
 	private final static int SLEEP = 500;
 	private final static int doFor = 20; // How long (ms) to run commands for.
-	private final static int maxHeight = 3000; // Maximum height in millimeters
-	private final static int minHeight = 2000;
+	//private final static int maxHeight = 3000; // Maximum height in millimeters
+	//private final static int minHeight = 2000;
 	private static int leftRightDiv = 10;
 	private static int leftRightAdd = 5;
 	
@@ -54,8 +54,8 @@ public class MainDroneController extends AbstractController implements TagListen
 
 	public MainDroneController(IARDrone drone) {
 		super(drone);
-		drone.getCommandManager().setMaxAltitude(maxHeight);
-		drone.getCommandManager().setMinAltitude(minHeight);
+		//drone.getCommandManager().setMaxAltitude(maxHeight);
+		//drone.getCommandManager().setMinAltitude(minHeight);
 		// Init ports list
 		for (int i = 0; i <= 7; i++)
 			ports.add("P.0" + i);
@@ -65,7 +65,7 @@ public class MainDroneController extends AbstractController implements TagListen
 	@Override
 	public void run() {
 		sc = new StateController(this, drone);
-		sc.state = Command.Centralize;
+		sc.state = Command.TakeOff;
 		while (!doStop) // control loop
 		{
 			try {

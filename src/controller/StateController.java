@@ -5,6 +5,8 @@ import com.google.zxing.ResultPoint;
 import de.yadrone.base.IARDrone;
 import imgManagement.Circle;
 
+import java.util.Random;
+
 /**
  * Created by Dave on 07/06/2017..
  */
@@ -19,6 +21,7 @@ public class StateController {
     
     private IARDrone drone;
     private MainDroneController controller;
+    int strayModeCircle = 0;
     
     private int nextPort = 1; // Consider handling this in MainDronController
     private final int maxPorts = 5;
@@ -198,15 +201,31 @@ public class StateController {
         }
         else {
         	// TODO Needs to actually FIND the circle
-            int direction = new Random().nextInt() % 4;
-            int speedo = 6;
-            int dofor = 1500;
-            switch(direction)
-            {
-                case 0 : drone.getCommandManager().forward(speedo).doFor(dofor); System.out.println("PaperChaseAutoController: Stray Around: FORWARD"); break;
-                case 1 : drone.getCommandManager().backward(speedo).doFor(dofor); System.out.println("PaperChaseAutoController: Stray Around: BACKWARD");break;
-                case 2 : drone.getCommandManager().goLeft(speedo).doFor(dofor); System.out.println("PaperChaseAutoController: Stray Around: LEFT"); break;
-                case 3 : drone.getCommandManager().goRight(speedo).doFor(dofor); System.out.println("PaperChaseAutoController: Stray Around: RIGHT");break;
+            int SPEEDSpin = 10;
+            int SPEEDMove = 4;
+            int doFor = 20;
+
+            switch(strayModeCircle) {
+                case 0:
+                    System.out.println("AutoController: Stray Around: Spin right, Case: 0");
+                    drone.getCommandManager().spinRight(SPEEDSpin * 3).doFor(doFor);
+                    strayModeCircle++;
+                    break;
+                case 1:
+                    System.out.println("AutoController: Stray Around: Go up, Case: 1");
+                    drone.getCommandManager().up(SPEEDMove).doFor(doFor);
+                    strayModeCircle++;
+                    break;
+                case 2:
+                    System.out.println("AutoController: Stray Around: Spin right, Case: 2");
+                    drone.getCommandManager().spinRight(SPEEDSpin * 3).doFor(doFor);
+                    strayModeCircle++;
+                    break;
+                case 3:
+                    System.out.println("AutoController: Stray Around: Go down, Case: 3");
+                    drone.getCommandManager().down(SPEEDMove).doFor(doFor);
+                    strayModeCircle = 0;
+                    break;
             }
 
             Thread.currentThread().sleep(1500);
