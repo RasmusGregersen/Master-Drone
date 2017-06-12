@@ -49,7 +49,7 @@ public class MainDroneController extends AbstractController implements TagListen
 
 	public MainDroneController(IARDrone drone) {
 		super(drone);
-		sc = new StateController(this, drone);
+		
 		drone.getCommandManager().setMaxAltitude(maxHeight);
 		// Init ports list
 		for (int i = 0; i <= 7; i++)
@@ -59,21 +59,21 @@ public class MainDroneController extends AbstractController implements TagListen
 
 	@Override
 	public void run() {
-		sc.state = Command.ReadyForTakeOff;
+		sc = new StateController(this, drone);
+		sc.state = Command.Centralize;
 		while (!doStop) // control loop
 		{
 			try {
+				// reset if too old (and not updated)
+				if ((tag != null) && (System.currentTimeMillis() - tag.getTimestamp() > 500)){
+					tag = null;
+				}
 				sc.commands(sc.state);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 
 //			try {
-//				// reset if too old (and not updated)
-//				if ((tag != null) && (System.currentTimeMillis() - tag.getTimestamp() > 500)){
-//					lastTag = tag;
-//					tag = null;
-//				}
 //				if (circles.length > 0) {
 //					if (!isCircleCentered())						
 //						centerCircle();
@@ -299,8 +299,8 @@ public class MainDroneController extends AbstractController implements TagListen
 		
 		if (circles.length > 0)  // Same deal as centerCircle()
 			for (Circle c : circles)
-				if (c.getRadius() >= MasterDrone.IMAGE_HEIGHT / 10)
-					ret = ((c.x > (imgCenterX - MasterDrone.TOLERANCE))
+				if (c.getRadius() >= MasterDrone.IMAGE_HEIGHT / 10) 
+					return ret = ((c.x > (imgCenterX - MasterDrone.TOLERANCE))
 							&& (c.x < (imgCenterX + MasterDrone.TOLERANCE))
 							&& (c.y > (imgCenterY - MasterDrone.TOLERANCE))
 							&& (c.y < (imgCenterY + MasterDrone.TOLERANCE))

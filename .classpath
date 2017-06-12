@@ -14,11 +14,16 @@
 	<classpathentry kind="lib" path="libs/slf4j-api-1.7.2.jar"/>
 	<classpathentry kind="lib" path="libs/slf4j-jdk14-1.7.2.jar"/>
 	<classpathentry kind="lib" path="libs/xuggle-xuggler-5.4.jar"/>
-	<classpathentry kind="lib" path="libs/yadrone_032.jar"/>
 	<classpathentry kind="lib" path="libs/reflections/guava-11.0.2.jar"/>
 	<classpathentry kind="lib" path="libs/reflections/javassist-3.16.1-GA.jar"/>
 	<classpathentry kind="lib" path="libs/reflections/reflections-0.9.9-RC1.jar"/>
 	<classpathentry kind="lib" path="libs/zxing/core-2.2.jar"/>
 	<classpathentry kind="lib" path="libs/zxing/javase-2.2.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Carzita/Documents/0 uni/4 semester/02343 CDIO-Projekt F17/yadrone_032_fat_lib/yadrone_032.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/OpenCV-3.2">
+		<attributes>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="C:/Users/Carzita/Documents/0 uni/4 semester/02343 CDIO-Projekt F17/opencv/build/java/x64"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="out/production/Master-Drone"/>
 </classpath>

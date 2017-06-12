@@ -6,14 +6,17 @@ import imgManagement.Circle;
 import javax.xml.bind.SchemaOutputResolver;
 import java.util.Random;
 
+import com.google.zxing.Result;
+import com.google.zxing.ResultPoint;
+
 /**
- * Created by Dave on 07/06/2017.
+ * Created by Dave on 07/06/2017..
  */
 public class StateController {
 
 
     public enum Command {
-        ReadyForTakeOff,Hover,QRSearching,QRFound,QRValidated,QRCentralized,CircleFound,DroneCentralized,FlownThrough, Finished
+        TakeOff,Hover,QRSearch,QRValidate,QRCentralizing,SearchForCircle,Centralize,FlyThrough,UpdateGate, Finished
     }
 
     public Command state;
@@ -21,7 +24,8 @@ public class StateController {
     private IARDrone drone;
     private MainDroneController controller;
     
-    private int nextPort = 0; // Consider handling this in MainDronController
+    private int nextPort = 1; // Consider handling this in MainDronController
+    private final int maxPorts = 5;
     
     public StateController(MainDroneController mc, IARDrone drone) {
     	this.controller = mc;
@@ -29,25 +33,25 @@ public class StateController {
     }
 
 
-    public void commands(Command command) throws InterruptedException {
+	public void commands(Command command) throws InterruptedException {
         switch(command){
-            case ReadyForTakeOff: takeOff();
+            case TakeOff: takeOff();
                 break;
             case Hover: hover();
                 break;
-            case QRSearching: qRSearch(); // Hannibal
+            case QRSearch: this.state = Command.Centralize;//qRSearch(); // Hannibal
                 break;
-            case QRFound: qRValidate(); // Nichlas
+            case QRValidate: qRValidate(); // Nichlas
                 break;
-            case QRValidated: qRCentralizing(); //TODO: Still needs to decide wether flying for QR's or Circles.
+            case QRCentralizing: qRCentralizing(); // Nichlas
                 break;
-            case QRCentralized: searchForCircle(); //David
+            case SearchForCircle: searchForCircle(); //David
                 break;
-            case CircleFound: centralize(); // Lars
+            case Centralize: centralize(); // Lars
                 break;
-            case DroneCentralized: flyThrough(); // David
+            case FlyThrough: flyThrough(); // David
                 break;
-            case FlownThrough: updateGate();
+            case UpdateGate: updateGate();
                 break;
             case Finished: finish();
                 break;
@@ -55,22 +59,24 @@ public class StateController {
     }
 
 
-    public void takeOff(){
+    public void takeOff() throws InterruptedException{
         //Takeoff
-        System.out.println("ReadyForTakeOff");
+        System.out.println("State: ReadyForTakeOff");
         drone.takeOff();
-        
+        MainDroneController.sleep(3000);
+        drone.getCommandManager().forward(1).doFor(10);     
         //Check conditions and transit to next state
         state = Command.Hover;
     }
 
 
-    public void hover() {
+    public void hover() throws InterruptedException {
         //Hover method
-        System.out.println("Hover");
-        drone.hover();
+        System.out.println("State: Hover");
+        drone.getCommandManager().hover().doFor(500);
+		MainDroneController.sleep(550);
         //Check conditions and transit to next state
-        state = Command.QRSearching;
+        state = Command.QRSearch;
     }
 
     int strayMode = 0;
@@ -81,25 +87,25 @@ public class StateController {
         int doFor = 20;
 
         //Searching method
-        System.out.println("QRSearch");
+        System.out.println("State: QRSearch");
         //TODO: Implement qRSearch method
 
         switch(strayMode) {
             case 0:
-                System.out.println("AutoController: Stray Around: Spin right, Case: 0");
-                drone.getCommandManager().spinRight(SPEED * 3).doFor(doFor);
+//                System.out.println("AutoController: Stray Around: Spin right, Case: 0");
+//                drone.getCommandManager().spinRight(SPEED * 3).doFor(doFor);
                 strayMode++;
                 break;
             case 1:
                 System.out.println("AutoController: Stray Around: Go up, Spin right, Case: 1");
                 drone.getCommandManager().up(SPEED).doFor(doFor);
-                drone.getCommandManager().spinRight(SPEED * 3).doFor(doFor);
+                //drone.getCommandManager().spinRight(SPEED * 3).doFor(doFor);
                 strayMode++;
                 break;
             case 2:
-                System.out.println("AutoController: Stray Around: Go down, Spin right, Case: 2");
-                drone.getCommandManager().up(SPEED).doFor(doFor);
-                drone.getCommandManager().spinRight(SPEED * 3).doFor(doFor);
+                //System.out.println("AutoController: Stray Around: Go down, Spin right, Case: 2");
+               // drone.getCommandManager().up(SPEED).doFor(doFor);
+               // drone.getCommandManager().spinRight(SPEED * 3).doFor(doFor);
                 strayMode++;
                 break;
             case 3:
@@ -108,90 +114,167 @@ public class StateController {
                 strayMode = 0;
                 break;
         }
-        Thread.currentThread();
-        Thread.sleep(doFor+10);
-        state = Command.QRFound;
+        MainDroneController.sleep(200);
+        state = Command.QRValidate;
     }
 
     
 
     public void qRValidate() {
     	System.out.print("State: QRValidate: ");
-    	if (controller.getTag() == null ) {
+    	Result tag = controller.getTag();
+    	if (tag == null ) {
     		System.out.println("no tag");
-    		this.state = Command.QRSearching;
+    		this.state = Command.QRSearch;
+    		return;
     	}
     	// The scanned QR is the next port we need
-    	if (controller.getPorts().get(nextPort).equals(controller.getTag().getText())) {
-    		System.out.println("Validated port: " + nextPort);
-    		this.state = Command.QRValidated;    		
+    	if (controller.getPorts().get(nextPort).equals(tag.getText())) {
+    		System.out.println("Validated port: " + tag.getText());
+    		this.state = Command.QRCentralizing;    		
+    	} else {
+    		System.out.println("Not validated port: " + tag.getText());
+    		this.state = Command.QRSearch;
     	}
     }
 
 
-    public void qRCentralizing() {
+    public void qRCentralizing() throws InterruptedException {
         //Centralize QR tag method
-        System.out.println("QRcentralizing");
-        //TODO: Implement method to centralize QR tag
+        System.out.print("State: QRcentralizing - ");
+        Result tag = controller.getTag();
+        if (tag == null) {
+        	System.out.println("no tag, back to searching");
+        	this.state = Command.QRSearch;
+        	return;
+        }
+        final int SPEED = 5;
+        final int SLEEP = 500;
+        ResultPoint[] points;
+		synchronized (tag) {
+			points = tag.getResultPoints();
+		}
 
-        //If succesfully centralized, transit otherwise move back to searching
-        //TODO: Implement check otherwise move back to search
+		int imgCenterX = MasterDrone.IMAGE_WIDTH / 2;
+		int imgCenterY = MasterDrone.IMAGE_HEIGHT / 2;
+
+		float x = (points[1].getX() + points[2].getX()) / 2; // True middle
+		float y = points[1].getY();
+
+//		if ((tagOrientation > 10) && (tagOrientation < 180)) {
+//			System.out.println("AutoController: Spin left");
+//			drone.getCommandManager().spinLeft(SPEED * 2);
+//			Thread.currentThread();
+//			Thread.sleep(SLEEP);
+//		} else if ((tagOrientation < 350) && (tagOrientation > 180)) {
+//			System.out.println("AutoController: Spin right");
+//			drone.getCommandManager().spinRight(SPEED * 2);
+//			Thread.currentThread();
+//			Thread.sleep(SLEEP);
+		//} else 
+		if (x < (imgCenterX - MasterDrone.TOLERANCE)) {
+			System.out.println("AutoController: Center Tag: Go left");
+			drone.getCommandManager().goLeft(SPEED).doFor(30);
+			MainDroneController.sleep(SLEEP);				
+		} else if (x > (imgCenterX + MasterDrone.TOLERANCE)) {
+			System.out.println("AutoController: Center Tag: Go right");
+			drone.getCommandManager().goRight(SPEED).doFor(30);
+			MainDroneController.sleep(SLEEP);
+		} else if (y < (imgCenterY - MasterDrone.TOLERANCE)) {
+			System.out.println("AutoController: Center Tag: Go up");
+			drone.getCommandManager().up(SPEED * 2).doFor(60);
+			MainDroneController.sleep(SLEEP);
+		} else if (y > (imgCenterY + MasterDrone.TOLERANCE)) {
+			System.out.println("AutoController: Center Tag: Go down");
+			drone.getCommandManager().down(SPEED * 2).doFor(60);
+			MainDroneController.sleep(SLEEP);
+		} else {
+			System.out.println("AutoController: Tag centered");
+			this.state = Command.SearchForCircle;
+		}
     }
 
-    public void searchForCircle() {
+    public void searchForCircle() throws InterruptedException {
         //Increase altitude and search for the circle
-        System.out.println("SearchForCircle");
-        //TODO: Implement method to find circle
-
-        //Check if circle found and transit state
-        //TODO: Check if circle is found and transit state, otherwise back to search.
+        System.out.print("State: SearchForCircle - ");
+        if (controller.getCircles().length >= 1) {
+            System.out.println("Circle found!");
+            this.state = Command.Centralize;
+        }
+        else {
+        	// TODO Needs to actually FIND the circle
+            System.out.println("Returning TO QR SEARCH!");
+            this.state = Command.QRSearch;
+            MainDroneController.sleep(200);
+        }
     }
+    
+	private float limit(float f, float min, float max) {
+		return (f > max ? max : (f < min ? min : f));
+	}
 
     public void centralize() throws InterruptedException {
         //Centralize drone in front of circle
-        System.out.println("Centralize");
+        System.out.print("State: Centralize - ");
         int imgCenterX = MasterDrone.IMAGE_WIDTH / 2;
         int imgCenterY = MasterDrone.IMAGE_HEIGHT / 2;
         if (controller.getCircles().length > 0) {
             // We have more than one circle, figure out which one is correct
             for (Circle c : controller.getCircles()){
-                float leftRightSpeed = (float) ((imgCenterX-c.x)/10+5)/100.0f;
-                float forwardSpeed = (float) ((c.r-150)/10)/100.0f;
-                float upDownSpeed = (float) ((c.y-imgCenterY)/10+5)/100.0f;
-                drone.getCommandManager().move(leftRightSpeed, forwardSpeed, upDownSpeed, 0f).doFor(30);
-                Thread.currentThread();
-                Thread.sleep(30);
-                if ((c.x > (imgCenterX - MasterDrone.TOLERANCE))
-                        && (c.x < (imgCenterX + MasterDrone.TOLERANCE))
-                        && (c.y > (imgCenterY - MasterDrone.TOLERANCE))
-                        && (c.y < (imgCenterY + MasterDrone.TOLERANCE))
-                        && (c.r >= 160)) {
-                    state = Command.DroneCentralized;
-                }
+            	if (c.getRadius() >= MasterDrone.IMAGE_HEIGHT / 10) {
+            		if (controller.isCircleCentered()) {
+            			System.out.println("CENTERED!");
+            			this.state = Command.FlyThrough;
+            			return;
+            		}
+	                float leftRightSpeed = (float) ((c.x - imgCenterX) / 10) / 100.0f;
+	                float forwardSpeed = (float) ((c.r - 160) / 6 ) / 100.0f;
+	                float upDownSpeed = (float) ((imgCenterY - c.y) / 10) / 100.0f;
+	                leftRightSpeed = limit(leftRightSpeed, -0.1f, 0.1f);
+	                System.out.println("Correcting position, " + leftRightSpeed +", " + forwardSpeed +", " + upDownSpeed);
+	                drone.getCommandManager().move(leftRightSpeed, forwardSpeed, upDownSpeed, 0f).doFor(30);
+	                drone.hover();
+	                MainDroneController.sleep(300);
+	                break;
+            	}
             }
+        }
+        else {
+            state = Command.SearchForCircle;
         }
     }
 
-    public void flyThrough() {
-        //Flying through the ring
-        System.out.println("FlyThrough");
-        //TODO: Implement flythrough
-
-        //Updating port to search for and transit state
-        //TODO: Transit state
+    public void flyThrough() throws InterruptedException {
+    	System.out.print("State: flyThrough - ");
+        System.out.println("AutoController: Going through port " + nextPort);
+        drone.getCommandManager().forward(16).doFor(1200);
+        MainDroneController.sleep(1500);
+        drone.getCommandManager().hover();
+        System.out.println("Returning to Hover State");
+        state = Command.UpdateGate;
     }
 
     public void updateGate() {
+    	System.out.print("State: updateGate: ");
         //Changing which QR tag to search for next
-        System.out.println("UpdateGate");
-        //TODO: Implement port state changer
+    	nextPort++;
+    	
+        System.out.println("Next port is " + nextPort);
 
         //Changing state to finishing or searching for next tag depending on port state
-        //TODO: Implement update gate and transit state
+        if(nextPort>maxPorts) {
+        	System.out.println("setting state to finish");
+        	this.state=Command.Finished;
+        }
+        else {
+        	System.out.println("setting state hover");
+        	this.state=Command.Hover;
+        }
     }
 
     public void finish() {
-        System.out.println("Finish");
+       System.out.println("State: Finish");
        drone.landing();
+       controller.stopController();
     }
 }
