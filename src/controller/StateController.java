@@ -247,19 +247,18 @@ public class StateController {
             // We have more than one circle, figure out which one is correct
             for (Circle c : controller.getCircles()){
             	if (c.getRadius() >= MasterDrone.IMAGE_HEIGHT / 10) {
-            		if (controller.isCircleCentered()) {
-            			System.out.println("CENTERED!");
-            			this.state = Command.FlyThrough;
-            			return;
-            		}
-	                float leftRightSpeed = (float) ((c.x - imgCenterX) / 10) / 100.0f;
+	                float leftRightSpeed = (float) ((c.x - imgCenterX) / 30 + 5) / 100.0f;
 	                float forwardSpeed = (float) ((c.r - 160) / 6 ) / 100.0f;
 	                float upDownSpeed = (float) ((imgCenterY - c.y) / 10) / 100.0f;
-	                leftRightSpeed = limit(leftRightSpeed, -0.1f, 0.1f);
 	                System.out.println("Correcting position, " + leftRightSpeed +", " + forwardSpeed +", " + upDownSpeed);
 	                drone.getCommandManager().move(leftRightSpeed, forwardSpeed, upDownSpeed, 0f).doFor(30);
 	                drone.hover();
 	                MainDroneController.sleep(300);
+                    if (controller.isCircleCentered()) {
+                        System.out.println("CENTERED!");
+                        this.state = Command.FlyThrough;
+                        return;
+                    }
 	                break;
             	}
             }
