@@ -3,17 +3,20 @@ package controller;
 import de.yadrone.base.IARDrone;
 import imgManagement.Circle;
 
+import javax.xml.bind.SchemaOutputResolver;
+import java.util.Random;
+
 import com.google.zxing.Result;
 import com.google.zxing.ResultPoint;
 
 /**
- * Created by Dave on 07/06/2017.
+ * Created by Dave on 07/06/2017..
  */
 public class StateController {
 
 
     public enum Command {
-        ReadyForTakeOff,Hover,QRSearching, QRValidate, QRCentralize, searchForCircle,CircleFound, FlyThrough, Updategate, Finish
+        ReadyForTakeOff,Hover,QRSearching,QRCheck,QRValidated,QRCentralized,CircleFound,DroneCentralized,FlownThrough, Finished
     }
 
     public Command state;
@@ -36,21 +39,21 @@ public class StateController {
                 break;
             case Hover: hover();
                 break;
-            case QRSearching: qRSearch(); // Hannibal
+            case QRSearching: this.state = Command.CircleFound;//qRSearch(); // Hannibal
                 break;
-            case QRValidate: qRValidate(); // Nichlas
+            case QRCheck: qRValidate(); // Nichlas
                 break;
-            case QRCentralize: qRCentralizing(); // Nichlas
+            case QRValidated: qRCentralizing(); // Nichlas
                 break;
-            case searchForCircle: searchForCircle(); //David
+            case QRCentralized: searchForCircle(); //David
                 break;
-            case CircleFound: circleFound(); // Lars
+            case CircleFound: centralize(); // Lars
                 break;
-            case FlyThrough: flyThrough(); // David
+            case DroneCentralized: flyThrough(); // David
                 break;
-            case Updategate: updateGate();
+            case FlownThrough: updateGate();
                 break;
-            case Finish: finish();
+            case Finished: finish();
                 break;
         }
     }
@@ -112,7 +115,7 @@ public class StateController {
                 break;
         }
         MainDroneController.sleep(200);
-        state = Command.QRValidate;
+        state = Command.QRCheck;
     }
 
     
@@ -128,7 +131,7 @@ public class StateController {
     	// The scanned QR is the next port we need
     	if (controller.getPorts().get(nextPort).equals(tag.getText())) {
     		System.out.println("Validated port: " + tag.getText());
-    		this.state = Command.QRCentralize;
+    		this.state = Command.QRValidated;    		
     	} else {
     		System.out.println("Not validated port: " + tag.getText());
     		this.state = Command.QRSearching;
@@ -187,7 +190,7 @@ public class StateController {
 			MainDroneController.sleep(SLEEP);
 		} else {
 			System.out.println("AutoController: Tag centered");
-			this.state = Command.searchForCircle;
+			this.state = Command.QRCentralized;
 		}
     }
 
@@ -205,10 +208,14 @@ public class StateController {
             MainDroneController.sleep(200);
         }
     }
+    
+	private float limit(float f, float min, float max) {
+		return (f > max ? max : (f < min ? min : f));
+	}
 
-    public void circleFound() throws InterruptedException {
+    public void centralize() throws InterruptedException {
         //Centralize drone in front of circle
-        System.out.println("State: Centralize - ");
+        System.out.print("State: Centralize - ");
         int imgCenterX = MasterDrone.IMAGE_WIDTH / 2;
         int imgCenterY = MasterDrone.IMAGE_HEIGHT / 2;
         if (controller.getCircles().length > 0) {
@@ -216,31 +223,35 @@ public class StateController {
             for (Circle c : controller.getCircles()){
             	if (c.getRadius() >= MasterDrone.IMAGE_HEIGHT / 10) {
             		if (controller.isCircleCentered()) {
-            			this.state = Command.FlyThrough;
+            			System.out.println("CENTERED!");
+            			this.state = Command.DroneCentralized;
             			return;
             		}
 	                float leftRightSpeed = (float) ((c.x - imgCenterX) / 10) / 100.0f;
-	                float forwardSpeed = (float) ((c.r - 150) /10 ) / 100.0f;
+	                float forwardSpeed = (float) ((c.r - 160) / 6 ) / 100.0f;
 	                float upDownSpeed = (float) ((imgCenterY - c.y) / 10) / 100.0f;
+	                leftRightSpeed = limit(leftRightSpeed, -0.1f, 0.1f);
+	                System.out.println("Correcting position, " + leftRightSpeed +", " + forwardSpeed +", " + upDownSpeed);
 	                drone.getCommandManager().move(leftRightSpeed, forwardSpeed, upDownSpeed, 0f).doFor(30);
-	                MainDroneController.sleep(30);
+	                drone.hover();
+	                MainDroneController.sleep(300);
 	                break;
             	}
             }
         }
         else {
-            state = Command.searchForCircle;
+            state = Command.QRCentralized;
         }
     }
 
     public void flyThrough() throws InterruptedException {
     	System.out.print("State: flyThrough - ");
         System.out.println("AutoController: Going through port " + nextPort);
-        drone.getCommandManager().forward(12).doFor(1500);
-        drone.getCommandManager().hover();
+        drone.getCommandManager().forward(16).doFor(1200);
         MainDroneController.sleep(1500);
+        drone.getCommandManager().hover();
         System.out.println("Returning to Hover State");
-        state = Command.Updategate;
+        state = Command.FlownThrough;
     }
 
     public void updateGate() {
@@ -253,7 +264,7 @@ public class StateController {
         //Changing state to finishing or searching for next tag depending on port state
         if(nextPort>maxPorts) {
         	System.out.println("setting state to finish");
-        	this.state=Command.Finish;
+        	this.state=Command.Finished;
         }
         else {
         	System.out.println("setting state hover");
@@ -262,7 +273,8 @@ public class StateController {
     }
 
     public void finish() {
-        System.out.println("State: Finish");
+       System.out.println("State: Finish");
        drone.landing();
+       controller.stopController();
     }
 }
