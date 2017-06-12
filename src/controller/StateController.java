@@ -16,7 +16,7 @@ public class StateController {
 
 
     public enum Command {
-        ReadyForTakeOff,Hover,QRSearching,QRCheck,QRValidated,QRCentralized,CircleFound,DroneCentralized,FlownThrough, Finished
+        TakeOff,Hover,QRSearch,QRValidate,QRCentralizing,SearchForCircle,Centralize,FlyThrough,UpdateGate, Finished
     }
 
     public Command state;
@@ -35,23 +35,23 @@ public class StateController {
 
 	public void commands(Command command) throws InterruptedException {
         switch(command){
-            case ReadyForTakeOff: takeOff();
+            case TakeOff: takeOff();
                 break;
             case Hover: hover();
                 break;
-            case QRSearching: this.state = Command.CircleFound;//qRSearch(); // Hannibal
+            case QRSearch: this.state = Command.Centralize;//qRSearch(); // Hannibal
                 break;
-            case QRCheck: qRValidate(); // Nichlas
+            case QRValidate: qRValidate(); // Nichlas
                 break;
-            case QRValidated: qRCentralizing(); // Nichlas
+            case QRCentralizing: qRCentralizing(); // Nichlas
                 break;
-            case QRCentralized: searchForCircle(); //David
+            case SearchForCircle: searchForCircle(); //David
                 break;
-            case CircleFound: centralize(); // Lars
+            case Centralize: centralize(); // Lars
                 break;
-            case DroneCentralized: flyThrough(); // David
+            case FlyThrough: flyThrough(); // David
                 break;
-            case FlownThrough: updateGate();
+            case UpdateGate: updateGate();
                 break;
             case Finished: finish();
                 break;
@@ -76,7 +76,7 @@ public class StateController {
         drone.getCommandManager().hover().doFor(500);
 		MainDroneController.sleep(550);
         //Check conditions and transit to next state
-        state = Command.QRSearching;
+        state = Command.QRSearch;
     }
 
     int strayMode = 0;
@@ -115,7 +115,7 @@ public class StateController {
                 break;
         }
         MainDroneController.sleep(200);
-        state = Command.QRCheck;
+        state = Command.QRValidate;
     }
 
     
@@ -125,16 +125,16 @@ public class StateController {
     	Result tag = controller.getTag();
     	if (tag == null ) {
     		System.out.println("no tag");
-    		this.state = Command.QRSearching;
+    		this.state = Command.QRSearch;
     		return;
     	}
     	// The scanned QR is the next port we need
     	if (controller.getPorts().get(nextPort).equals(tag.getText())) {
     		System.out.println("Validated port: " + tag.getText());
-    		this.state = Command.QRValidated;    		
+    		this.state = Command.QRCentralizing;    		
     	} else {
     		System.out.println("Not validated port: " + tag.getText());
-    		this.state = Command.QRSearching;
+    		this.state = Command.QRSearch;
     	}
     }
 
@@ -145,7 +145,7 @@ public class StateController {
         Result tag = controller.getTag();
         if (tag == null) {
         	System.out.println("no tag, back to searching");
-        	this.state = Command.QRSearching;
+        	this.state = Command.QRSearch;
         	return;
         }
         final int SPEED = 5;
@@ -190,7 +190,7 @@ public class StateController {
 			MainDroneController.sleep(SLEEP);
 		} else {
 			System.out.println("AutoController: Tag centered");
-			this.state = Command.QRCentralized;
+			this.state = Command.SearchForCircle;
 		}
     }
 
@@ -199,12 +199,12 @@ public class StateController {
         System.out.print("State: SearchForCircle - ");
         if (controller.getCircles().length >= 1) {
             System.out.println("Circle found!");
-            this.state = Command.CircleFound;
+            this.state = Command.Centralize;
         }
         else {
         	// TODO Needs to actually FIND the circle
             System.out.println("Returning TO QR SEARCH!");
-            this.state = Command.QRSearching;
+            this.state = Command.QRSearch;
             MainDroneController.sleep(200);
         }
     }
@@ -224,7 +224,7 @@ public class StateController {
             	if (c.getRadius() >= MasterDrone.IMAGE_HEIGHT / 10) {
             		if (controller.isCircleCentered()) {
             			System.out.println("CENTERED!");
-            			this.state = Command.DroneCentralized;
+            			this.state = Command.FlyThrough;
             			return;
             		}
 	                float leftRightSpeed = (float) ((c.x - imgCenterX) / 10) / 100.0f;
@@ -240,7 +240,7 @@ public class StateController {
             }
         }
         else {
-            state = Command.QRCentralized;
+            state = Command.SearchForCircle;
         }
     }
 
@@ -251,7 +251,7 @@ public class StateController {
         MainDroneController.sleep(1500);
         drone.getCommandManager().hover();
         System.out.println("Returning to Hover State");
-        state = Command.FlownThrough;
+        state = Command.UpdateGate;
     }
 
     public void updateGate() {
