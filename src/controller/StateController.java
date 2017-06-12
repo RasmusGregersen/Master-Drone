@@ -83,7 +83,8 @@ public class StateController {
 
     public void qRSearch() throws InterruptedException {
 
-        int SPEED = 4;
+        int SPEEDSpin = 10;
+        int SPEEDMove = 4;
         int doFor = 20;
 
         //Searching method
@@ -92,25 +93,23 @@ public class StateController {
 
         switch(strayMode) {
             case 0:
-//                System.out.println("AutoController: Stray Around: Spin right, Case: 0");
-//                drone.getCommandManager().spinRight(SPEED * 3).doFor(doFor);
+                System.out.println("AutoController: Stray Around: Spin right, Case: 0");
+                drone.getCommandManager().spinRight(SPEEDSpin * 3).doFor(doFor);
                 strayMode++;
                 break;
             case 1:
-                System.out.println("AutoController: Stray Around: Go up, Spin right, Case: 1");
-                drone.getCommandManager().up(SPEED).doFor(doFor);
-                //drone.getCommandManager().spinRight(SPEED * 3).doFor(doFor);
+                System.out.println("AutoController: Stray Around: Go up, Case: 1");
+                drone.getCommandManager().up(SPEEDMove).doFor(doFor);
                 strayMode++;
                 break;
             case 2:
-                //System.out.println("AutoController: Stray Around: Go down, Spin right, Case: 2");
-               // drone.getCommandManager().up(SPEED).doFor(doFor);
-               // drone.getCommandManager().spinRight(SPEED * 3).doFor(doFor);
+                System.out.println("AutoController: Stray Around: Spin right, Case: 2");
+                drone.getCommandManager().spinRight(SPEEDSpin * 3).doFor(doFor);
                 strayMode++;
                 break;
             case 3:
-                System.out.println("AutoController: Stray Around: Spin right, Case: 3");
-                drone.getCommandManager().spinRight(SPEED * 3).doFor(doFor);
+                System.out.println("AutoController: Stray Around: Go down, Case: 3");
+                drone.getCommandManager().down(SPEEDMove).doFor(doFor);
                 strayMode = 0;
                 break;
         }
