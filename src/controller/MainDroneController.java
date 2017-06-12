@@ -60,7 +60,7 @@ public class MainDroneController extends AbstractController implements TagListen
 	@Override
 	public void run() {
 		sc = new StateController(this, drone);
-		sc.state = Command.CircleFound;
+		sc.state = Command.Centralize;
 		while (!doStop) // control loop
 		{
 			try {
