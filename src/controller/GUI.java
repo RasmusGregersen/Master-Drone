@@ -16,6 +16,7 @@ import java.awt.image.BufferedImage;
 
 public class GUI extends JFrame implements ImageListener, TagListener, CircleListener {
 	private MasterDrone main;
+	private TestClass test;
 	private IARDrone drone;
 
 	private BufferedImage image = null;
@@ -51,6 +52,32 @@ public class GUI extends JFrame implements ImageListener, TagListener, CircleLis
         
         add(createVideoPanel(), new GridBagConstraints(0, 0, 1, 2, 1, 1, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.BOTH, new Insets(0,0,0,0), 0, 0));
         pack(); 
+	}
+	public GUI(final IARDrone drone, TestClass main) {
+		super("Master Drone");
+
+		this.test = main;
+		this.drone = drone;
+
+		batteryListener();
+
+		createMenuBar();
+
+		setSize(MasterDrone.IMAGE_WIDTH, MasterDrone.IMAGE_HEIGHT);
+		setVisible(true);
+		setResizable(false);
+
+		addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent e) {
+				drone.stop();
+				System.exit(0);
+			}
+		});
+
+		setLayout(new GridBagLayout());
+
+		add(createVideoPanel(), new GridBagConstraints(0, 0, 1, 2, 1, 1, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.BOTH, new Insets(0,0,0,0), 0, 0));
+		pack();
 	}
 
 	private void createMenuBar() {

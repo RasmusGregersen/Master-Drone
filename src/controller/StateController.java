@@ -39,7 +39,7 @@ public class StateController {
                 break;
             case Hover: hover();
                 break;
-            case QRSearch: this.state = Command.Centralize;//qRSearch(); // Hannibal
+            case QRSearch: qRSearch();//qRSearch(); // Hannibal
                 break;
             case QRValidate: qRValidate(); // Nichlas
                 break;
@@ -64,7 +64,7 @@ public class StateController {
         System.out.println("State: ReadyForTakeOff");
         drone.takeOff();
         MainDroneController.sleep(3000);
-        drone.getCommandManager().forward(1).doFor(10);     
+        drone.getCommandManager().forward(1).doFor(10);
         //Check conditions and transit to next state
         state = Command.Hover;
     }
@@ -202,9 +202,20 @@ public class StateController {
         }
         else {
         	// TODO Needs to actually FIND the circle
-            System.out.println("Returning TO QR SEARCH!");
-            this.state = Command.QRSearch;
-            MainDroneController.sleep(200);
+            int direction = new Random().nextInt() % 4;
+            int speedo = 6;
+            int dofor = 1500;
+            switch(direction)
+            {
+                case 0 : drone.getCommandManager().forward(speedo).doFor(dofor); System.out.println("PaperChaseAutoController: Stray Around: FORWARD"); break;
+                case 1 : drone.getCommandManager().backward(speedo).doFor(dofor); System.out.println("PaperChaseAutoController: Stray Around: BACKWARD");break;
+                case 2 : drone.getCommandManager().goLeft(speedo).doFor(dofor); System.out.println("PaperChaseAutoController: Stray Around: LEFT"); break;
+                case 3 : drone.getCommandManager().goRight(speedo).doFor(dofor); System.out.println("PaperChaseAutoController: Stray Around: RIGHT");break;
+            }
+
+            Thread.currentThread().sleep(1500);
+
+            this.state = Command.SearchForCircle;
         }
     }
     
