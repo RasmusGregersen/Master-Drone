@@ -247,7 +247,7 @@ public class StateController {
             // We have more than one circle, figure out which one is correct
             Circle c = controller.getCircles()[0];
             if (c.getRadius() >= MasterDrone.IMAGE_HEIGHT / 10) {
-                float leftRightSpeed = (float) ((c.x - imgCenterX) / 30 + 5) / 100.0f;
+                float leftRightSpeed = (float) ((c.x - imgCenterX) / 30) / 100.0f;
                 float forwardSpeed = (float) ((c.r - 160) / 6 ) / 100.0f;
                 float upDownSpeed = (float) ((imgCenterY - c.y) / 10) / 100.0f;
                 System.out.println("Correcting position, " + leftRightSpeed +", " + forwardSpeed +", " + upDownSpeed);
