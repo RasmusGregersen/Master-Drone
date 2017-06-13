@@ -34,7 +34,6 @@ public class MasterDrone {
 		drone.getCommandManager().setVideoBitrateControl(VideoBitRateMode.MANUAL);
 		drone.getCommandManager().setVideoBitrate(1024);
 		drone.getCommandManager().setVideoChannel(VideoChannel.HORI);
-		drone.getCommandManager().setNavDataDemo(true);
 		
 		drone.getNavDataManager().addAttitudeListener(new AttitudeListener() {
 			public void attitudeUpdated(float pitch, float roll, float yaw){

@@ -261,6 +261,7 @@ public class StateController {
 
                         break;
                     }
+                }
             }
         }
         else {

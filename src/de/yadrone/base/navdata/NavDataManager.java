@@ -376,7 +376,7 @@ public class NavDataManager extends AbstractManager
 
 				// TODO bootstrapping probably be handled by commandmanager
 				if (!bootstrapping && maskChanged) {
-					manager.setNavDataDemo(false);
+					manager.setNavDataDemo(true);
 					manager.setNavDataOptions(mask);
 					maskChanged = false;
 				}
