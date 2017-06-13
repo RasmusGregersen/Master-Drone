@@ -25,7 +25,7 @@ public class GUI extends JFrame implements ImageListener, TagListener, CircleLis
 
 	private JPanel videoPanel;
 	private int batterypercentage;
-	private int imgScale = 4; // Scale the preset width/height with this factor
+	private int imgScale = 1; // Scale the preset width/height with this factor
 
 	public GUI(final IARDrone drone, MasterDrone main) {
 		super("Master Drone");
@@ -225,8 +225,8 @@ public class GUI extends JFrame implements ImageListener, TagListener, CircleLis
 	}
 
 	public void imageUpdated(BufferedImage newImage) {
-		if ((++imageCount % 2) == 0)
-			return;
+	/*	if ((++imageCount % 1) == 0)
+			return;*/
 		
     	image = newImage;
 		SwingUtilities.invokeLater(new Runnable() {

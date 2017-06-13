@@ -63,16 +63,14 @@ public class TestClass extends Thread {
 
     public void run() {
 
-        try {
-            drone.takeOff();
+       /* try {
+          *//*  drone.takeOff();
             Thread.sleep(5000);
-            drone.hover();
-            Thread.sleep(5000);
-            drone.landing();
+            drone.getCommandManager().hover().doFor(5000);*//*
 
         } catch (InterruptedException e) {
             e.printStackTrace();
-        }
+        }*/
     }
 
 

@@ -30,10 +30,13 @@ public class MasterDrone {
 		
 		drone = new ARDrone();
 		drone.start();
-		drone.getCommandManager().setConfigurationIds().setVideoCodec(VideoCodec.H264_360P);
-		drone.getCommandManager().setVideoBitrateControl(VideoBitRateMode.MANUAL);
-		drone.getCommandManager().setVideoBitrate(1024);
+		drone.getCommandManager().setVideoCodec(VideoCodec.H264_360P);
+		//drone.getCommandManager().setVideoBitrateControl(VideoBitRateMode.MANUAL);
+		drone.getCommandManager().setMaxVideoBitrate(4000);
+		drone.getCommandManager().setVideoBitrate(1400);
 		drone.getCommandManager().setVideoChannel(VideoChannel.HORI);
+		drone.getCommandManager().setVideoCodecFps(30);
+
 		
 		drone.getNavDataManager().addAttitudeListener(new AttitudeListener() {
 			public void attitudeUpdated(float pitch, float roll, float yaw){
@@ -53,16 +56,34 @@ public class MasterDrone {
 		
 		scanner = new QRCodeScanner();
 		scanner.addListener(gui);
-		drone.getVideoManager().addImageListener(gui);
-		drone.getVideoManager().addImageListener(scanner);
 		CircleFinder cf = new CircleFinder();
-		drone.getVideoManager().addImageListener(cf);
 		
 		cf.addListener(droneController);
 		cf.addListener(gui);
 		
 		drone.getCommandManager().setFlyingMode(FlyingMode.HOVER_ON_TOP_OF_ROUNDEL);
 		//drone.getCommandManager().setFlyingMode(FlyingMode.HOVER_ON_TOP_OF_ORIENTED_ROUNDEL);
+
+		Thread g = new Thread() {
+			public void run() {
+				drone.getVideoManager().addImageListener(gui);
+			}
+		};
+		g.start();
+
+		Thread q = new Thread() {
+			public void run() {
+				drone.getVideoManager().addImageListener(scanner);
+			}
+		};
+		q.start();
+
+		Thread c = new Thread() {
+			public void run() {
+				drone.getVideoManager().addImageListener(cf);
+			}
+		};
+		c.start();
 	}
 
 	public MainDroneController getDroneController() {
