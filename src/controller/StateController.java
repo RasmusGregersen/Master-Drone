@@ -88,7 +88,6 @@ public class StateController {
 
         //Searching method
         System.out.println("State: QRSearch");
-        //TODO: Implement qRSearch method
 
         switch(strayMode) {
             case 0:
@@ -169,7 +168,7 @@ public class StateController {
 //			drone.getCommandManager().spinRight(SPEED * 2);
 //			Thread.currentThread();
 //			Thread.sleep(SLEEP);
-		//} else 
+//		} else
 		if (x < (imgCenterX - MasterDrone.TOLERANCE)) {
 			System.out.println("AutoController: Center Tag: Go left");
 			drone.getCommandManager().goLeft(SPEED).doFor(30);
@@ -190,6 +189,8 @@ public class StateController {
 			System.out.println("AutoController: Tag centered");
 			this.state = Command.SearchForCircle;
 		}
+
+
     }
 
     public void searchForCircle() throws InterruptedException {
@@ -233,10 +234,6 @@ public class StateController {
             this.state = Command.SearchForCircle;
         }
     }
-    
-	private float limit(float f, float min, float max) {
-		return (f > max ? max : (f < min ? min : f));
-	}
 
     public void centralize() throws InterruptedException {
         //Centralize drone in front of circle
@@ -245,20 +242,24 @@ public class StateController {
         int imgCenterY = MasterDrone.IMAGE_HEIGHT / 2;
         if (controller.getCircles().length > 0) {
             // We have more than one circle, figure out which one is correct
-            Circle c = controller.getCircles()[0];
-            if (c.getRadius() >= MasterDrone.IMAGE_HEIGHT / 10) {
-                float leftRightSpeed = (float) ((c.x - imgCenterX) / 30) / 100.0f;
-                float forwardSpeed = (float) ((c.r - 160) / 6 ) / 100.0f;
-                float upDownSpeed = (float) ((imgCenterY - c.y) / 10) / 100.0f;
-                System.out.println("Correcting position, " + leftRightSpeed +", " + forwardSpeed +", " + upDownSpeed);
-                drone.getCommandManager().move(leftRightSpeed, forwardSpeed, upDownSpeed, 0f).doFor(30);
-                drone.hover();
-                MainDroneController.sleep(300);
-                if (controller.isCircleCentered()) {
-                    System.out.println("CENTERED!");
-                    this.state = Command.FlyThrough;
-                    return;
-                }
+            if (controller.getCircles().length > 0) {
+                // We have more than one circle, figure out which one is correct
+                for (Circle c : controller.getCircles()){
+                    if (c.getRadius() >= MasterDrone.IMAGE_HEIGHT / 10) {
+                        float leftRightSpeed = (float) ((c.x - imgCenterX) / 30 + 5) / 100.0f;
+                        float forwardSpeed = (float) ((c.r - 160) / 6 ) / 100.0f;
+                        float upDownSpeed = (float) ((imgCenterY - c.y) / 10) / 100.0f;
+                        System.out.println("Correcting position, " + leftRightSpeed +", " + forwardSpeed +", " + upDownSpeed);
+                        drone.getCommandManager().move(leftRightSpeed, forwardSpeed, upDownSpeed, 0f).doFor(30);
+                        drone.hover();
+                        MainDroneController.sleep(300);
+                        if (controller.isCircleCentered()) {
+                            System.out.println("CENTERED!");
+                            this.state = Command.FlyThrough;
+                            return;
+                        }
+                        break;
+                    }
             }
         }
         else {
