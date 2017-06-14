@@ -40,7 +40,7 @@ public class MainDroneController extends AbstractController implements TagListen
 	private ArrayList<String> ports = new ArrayList<String>();
 	private HashMap<String, Point> wallMarks;
 	private Circle[] circles;
-	private int nextPort = 3;
+	private int nextPort = 1;
 
 	public StateController getSc() {
 		return sc;
@@ -66,10 +66,12 @@ public class MainDroneController extends AbstractController implements TagListen
 		{
 			try {
 				// reset if too old (and not updated)
-				if ((tag != null) && (System.currentTimeMillis() - tag.getTimestamp() > 500)){
+				if ((tag != null) && (System.currentTimeMillis() - tag.getTimestamp() > 1000)){
+					System.out.println("Resetting tag");
 					tag = null;
 				}
 				sc.commands(sc.state);
+				Thread.currentThread().sleep(100);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -108,7 +110,7 @@ public class MainDroneController extends AbstractController implements TagListen
 		tagOrientation = orientation;
 		System.out.println("QR Angle: " + this.getQRRelativeAngle());
 	}
-	
+
 	Boolean isCircleCentered() {
 		Boolean ret = false;
 		int imgCenterX = MasterDrone.IMAGE_WIDTH / 2;

@@ -25,7 +25,7 @@ public class GUI extends JFrame implements ImageListener, TagListener, CircleLis
 
 	private JPanel videoPanel;
 	private int batterypercentage;
-	private int imgScale = 4; // Scale the preset width/height with this factor
+	private int imgScale = 1; // Scale the preset width/height with this factor
 
 	public GUI(final IARDrone drone, MasterDrone main) {
 		super("Master Drone");
@@ -130,14 +130,14 @@ public class GUI extends JFrame implements ImageListener, TagListener, CircleLis
 
 					g.drawString("Battery: "+batterypercentage+"%", 0, 15);
 
-					// draw current state
+					/*// draw current state
 					if (main.getDroneController().getSc() != null)
 						g.drawString("State: " + main.getDroneController().getSc().state.toString(), 0, 40);
 					else
 						g.drawString("State: Waiting for AutoController...", 0, 40);
 
 					// draw circle status
-					g.drawString("Circles remaining: " + main.getDroneController().getPorts().size(), 0, 65);
+					g.drawString("Circles remaining: " + main.getDroneController().getPorts().size(), 0, 65);*/
 
         			// draw tolerance field (rectangle)
         			g.setColor(Color.RED);
@@ -225,8 +225,8 @@ public class GUI extends JFrame implements ImageListener, TagListener, CircleLis
 	}
 
 	public void imageUpdated(BufferedImage newImage) {
-		if ((++imageCount % 2) == 0)
-			return;
+	/*	if ((++imageCount % 1) == 0)
+			return;*/
 		
     	image = newImage;
 		SwingUtilities.invokeLater(new Runnable() {

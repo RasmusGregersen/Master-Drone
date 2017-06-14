@@ -46,7 +46,6 @@ public class KeyboardController extends AbstractController
 					drone.getCommandManager().move(-4/100.0f, -4/100.0f, 20/100.0f, 0).doFor(100);
 					System.out.println("Testing MoveCommand!!");
 				}
-					
 				else
 					keyboardCommandManager.keyPressed(e);
 				// TODO For now any key command just kills the drone

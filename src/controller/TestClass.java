@@ -50,6 +50,8 @@ public class TestClass extends Thread {
         GUI gui = new GUI(drone, this);
         scanner = new QRCodeScanner();
         scanner.addListener(gui);
+        drone.getCommandManager().resetCommunicationWatchDog();
+        drone.getCommandManager().setNavDataDemo(true);
         drone.getVideoManager().addImageListener(gui);
         drone.getVideoManager().addImageListener(scanner);
         CircleFinder cf = new CircleFinder();
@@ -58,22 +60,33 @@ public class TestClass extends Thread {
         cf.addListener(gui);
 
         drone.getCommandManager().setFlyingMode(FlyingMode.HOVER_ON_TOP_OF_ROUNDEL);
-        run();
     }
 
     public void run() {
+        int strayMode = 0;
 
-        try {
-            drone.takeOff();
-            Thread.sleep(5000);
-            drone.hover();
-            Thread.sleep(5000);
-            drone.landing();
-
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        System.out.println("Start");
+        drone.getCommandManager().takeOff().doFor(10000);
+        System.out.println("skifter action");
+        drone.getCommandManager().hover();
+        System.out.println("skifter action");
+        drone.getCommandManager().hover();
+        System.out.println("skifter til SPIN");
+        drone.getCommandManager();
+        System.out.println("skifter action");
+        drone.getCommandManager().hover().doFor(10000);
+        System.out.println("skifter action");
+        drone.getCommandManager().spinRight(50).doFor(5000);
+        System.out.println("skifter action");
+        drone.getCommandManager().hover();
+        System.out.println("skifter action");
+        drone.getCommandManager().spinRight(20);
+        System.out.println("skifter action");
+        drone.getCommandManager().hover();
+        System.out.println("skifter Landning");
     }
+
+
 
 
     public static void main(String[] args) {
@@ -86,4 +99,34 @@ public class TestClass extends Thread {
             e.printStackTrace();
         }
     }
+
+   public void StrayAroundMethod() {
+       int strayMode = 0;
+       int SPEEDSpin = 20;
+       int SPEEDMove = 4;
+       int doFor = 100;
+
+       switch(strayMode) {
+     case 0:
+         System.out.println("AutoController: Stray Around: Spin right, Case: 0");
+         drone.getCommandManager().spinRight(SPEEDSpin).doFor(doFor).hover();
+         strayMode++;
+         break;
+     case 1:
+         System.out.println("AutoController: Stray Around: Go up, Case: 1");
+         drone.getCommandManager().up(SPEEDMove).doFor(doFor).hover();
+         strayMode++;
+         break;
+     case 2:
+         System.out.println("AutoController: Stray Around: Spin right, Case: 2");
+         drone.getCommandManager().spinRight(SPEEDSpin).doFor(doFor).hover();
+         strayMode++;
+         break;
+     case 3:
+         System.out.println("AutoController: Stray Around: Go down, Case: 3");
+         drone.getCommandManager().down(SPEEDMove).doFor(doFor).hover();
+         strayMode = 0;
+         break;
+ }
+   }
 }
