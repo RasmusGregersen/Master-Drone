@@ -14,7 +14,7 @@ public class StateController {
 
 
     public enum Command {
-        TakeOff,Hover,QRSearch,QRValidate,QRCentralizing,SearchForCircle,Centralize,FlyThrough,UpdateGate, Finished
+        TakeOff,Hover,QRSearch, QRLost, QRValidate,QRCentralizing,SearchForCircle,Centralize,FlyThrough,UpdateGate, Finished
     }
 
     public Command state;
@@ -39,6 +39,8 @@ public class StateController {
             case Hover: hover();
                 break;
             case QRSearch: qRSearch();//qRSearch(); // Hannibal
+                break;
+            case QRLost: qRLost(); //Rasmus og Lars
                 break;
             case QRValidate: qRValidate(); // Nichlas
                 break;
@@ -89,6 +91,13 @@ public class StateController {
         //Searching method
         System.out.println("State: QRSearch");
 
+        Result tag = controller.getTag();
+        if (tag != null ) {
+            System.out.println("Tag found");
+            this.state = Command.QRValidate;
+            return;
+        }
+
         switch(strayMode) {
             case 0:
                 System.out.println("AutoController: Stray Around: Spin right, Case: 0");
@@ -112,7 +121,36 @@ public class StateController {
                 break;
         }
         MainDroneController.sleep(200);
-        state = Command.QRValidate;
+    }
+
+    int lostMode = 0;
+
+    public void qRLost() {
+        System.out.println("QR Lost");
+        Result tag = controller.getTag();
+        if (tag != null ) {
+            System.out.println("Tag found");
+            this.state = Command.QRValidate;
+            return;
+        }
+
+        switch(lostMode) {
+            case 0:
+                System.out.println("Fly backwards");
+                drone.getCommandManager().backward(4).doFor(200);
+                lostMode = 1;
+                break;
+            case 1:
+                System.out.println("Look right");
+                drone.getCommandManager().spinRight(10).doFor(200);
+                lostMode = 2;
+                break;
+            case 2:
+                System.out.println("Look left");
+                drone.getCommandManager().spinLeft(10).doFor(200);
+                lostMode = 1;
+                break;
+        }
     }
 
     
@@ -120,11 +158,11 @@ public class StateController {
     public void qRValidate() {
     	System.out.print("State: QRValidate: ");
     	Result tag = controller.getTag();
-    	if (tag == null ) {
-    		System.out.println("no tag");
-    		this.state = Command.QRSearch;
-    		return;
-    	}
+        if (tag == null ) {
+            System.out.println("Tag found");
+            this.state = Command.QRLost;
+            return;
+        }
     	// The scanned QR is the next port we need
     	if (controller.getPorts().get(nextPort).equals(tag.getText())) {
     		System.out.println("Validated port: " + tag.getText());
