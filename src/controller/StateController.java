@@ -263,7 +263,7 @@ public class StateController {
                             this.state = Command.FlyThrough;
                             return;
                         }
-                        float leftRightSpeed = (float) ((c.x - imgCenterX) / 30 + 5) / 100.0f;
+                        float leftRightSpeed = (float) ((c.x - imgCenterX) / 30) / 100.0f;
                         float forwardSpeed = (float) ((c.r - 160) / 6 ) / 100.0f;
                         float upDownSpeed = (float) ((imgCenterY - c.y) / 10) / 100.0f;
                         System.out.println("Correcting position, " + leftRightSpeed +", " + forwardSpeed +", " + upDownSpeed);
