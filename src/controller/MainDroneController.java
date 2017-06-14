@@ -61,7 +61,7 @@ public class MainDroneController extends AbstractController implements TagListen
 	@Override
 	public void run() {
 		sc = new StateController(this, drone);
-		sc.state = Command.TakeOff;
+		sc.state = Command.Centralize;
 		while (!doStop) // control loop
 		{
 			try {
@@ -106,6 +106,7 @@ public class MainDroneController extends AbstractController implements TagListen
 
 		tag = result;
 		tagOrientation = orientation;
+		System.out.println("QR Angle: " + this.getQRRelativeAngle());
 	}
 	
 	Boolean isCircleCentered() {
@@ -131,5 +132,33 @@ public class MainDroneController extends AbstractController implements TagListen
 	@Override
 	public void circlesUpdated(Circle[] circles) {
 		this.circles = circles;		
+	}
+	
+	private Point getTagCenter(Result tag) {
+		ResultPoint[] points = tag.getResultPoints();
+		double dy = (points[0].getY() + points[1].getY()) / 2; // bottom-left, top-left
+		double dx = (points[1].getX() + points[2].getX()) / 2; // Top-left, top-right
+		return new Point(dx, dy);		
+	}
+	
+	/**
+	 * Guesstimates the angle to the QR from the center of the image.
+	 * @return double angle. The angle is negative if the QR is to the left of the image center.
+	 */
+	public double getQRRelativeAngle(Result tag) {
+		final int cameraAngle = 92;
+		final int imgCenterX = MasterDrone.IMAGE_WIDTH / 2;
+		double degPerPx = cameraAngle/MasterDrone.IMAGE_WIDTH; 
+		
+		synchronized(tag){
+			// TODO Consider if we should handle the Y offset
+			if (tag == null)
+				return 0.0;
+			Point qrCenter = getTagCenter(tag);
+			return (qrCenter.x - imgCenterX) * degPerPx;
+		}
+	}
+	public double getQRRelativeAngle() {
+		return getQRRelativeAngle(this.tag);
 	}
 }
