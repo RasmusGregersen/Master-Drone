@@ -225,8 +225,8 @@ public class GUI extends JFrame implements ImageListener, TagListener, CircleLis
 	}
 
 	public void imageUpdated(BufferedImage newImage) {
-	/*	if ((++imageCount % 1) == 0)
-			return;*/
+		if ((++imageCount % 2) == 0)
+			return;
 		
     	image = newImage;
 		SwingUtilities.invokeLater(new Runnable() {

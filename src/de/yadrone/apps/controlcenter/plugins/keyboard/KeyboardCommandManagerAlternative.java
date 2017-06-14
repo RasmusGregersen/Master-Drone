@@ -31,20 +31,16 @@ public class KeyboardCommandManagerAlternative extends KeyboardCommandManager
 				drone.landing();
 				break;
 			case KeyEvent.VK_A:
-				drone.getCommandManager().goLeft(5).doFor(10);
-				//drone.goLeft();
+				drone.goLeft();
 				break;
 			case KeyEvent.VK_D:
-				drone.getCommandManager().goRight(5).doFor(10);
-				//drone.goRight();
+				drone.goRight();
 				break;
 			case KeyEvent.VK_W:
-				drone.getCommandManager().forward(5).doFor(10);
-				//drone.forward();
+				drone.forward();
 				break;
 			case KeyEvent.VK_S:
-				drone.getCommandManager().backward(5).doFor(10);
-				//drone.backward();
+				drone.backward();
 				break;
 			case KeyEvent.VK_E:
 				drone.stop();
