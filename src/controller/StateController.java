@@ -5,8 +5,6 @@ import com.google.zxing.ResultPoint;
 import de.yadrone.base.IARDrone;
 import imgManagement.Circle;
 
-import java.util.Random;
-
 /**
  * Created by Dave on 07/06/2017..
  */
@@ -89,7 +87,7 @@ public class StateController {
         int doFor = 20;
 
         //Searching method
-        System.out.println("State: QRSearch");
+        System.out.print("State: QRSearch - ");
 
         Result tag = controller.getTag();
         if (tag != null ) {
@@ -98,29 +96,8 @@ public class StateController {
             return;
         }
 
-        switch(strayMode) {
-            case 0:
-                System.out.println("AutoController: Stray Around: Spin right, Case: 0");
-                drone.getCommandManager().spinRight(SPEEDSpin * 3).doFor(doFor);
-                strayMode++;
-                break;
-            case 1:
-                System.out.println("AutoController: Stray Around: Go up, Case: 1");
-                drone.getCommandManager().up(SPEEDMove).doFor(doFor);
-                strayMode++;
-                break;
-            case 2:
-                System.out.println("AutoController: Stray Around: Spin right, Case: 2");
-                drone.getCommandManager().spinRight(SPEEDSpin * 3).doFor(doFor);
-                strayMode++;
-                break;
-            case 3:
-                System.out.println("AutoController: Stray Around: Go down, Case: 3");
-                drone.getCommandManager().down(SPEEDMove).doFor(doFor);
-                strayMode = 0;
-                break;
-        }
-        MainDroneController.sleep(200);
+        System.out.println("Spin right");
+        drone.getCommandManager().spinRight(SPEEDSpin * 3).doFor(doFor);
     }
 
     int lostMode = 0;
@@ -133,7 +110,6 @@ public class StateController {
             this.state = Command.QRValidate;
             return;
         }
-
         switch(lostMode) {
             case 0:
                 System.out.println("Fly backwards");
@@ -152,8 +128,6 @@ public class StateController {
                 break;
         }
     }
-
-    
 
     public void qRValidate() {
     	System.out.print("State: QRValidate: ");
