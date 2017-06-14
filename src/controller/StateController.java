@@ -133,9 +133,6 @@ public class StateController {
                 lostMode = 1;
                 break;
         }
-
-        Thread.currentThread().sleep(doFor);
-        state = Command.QRValidate;
     }
 
     public void qRValidate() {
