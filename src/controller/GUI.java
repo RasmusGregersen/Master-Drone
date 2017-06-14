@@ -130,14 +130,14 @@ public class GUI extends JFrame implements ImageListener, TagListener, CircleLis
 
 					g.drawString("Battery: "+batterypercentage+"%", 0, 15);
 
-					// draw current state
+					/*// draw current state
 					if (main.getDroneController().getSc() != null)
 						g.drawString("State: " + main.getDroneController().getSc().state.toString(), 0, 40);
 					else
 						g.drawString("State: Waiting for AutoController...", 0, 40);
 
 					// draw circle status
-					g.drawString("Circles remaining: " + main.getDroneController().getPorts().size(), 0, 65);
+					g.drawString("Circles remaining: " + main.getDroneController().getPorts().size(), 0, 65);*/
 
         			// draw tolerance field (rectangle)
         			g.setColor(Color.RED);

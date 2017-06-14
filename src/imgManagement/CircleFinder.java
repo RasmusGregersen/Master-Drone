@@ -97,6 +97,7 @@ public class CircleFinder implements ImageListener {
 	@Override
 	public void imageUpdated(BufferedImage img) {
 		// We don't need to find circles in every frame
+		//System.out.println("Image"+System.currentTimeMillis());
 		if ((imageCount++ % frameSkip) != 0)
 			return;
 		Circle[] circles = findCircles(img);
