@@ -12,7 +12,7 @@ public class StateController {
 
 
     public enum Command {
-        TakeOff,Hover,QRSearch,QRValidate,QRCentralizing,SearchForCircle,Centralize,FlyThrough,UpdateGate, Finished
+        TakeOff,Hover,QRSearch, QRLost, QRValidate,QRCentralizing,SearchForCircle,Centralize,FlyThrough,UpdateGate, Finished
     }
 
     public Command state;
@@ -36,6 +36,8 @@ public class StateController {
             case Hover: hover();
                 break;
             case QRSearch: qRSearch();//qRSearch(); // Hannibal
+                break;
+            case QRLost: qRLost(); //Rasmus og Lars
                 break;
             case QRValidate: qRValidate(); // Nichlas
                 break;
@@ -90,44 +92,60 @@ public class StateController {
         int doFor = 200;
 
         //Searching method
-        System.out.println("State: QRSearch");
+        System.out.print("State: QRSearch - ");
 
-        switch(strayMode) {
+        Result tag = controller.getTag();
+        if (tag != null ) {
+            System.out.println("Tag found");
+            this.state = Command.QRValidate;
+            return;
+        }
+
+        System.out.println("Spin right");
+        drone.getCommandManager().spinRight(SPEEDSpin * 3).doFor(doFor);
+    }
+
+    int lostMode = 0;
+
+    public void qRLost() {
+        System.out.println("QR Lost");
+        Result tag = controller.getTag();
+        if (tag != null ) {
+            System.out.println("Tag found");
+            this.state = Command.QRValidate;
+            return;
+        }
+        switch(lostMode) {
             case 0:
-                System.out.println("AutoController: Stray Around: Spin right, Case: 0");
-                drone.getCommandManager().spinRight(SPEEDSpin * 3).doFor(doFor).hover();
-                strayMode++;
+
+                System.out.println("Fly backwards");
+                drone.getCommandManager().backward(4).doFor(200);
+                lostMode = 1;
                 break;
             case 1:
-                System.out.println("AutoController: Stray Around: Go up, Case: 1");
-                drone.getCommandManager().up(SPEEDMove).doFor(doFor).hover();
-                strayMode++;
+                System.out.println("Look right");
+                drone.getCommandManager().spinRight(10).doFor(200);
+                lostMode = 2;
                 break;
             case 2:
-                System.out.println("AutoController: Stray Around: Spin right, Case: 2");
-                drone.getCommandManager().spinRight(SPEEDSpin * 3).doFor(doFor).hover();
-                strayMode++;
-                break;
-            case 3:
-                System.out.println("AutoController: Stray Around: Go down, Case: 3");
-                drone.getCommandManager().down(SPEEDMove).doFor(doFor).hover();
-                strayMode = 0;
+                System.out.println("Look left");
+                drone.getCommandManager().spinLeft(10).doFor(200);
+                lostMode = 1;
                 break;
         }
+
         Thread.currentThread().sleep(doFor);
         state = Command.QRValidate;
     }
 
-    
-
     public void qRValidate() {
     	System.out.print("State: QRValidate: ");
     	Result tag = controller.getTag();
-    	if (tag == null ) {
-    		System.out.println("no tag");
-    		this.state = Command.QRSearch;
-    		return;
-    	}
+        if (tag == null ) {
+            System.out.println("Tag found");
+            this.state = Command.QRLost;
+            return;
+        }
     	// The scanned QR is the next port we need
     	if (controller.getPorts().get(nextPort).equals(tag.getText())) {
     		System.out.println("Validated port: " + tag.getText());
@@ -239,8 +257,10 @@ public class StateController {
                             return;
                         }
                         float leftRightSpeed = (float) ((c.x - imgCenterX) / 30) / 100.0f;
-                        float forwardSpeed = (float) ((c.r - 160) / 18 ) / 100.0f;
-                        float upDownSpeed = (float) ((imgCenterY - c.y) / 10) / 100.0f;
+
+                        float forwardSpeed = (float) ((c.r - 160) / 6 ) / 100.0f;
+
+        float upDownSpeed = (float) ((imgCenterY - c.y) / 10) / 100.0f;
                         System.out.println("Correcting position, " + leftRightSpeed +", " + forwardSpeed +", " + upDownSpeed);
                         drone.getCommandManager().move(leftRightSpeed, forwardSpeed, upDownSpeed, 0f).doFor(30);
                         drone.hover();
