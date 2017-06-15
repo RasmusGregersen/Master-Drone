@@ -66,9 +66,10 @@ public class StateController {
         //Takeoff
         System.out.println("State: ReadyForTakeOff");
         drone.getCommandManager().takeOff();
-        Thread.currentThread().sleep(4000);
-        //MainDroneController.sleep(1250);
-        drone.getCommandManager().up(15).doFor(1250);
+        flyToHeight(2000);
+        Thread.currentThread().sleep(500);
+//        //MainDroneController.sleep(1250);
+//        drone.getCommandManager().up(15).doFor(1250);
         //MainDroneController.sleep(1250);
         //drone.getCommandManager().landing();
         //MainDroneController.sleep(3000);
@@ -331,5 +332,26 @@ private boolean firstTag = false;
         System.out.println("State: Finish");
         drone.getCommandManager().landing();
         controller.stopController();
+    }
+    
+    
+    /**
+     * Puts the drone to a specific height. This will run until the height is reached.
+     * Has a tolerance of 10 cms in each direction.
+     * @param height The requested height in millimeters.
+     */
+    private void flyToHeight(int height) {
+    	System.out.println("StateController: flyToHeight: " + height);
+    	while(true) {
+    		if (height - 100 < this.controller.getAltitude()){ // fly down
+    			drone.getCommandManager().down(30).doFor(30).hover();
+    			// Sleep maybe?
+    		} else if (height + 100 > this.controller.getAltitude()) { // fly up
+    			drone.getCommandManager().up(30).doFor(30).hover();
+    		} else {
+    			System.out.println("Reached height: " + this.controller.getAltitude()); // done
+    			return;
+    		}
+    	}
     }
 }
