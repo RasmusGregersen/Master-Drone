@@ -5,6 +5,8 @@ import com.google.zxing.ResultPoint;
 import controller.StateController.Command;
 import de.yadrone.base.IARDrone;
 import de.yadrone.base.command.LEDAnimation;
+import de.yadrone.base.navdata.Altitude;
+import de.yadrone.base.navdata.AltitudeListener;
 import de.yadrone.base.video.ImageListener;
 import imgManagement.Circle;
 import imgManagement.CircleFinder;
@@ -43,6 +45,7 @@ public class MainDroneController extends AbstractController implements TagListen
 	private HashMap<String, Point> wallMarks;
 	private Circle[] circles;
 	private int nextPort = 1;
+	private int altitude;
 	
 	protected double latestImgTime;
 
@@ -60,6 +63,7 @@ public class MainDroneController extends AbstractController implements TagListen
 		for (int i = 0; i <= 7; i++)
 			ports.add("P.0" + i);
 		wallMarks = WallCoordinatesReader.read();
+		setupAltitudeListener();
 	}
 
 	@Override
@@ -170,5 +174,25 @@ public class MainDroneController extends AbstractController implements TagListen
 	@Override
 	public void imageUpdated(BufferedImage image) {
 		this.latestImgTime = System.currentTimeMillis();		
+	}
+	
+	
+	/**
+	 * Setups an AltitudeListener so we can extract the altitude when received.
+	 */
+	private void setupAltitudeListener() {
+		drone.getNavDataManager().addAltitudeListener(new AltitudeListener() {
+			@Override
+			public void receivedAltitude(int a) {
+				altitude = a;
+			}
+			@Override
+			public void receivedExtendedAltitude(Altitude d) {
+			}
+		});
+	}
+	
+	public int getAltitude() {
+		return this.altitude;
 	}
 }

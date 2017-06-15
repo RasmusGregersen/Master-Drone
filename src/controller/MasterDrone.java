@@ -100,5 +100,9 @@ public class MasterDrone {
 	public boolean getAutoControlEnabled() {
 		return autoControlEnabled;
 	}
+	
+	public int getAltitude(){
+		return this.droneController.getAltitude(); 
+	}
 
 }
