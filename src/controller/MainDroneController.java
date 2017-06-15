@@ -112,7 +112,6 @@ public class MainDroneController extends AbstractController implements TagListen
 
 		tag = result;
 		tagOrientation = orientation;
-		System.out.println("QR Angle: " + this.getQRRelativeAngle());
 	}
 
 	Boolean isCircleCentered() {
@@ -152,8 +151,8 @@ public class MainDroneController extends AbstractController implements TagListen
 	 * @return double angle. The angle is negative if the QR is to the left of the image center.
 	 */
 	public double getQRRelativeAngle(Result tag) {
-		final int cameraAngle = 92;
-		final int imgCenterX = MasterDrone.IMAGE_WIDTH / 2;
+		final double cameraAngle = 92;
+		final double imgCenterX = MasterDrone.IMAGE_WIDTH / 2;
 		double degPerPx = cameraAngle/MasterDrone.IMAGE_WIDTH; 
 		
 		synchronized(tag){
