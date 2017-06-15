@@ -27,7 +27,6 @@ public class GUI extends JFrame implements ImageListener, TagListener, CircleLis
 
 	private JPanel videoPanel;
 	private int batterypercentage;
-	private int DroneAltitude;
 	private int imgScale = 4; // Scale the preset width/height with this factor
 
 	public GUI(final IARDrone drone, MasterDrone main) {
@@ -37,7 +36,6 @@ public class GUI extends JFrame implements ImageListener, TagListener, CircleLis
 		this.drone = drone;
 
 		batteryListener();
-		altitudeListener();
 
 		createMenuBar();
 
@@ -64,7 +62,6 @@ public class GUI extends JFrame implements ImageListener, TagListener, CircleLis
 		this.drone = drone;
 
 		batteryListener();
-		altitudeListener();
 		createMenuBar();
 
 		setSize(MasterDrone.IMAGE_WIDTH, MasterDrone.IMAGE_HEIGHT);
@@ -133,16 +130,16 @@ public class GUI extends JFrame implements ImageListener, TagListener, CircleLis
 					}
 
 					g.drawString("Battery: "+batterypercentage+"%", 0, 15);
-					g.drawString("Altitude: "+DroneAltitude, 0, 35);
+					g.drawString("Altitude: "+main.getAltitude(), 0, 35);
 
-					/*// draw current state
+					// draw current state
 					if (main.getDroneController().getSc() != null)
-						g.drawString("State: " + main.getDroneController().getSc().state.toString(), 0, 40);
+						g.drawString("State: " + main.getDroneController().getSc().state.toString(), 0, 55);
 					else
 						g.drawString("State: Waiting for AutoController...", 0, 40);
 
 					// draw circle status
-					g.drawString("Circles remaining: " + main.getDroneController().getPorts().size(), 0, 65);*/
+					g.drawString("Circles remaining: " + main.getDroneController().getPorts().size(), 0, 75);
 
         			// draw tolerance field (rectangle)
         			g.setColor(Color.RED);
@@ -230,20 +227,7 @@ public class GUI extends JFrame implements ImageListener, TagListener, CircleLis
 	}
 
 
-	private void altitudeListener() {
-		drone.getNavDataManager().addAltitudeListener(new AltitudeListener() {
-
-			@Override
-			public void receivedAltitude(int altitude) {
-				DroneAltitude = altitude;
-			}
-
-			@Override
-			public void receivedExtendedAltitude(Altitude d) {
-
-			}
-		});
-	}
+	
 
 
 

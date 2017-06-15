@@ -3,7 +3,6 @@ package controller;
 import com.google.zxing.Result;
 import com.google.zxing.ResultPoint;
 import de.yadrone.base.IARDrone;
-import de.yadrone.base.command.CommandManager;
 import imgManagement.Circle;
 
 /**
@@ -20,7 +19,6 @@ public class StateController {
     
     private IARDrone drone;
     private MainDroneController controller;
-    private CommandManager cmd;
     int strayModeCircle = 0;
     
     private int nextPort = 1; // Consider handling this in MainDronController
@@ -28,9 +26,7 @@ public class StateController {
     
     public StateController(MainDroneController mc, IARDrone drone) {
     	this.controller = mc;
-        this.drone = drone;
-        this.cmd = drone.getCommandManager();
-
+    	this.drone = drone;
     }
 
 	public void commands(Command command) throws InterruptedException {
@@ -69,10 +65,11 @@ public class StateController {
     public void takeOff() throws InterruptedException{
         //Takeoff
         System.out.println("State: ReadyForTakeOff");
-        cmd.takeOff();
-        Thread.currentThread().sleep(4000);
-        //MainDroneController.sleep(1250);
-        cmd.up(15).doFor(1250);
+        drone.getCommandManager().takeOff();
+        flyToHeight(2000);
+        Thread.currentThread().sleep(500);
+//        //MainDroneController.sleep(1250);
+//        drone.getCommandManager().up(15).doFor(1250);
         //MainDroneController.sleep(1250);
         //drone.getCommandManager().landing();
         //MainDroneController.sleep(3000);
@@ -85,7 +82,7 @@ public class StateController {
     public void hover() throws InterruptedException {
         //Hover method
         System.out.println("State: Hover");
-        cmd.hover().doFor(5000);
+        drone.getCommandManager().hover().doFor(5000);
 //		Thread.currentThread().sleep(5000);
         //MainDroneController.sleep(550);
         //Check conditions and transit to next state
@@ -98,7 +95,7 @@ public class StateController {
 
         int SPEEDSpin = 10;
         int SPEEDMove = 4;
-        int doFor = 50;
+        int doFor = 200;
 
         //Searching method
         System.out.print("State: QRSearch - ");
@@ -111,16 +108,14 @@ public class StateController {
         }
 
         System.out.println("Spin right");
-        cmd.spinRight(SPEEDSpin * 3).doFor(doFor);
-        cmd.spinLeft(1).doFor(1);
-        Thread.currentThread().sleep(20);
-        cmd.spinLeft(SPEEDSpin * 3).doFor(doFor);
-        cmd.spinLeft(1).doFor(1);
+        drone.getCommandManager().spinRight(SPEEDSpin * 3).doFor(doFor);
+        drone.getCommandManager().spinLeft(1).doFor(1);
+        Thread.currentThread().sleep(500 );
     }
 
     int lostMode = 0;
 
-    public void qRLost() throws InterruptedException {
+    public void qRLost() {
         System.out.println("QR Lost");
         Result tag = controller.getTag();
         if (tag != null ) {
@@ -132,20 +127,17 @@ public class StateController {
             case 0:
 
                 System.out.println("Fly backwards");
-                cmd.backward(4).doFor(200);
+                drone.getCommandManager().backward(4).doFor(200);
                 lostMode = 1;
                 break;
             case 1:
                 System.out.println("Look right");
-                cmd.spinRight(10).doFor(200);
-                cmd.spinLeft(1).doFor(5);
-                //Thread.currentThread().sleep(50);
+                drone.getCommandManager().spinRight(10).doFor(200);
                 lostMode = 2;
                 break;
             case 2:
                 System.out.println("Look left");
-                cmd.spinLeft(10).doFor(200);
-                cmd.spinRight(1).doFor(5);
+                drone.getCommandManager().spinLeft(10).doFor(200);
                 lostMode = 1;
                 break;
         }
@@ -191,6 +183,7 @@ private boolean firstTag = false;
 		synchronized (tag) {
 			points = tag.getResultPoints();
 		}
+
 		int imgCenterX = MasterDrone.IMAGE_WIDTH / 2;
 		int imgCenterY = MasterDrone.IMAGE_HEIGHT / 2;
 
@@ -210,26 +203,26 @@ private boolean firstTag = false;
 //		} else
 		if (x < (imgCenterX - MasterDrone.TOLERANCE)) {
 			System.out.println("AutoController: Center Tag: Go left");
-            cmd.goLeft(SPEED).doFor(30).hover();
+			drone.getCommandManager().goLeft(SPEED).doFor(30).hover();
 			Thread.currentThread().sleep(SLEEP);
 		} else if (x > (imgCenterX + MasterDrone.TOLERANCE)) {
 			System.out.println("AutoController: Center Tag: Go right");
-            cmd.goRight(SPEED).doFor(30).hover();
+			drone.getCommandManager().goRight(SPEED).doFor(30).hover();
             Thread.currentThread().sleep(SLEEP);
 		} else if (y < (imgCenterY - MasterDrone.TOLERANCE)) {
 			System.out.println("AutoController: Center Tag: Go up");
-            cmd.up(SPEED * 2).doFor(60).hover();
+			drone.getCommandManager().up(SPEED * 2).doFor(60).hover();
             Thread.currentThread().sleep(SLEEP);
 		} else if (y > (imgCenterY + MasterDrone.TOLERANCE)) {
 			System.out.println("AutoController: Center Tag: Go down");
-            cmd.down(SPEED * 2).doFor(60).hover();
+			drone.getCommandManager().down(SPEED * 2).doFor(60).hover();
             Thread.currentThread().sleep(SLEEP);
 		} else {
 			System.out.println("AutoController: Tag centered");
 
 
             // ADJUSTING TO CIRCLE HEIGHT
-            cmd.up(SPEED * 2).doFor(200).hover();
+            drone.getCommandManager().up(SPEED * 2).doFor(200).hover();
             Thread.currentThread().sleep(200);
 
             this.state = Command.SearchForCircle;
@@ -252,7 +245,6 @@ private boolean firstTag = false;
             int SPEEDMove = 4;
             int doFor = 20;
 
-            cmd.up(20).doFor(30);
 
             Thread.currentThread().sleep(1500);
 
@@ -287,15 +279,15 @@ private boolean firstTag = false;
                         midlertidlig =leftRightSpeed +", " + forwardSpeed +", " + upDownSpeed;
                         if (currentCorrect.equals(midlertidlig)) {
                             System.out.println("Picture FUCKS");
-                            cmd.hover().doFor(500);
+                            drone.getCommandManager().hover().doFor(500);
                             return;
                         }
                         else
                         currentCorrect = midlertidlig;
 
                         System.out.println("Correcting position, " + leftRightSpeed +", " + forwardSpeed +", " + upDownSpeed);
-                        cmd.move(leftRightSpeed, forwardSpeed, upDownSpeed, 0f).doFor(30);
-                        cmd.hover();
+                        drone.getCommandManager().move(leftRightSpeed, forwardSpeed, upDownSpeed, 0f).doFor(30);
+                        drone.hover();
                         Thread.currentThread().sleep(300);
 
                         break;
@@ -311,9 +303,9 @@ private boolean firstTag = false;
     public void flyThrough() throws InterruptedException {
     	System.out.print("State: flyThrough - ");
         System.out.println("AutoController: Going through port " + nextPort);
-        cmd.forward(16).doFor(2500);
+        drone.getCommandManager().forward(16).doFor(2500);
 //        Thread.currentThread().sleep(1200);
-        cmd.hover();
+        drone.getCommandManager().hover();
         System.out.println("Returning to Hover State");
         state = Command.UpdateGate;
     }
@@ -338,7 +330,28 @@ private boolean firstTag = false;
 
     public void finish() {
         System.out.println("State: Finish");
-        cmd.landing();
+        drone.getCommandManager().landing();
         controller.stopController();
+    }
+    
+    
+    /**
+     * Puts the drone to a specific height. This will run until the height is reached.
+     * Has a tolerance of 10 cms in each direction.
+     * @param height The requested height in millimeters.
+     */
+    private void flyToHeight(int height) {
+    	System.out.println("StateController: flyToHeight: " + height);
+    	while(true) {
+    		if (height - 100 < this.controller.getAltitude()){ // fly down
+    			drone.getCommandManager().down(30).doFor(30).hover();
+    			// Sleep maybe?
+    		} else if (height + 100 > this.controller.getAltitude()) { // fly up
+    			drone.getCommandManager().up(30).doFor(30).hover();
+    		} else {
+    			System.out.println("Reached height: " + this.controller.getAltitude()); // done
+    			return;
+    		}
+    	}
     }
 }
