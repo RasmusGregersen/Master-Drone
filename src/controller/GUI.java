@@ -1,11 +1,11 @@
 package controller;
+
 import com.google.zxing.Result;
 import com.google.zxing.ResultPoint;
 import de.yadrone.base.IARDrone;
 import de.yadrone.base.navdata.BatteryListener;
 import de.yadrone.base.video.ImageListener;
 import imgManagement.Circle;
-import imgManagement.CircleFinder;
 import imgManagement.CircleListener;
 import imgManagement.TagListener;
 
@@ -25,6 +25,7 @@ public class GUI extends JFrame implements ImageListener, TagListener, CircleLis
 
 	private JPanel videoPanel;
 	private int batterypercentage;
+	private int imgScale = 4; // Scale the preset width/height with this factor
 
 	public GUI(final IARDrone drone, MasterDrone main) {
 		super("Master Drone");
@@ -36,21 +37,48 @@ public class GUI extends JFrame implements ImageListener, TagListener, CircleLis
 
 		createMenuBar();
 
-        setSize(MasterDrone.IMAGE_WIDTH, MasterDrone.IMAGE_HEIGHT);
-        setVisible(true);
-        setResizable(false);
+		setSize(MasterDrone.IMAGE_WIDTH * imgScale, MasterDrone.IMAGE_HEIGHT * imgScale);
+		setVisible(true);
+		setResizable(false);
 
-        addWindowListener(new WindowAdapter() {
+		addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
 				drone.stop();
 				System.exit(0);
 			}
 		});
 
-        setLayout(new GridBagLayout());
-        
-        add(createVideoPanel(), new GridBagConstraints(0, 0, 1, 2, 1, 1, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.BOTH, new Insets(0,0,0,0), 0, 0));
-        pack(); 
+		setLayout(new GridBagLayout());
+
+		add(createVideoPanel(), new GridBagConstraints(0, 0, 1, 2, 1, 1, GridBagConstraints.FIRST_LINE_START,
+				GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+		pack();
+	}
+
+	public GUI(final IARDrone drone, TestClass main) {
+		super("Master Drone");
+
+		this.drone = drone;
+
+		batteryListener();
+		createMenuBar();
+
+		setSize(MasterDrone.IMAGE_WIDTH, MasterDrone.IMAGE_HEIGHT);
+		setVisible(true);
+		setResizable(false);
+
+		addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent e) {
+				drone.stop();
+				System.exit(0);
+			}
+		});
+
+		setLayout(new GridBagLayout());
+
+		add(createVideoPanel(), new GridBagConstraints(0, 0, 1, 2, 1, 1, GridBagConstraints.FIRST_LINE_START,
+				GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+		pack();
 	}
 
 	private void createMenuBar() {
@@ -58,8 +86,7 @@ public class GUI extends JFrame implements ImageListener, TagListener, CircleLis
 
 		final JCheckBoxMenuItem autoControlMenuItem = new JCheckBoxMenuItem("Start autonomous flight");
 		autoControlMenuItem.addItemListener(new ItemListener() {
-			public void itemStateChanged(ItemEvent e)
-			{
+			public void itemStateChanged(ItemEvent e) {
 				main.enableAutoControl(autoControlMenuItem.isSelected());
 			}
 		});
@@ -79,106 +106,120 @@ public class GUI extends JFrame implements ImageListener, TagListener, CircleLis
 			 *
 			 */
 			private static final long serialVersionUID = 1L;
-			private Font tagFont = new Font("SansSerif", Font.BOLD, 14);
-			private Font timeFont = new Font("SansSerif", Font.BOLD, 18);
-			private Font gameOverFont = new Font("SansSerif", Font.BOLD, 36);
+			private Font tagFont = new Font("SansSerif", Font.BOLD, 14 * imgScale / 2);
 
-        	public void paint(Graphics g)
-        	{
-        		if (image != null)
-        		{
-        			// now draw the camera image
-        			g.drawImage(image, 0, 0, image.getWidth(), image.getHeight(), null);
+			public void paint(Graphics g) {
+				if (image != null) {
+					// now draw the camera image
+					Image img = image.getScaledInstance(MasterDrone.IMAGE_WIDTH * imgScale,
+							MasterDrone.IMAGE_HEIGHT * imgScale, Image.SCALE_DEFAULT);
+					g.drawImage(img, 0, 0, MasterDrone.IMAGE_WIDTH * imgScale, MasterDrone.IMAGE_HEIGHT * imgScale,
+							null);
 
-        			// draw the battery percentage
-					if(batterypercentage>50) {
+					// draw the battery percentage
+					if (batterypercentage > 50) {
 						g.setColor(Color.GREEN);
 						g.setFont(tagFont);
-					}
-					else {
+					} else {
 						g.setColor(Color.RED);
 						g.setFont(tagFont);
 					}
 
-					g.drawString("Battery: "+batterypercentage+"%", 0, 15);
+					g.drawString("Battery: " + batterypercentage + "%", 0, 25);
+					g.drawString("Altitude: " + main.getAltitude(), 0, 75);
 
-        			// draw tolerance field (rectangle)
-        			g.setColor(Color.RED);
+					// draw current state
+					if (main.getDroneController().getSc() != null)
+						g.drawString("State: " + main.getDroneController().getSc().state.toString(), 0, 50);
+					else
+						g.drawString("State: Waiting for AutoController...", 0, 50);
 
-    				int imgCenterX = MasterDrone.IMAGE_WIDTH / 2;
-    				int imgCenterY = MasterDrone.IMAGE_HEIGHT / 2;
-    				int tolerance = MasterDrone.TOLERANCE;
+					// draw circle status
+					g.drawString("Circles remaining: " + main.getDroneController().getPorts().size(), 0, 100);
 
-    				g.drawPolygon(new int[] {imgCenterX-tolerance, imgCenterX+tolerance, imgCenterX+tolerance, imgCenterX-tolerance},
-						      		  new int[] {imgCenterY-tolerance, imgCenterY-tolerance, imgCenterY+tolerance, imgCenterY+tolerance}, 4);
+					// draw tolerance field (rectangle)
+					g.setColor(Color.RED);
 
-    				// draw triangle if tag is visible
-        			if (result != null)
-        			{
-        				ResultPoint[] points = result.getResultPoints();
-        				ResultPoint a = points[1]; // top-left
-        				ResultPoint b = points[2]; // top-right
-        				ResultPoint c = points[0]; // bottom-left
-        				ResultPoint d = points.length == 4 ? points[3] : points[0]; // alignment point (bottom-right)
+					int imgCenterX = MasterDrone.IMAGE_WIDTH * imgScale / 2;
+					int imgCenterY = MasterDrone.IMAGE_HEIGHT * imgScale / 2;
+					int tolerance = MasterDrone.TOLERANCE * imgScale;
 
-        				g.setColor(Color.GREEN);
+					g.drawPolygon(
+							new int[] { imgCenterX - tolerance, imgCenterX + tolerance, imgCenterX + tolerance,
+									imgCenterX - tolerance },
+							new int[] { imgCenterY - tolerance, imgCenterY - tolerance, imgCenterY + tolerance,
+									imgCenterY + tolerance },
+							4);
 
-        				g.drawPolygon(new int[] {(int)a.getX(),(int)b.getX(),(int)d.getX(),(int)c.getX()},
-  						      new int[] {(int)a.getY(),(int)b.getY(),(int)d.getY(),(int)c.getY()}, 4);
+					// draw triangle if tag is visible
+					if (result != null) {
+						ResultPoint[] points = result.getResultPoints();
+						ResultPoint a = points[1]; // top-left
+						ResultPoint b = points[2]; // top-right
+						ResultPoint c = points[0]; // bottom-left
+						ResultPoint d = points.length == 4 ? points[3] : points[0]; // alignment
+																					// point
+																					// (bottom-right)
 
-        				g.setColor(Color.RED);
-        				g.setFont(tagFont);
-        				g.drawString(result.getText(), (int)a.getX(), (int)a.getY());
-        				g.drawString(orientation, (int)a.getX(), (int)a.getY() + 20);
+						g.setColor(Color.GREEN);
 
-        				if ((System.currentTimeMillis() - result.getTimestamp()) > 1000)
-        				{
-        					result = null;
-        				}
-        			}
+						g.drawPolygon(
+								new int[] { (int) a.getX() * imgScale, (int) b.getX() * imgScale,
+										(int) d.getX() * imgScale, (int) c.getX() * imgScale },
+								new int[] { (int) a.getY() * imgScale, (int) b.getY() * imgScale,
+										(int) d.getY() * imgScale, (int) c.getY() * imgScale },
+								4);
 
-        			// Draw circles
-					if (circles != null)
-						for(Circle c : circles){
-							g.setColor(Color.RED);
-							g.drawRect((int)c.x, (int)c.y, 10, 10);
-							g.setColor(Color.BLUE);
-							g.drawOval((int)(c.x - c.r), (int) (c.y - c.r), (int)(2*c.r), (int)(2*c.r));
+						g.setColor(Color.RED);
+						g.setFont(tagFont);
+						g.drawString(result.getText(), (int) a.getX() * imgScale, (int) a.getY() * imgScale);
+						g.drawString(orientation, (int) a.getX() * imgScale, (int) a.getY() * imgScale + 20);
+
+						if ((System.currentTimeMillis() - result.getTimestamp()) > 1000) {
+							result = null;
 						}
-        		}
-        		else
-        		{
-        			// draw "Waiting for video"
-        			g.setColor(Color.RED);
-    				g.setFont(tagFont);
-        			g.drawString("Waiting for VideoRecognition ...", 10, 20);
-        		}
-        	}
-        };
+					}
 
-        // a click on the video shall toggle the camera (from vertical to horizontal and vice versa)
+					// Draw circles
+					if (circles != null)
+						for (Circle c : circles) {
+							g.setColor(Color.RED);
+							g.drawRect((int) c.x * imgScale, (int) c.y * imgScale, 10, 10);
+							g.setColor(Color.BLUE);
+							g.drawOval((int) (c.x - c.r) * imgScale, (int) (c.y - c.r) * imgScale,
+									(int) (2 * c.r) * imgScale, (int) (2 * c.r) * imgScale);
+						}
+				} else {
+					// draw "Waiting for video"
+					g.setColor(Color.RED);
+					g.setFont(tagFont);
+					g.drawString("Waiting for VideoRecognition ...", 10, 20);
+				}
+			}
+		};
+
+		// a click on the video shall toggle the camera (from vertical to
+		// horizontal and vice versa)
 		videoPanel.addMouseListener(new MouseAdapter() {
-			public void mouseClicked(MouseEvent e)
-			{
+			public void mouseClicked(MouseEvent e) {
 				drone.toggleCamera();
 			}
 		});
+		videoPanel.setSize(MasterDrone.IMAGE_WIDTH * imgScale, MasterDrone.IMAGE_HEIGHT * imgScale);
+		videoPanel.setMinimumSize(new Dimension(MasterDrone.IMAGE_WIDTH, MasterDrone.IMAGE_HEIGHT));
+		videoPanel.setPreferredSize(
+				new Dimension(MasterDrone.IMAGE_WIDTH * imgScale, MasterDrone.IMAGE_HEIGHT * imgScale));
+		videoPanel.setMaximumSize(new Dimension(MasterDrone.IMAGE_WIDTH, MasterDrone.IMAGE_HEIGHT));
 
-        videoPanel.setSize(MasterDrone.IMAGE_WIDTH, MasterDrone.IMAGE_HEIGHT);
-        videoPanel.setMinimumSize(new Dimension(MasterDrone.IMAGE_WIDTH, MasterDrone.IMAGE_HEIGHT));
-        videoPanel.setPreferredSize(new Dimension(MasterDrone.IMAGE_WIDTH, MasterDrone.IMAGE_HEIGHT));
-        videoPanel.setMaximumSize(new Dimension(MasterDrone.IMAGE_WIDTH, MasterDrone.IMAGE_HEIGHT));
-        
-        return videoPanel;
+		return videoPanel;
 	}
-	
+
 	private long imageCount = 0;
 
 	private void batteryListener() {
 		drone.getNavDataManager().addBatteryListener(new BatteryListener() {
 
-			public void batteryLevelChanged(int percentage)
-			{
+			public void batteryLevelChanged(int percentage) {
 				batterypercentage = percentage;
 			}
 
@@ -191,15 +232,14 @@ public class GUI extends JFrame implements ImageListener, TagListener, CircleLis
 	public void imageUpdated(BufferedImage newImage) {
 		if ((++imageCount % 2) == 0)
 			return;
-		
-    	image = newImage;
+
+		image = newImage;
 		SwingUtilities.invokeLater(new Runnable() {
-			public void run()
-			{
+			public void run() {
 				videoPanel.repaint();
 			}
 		});
-    }
+	}
 
 	@Override
 	public void onTag(Result result, float v) {
@@ -211,6 +251,6 @@ public class GUI extends JFrame implements ImageListener, TagListener, CircleLis
 
 	@Override
 	public void circlesUpdated(Circle[] circles) {
-		this.circles = circles;		
+		this.circles = circles;
 	}
 }

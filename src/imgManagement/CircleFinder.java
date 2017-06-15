@@ -6,8 +6,6 @@ import java.util.ArrayList;
 
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.core.Point;
-import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
@@ -25,7 +23,7 @@ public class CircleFinder implements ImageListener {
 	private static final int BLUR = 9; // Blur amount, removes noise - must be uneven
 	
 	private long imageCount = 0;
-	private final int frameSkip = 5; // Only check every n frames. Must be > 0. 1 == no skip.
+	private final int frameSkip = 4; // Only check every n frames. Must be > 0. 1 == no skip.
 	
 	private ArrayList<CircleListener> listeners = new ArrayList<CircleListener>();
 	
@@ -44,7 +42,6 @@ public class CircleFinder implements ImageListener {
 		if (image.size().height > 1200)
 			Imgproc.resize(image, image, imgSize, 0.5,0.5,1);
 		//System.out.println(image.size());
-		Mat output = image.clone();
 		Mat gray = image.clone();
 		// Get the gray img
 		Imgproc.cvtColor(image, gray, Imgproc.COLOR_BGR2GRAY);
@@ -97,6 +94,7 @@ public class CircleFinder implements ImageListener {
 	@Override
 	public void imageUpdated(BufferedImage img) {
 		// We don't need to find circles in every frame
+		//System.out.println("Image"+System.currentTimeMillis());
 		if ((imageCount++ % frameSkip) != 0)
 			return;
 		Circle[] circles = findCircles(img);
