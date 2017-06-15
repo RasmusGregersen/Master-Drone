@@ -31,10 +31,13 @@ public class MasterDrone {
 	public MasterDrone() {
 		
 		drone = new ARDrone();
+		KeyboardController keyboardController = new KeyboardController(this, drone);
+		droneController = new MainDroneController(drone);
 		drone.start();
+		new Thread(keyboardController).start();
 		drone.getCommandManager().setVideoCodec(VideoCodec.H264_360P);
 		drone.getCommandManager().setVideoBitrateControl(VideoBitRateMode.MANUAL);
-		drone.getCommandManager().setMaxVideoBitrate(4000);
+		//drone.getCommandManager().setMaxVideoBitrate(4000);
 		drone.getCommandManager().setVideoBitrate(1400);
 		drone.getCommandManager().setVideoChannel(VideoChannel.HORI);
 		drone.getCommandManager().setVideoCodecFps(30);
@@ -52,9 +55,7 @@ public class MasterDrone {
 		});
 		GUI gui = new GUI(drone, this);
 
-		KeyboardController keyboardController = new KeyboardController(this, drone);
-		keyboardController.start();
-		droneController = new MainDroneController(drone);
+		
 		
 		scanner = new QRCodeScanner();
 		scanner.addListener(gui);
