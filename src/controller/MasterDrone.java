@@ -86,6 +86,7 @@ public class MasterDrone {
 			droneController.stopController();
 			scanner.removeListener(droneController);
 		}
+		this.autoControlEnabled = enable;
 	}
 
 	// Main program start

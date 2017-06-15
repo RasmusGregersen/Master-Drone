@@ -59,6 +59,10 @@ public class KeyboardController extends AbstractController
 					case KeyEvent.VK_Z:
 						md.enableAutoControl(!md.getAutoControlEnabled());
 						break;
+					case KeyEvent.VK_SPACE:
+						System.out.println("Manual landing.");
+						drone.landing();
+						md.enableAutoControl(false);
 					default:
 						keyboardCommandManager.keyPressed(e);	
 				}
