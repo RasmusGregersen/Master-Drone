@@ -6,8 +6,6 @@ import java.util.ArrayList;
 
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.core.Point;
-import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
@@ -44,7 +42,6 @@ public class CircleFinder implements ImageListener {
 		if (image.size().height > 1200)
 			Imgproc.resize(image, image, imgSize, 0.5,0.5,1);
 		//System.out.println(image.size());
-		Mat output = image.clone();
 		Mat gray = image.clone();
 		// Get the gray img
 		Imgproc.cvtColor(image, gray, Imgproc.COLOR_BGR2GRAY);

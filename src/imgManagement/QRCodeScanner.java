@@ -48,7 +48,7 @@ public class QRCodeScanner implements ImageListener {
 		// decode the QR code
 		QRCodeReader reader = new QRCodeReader();
 		
-		Map<DecodeHintType,BarcodeFormat> readerHint = new HashMap();
+		Map<DecodeHintType,BarcodeFormat> readerHint = new HashMap<DecodeHintType, BarcodeFormat>();
 		readerHint.put(DecodeHintType.valueOf("POSSIBLE_FORMATS"), BarcodeFormat.QR_CODE);
 
 		double theta = Double.NaN;
