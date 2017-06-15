@@ -67,6 +67,7 @@ public class MasterDrone {
 		Thread g = new Thread() {
 			public void run() {
 				drone.getVideoManager().addImageListener(gui);
+				drone.getVideoManager().addImageListener(droneController);
 			}
 		};
 		g.start();

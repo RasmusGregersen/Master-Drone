@@ -30,7 +30,7 @@ public class QRCodeScanner implements ImageListener {
 	private ArrayList<TagListener> listener = new ArrayList<TagListener>();
 	private Result scanResult;
 	private long imageCount = 0;
-	private int frameSkip = 3; // Skip every n frames. Must be > 0. 1 == no skip.
+	private int frameSkip = 2; // Skip every n frames. Must be > 0. 1 == no skip.
 	
 
 	/**

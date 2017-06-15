@@ -30,6 +30,11 @@ public class StateController {
     }
 
 	public void commands(Command command) throws InterruptedException {
+		if (System.currentTimeMillis() - this.controller.latestImgTime < 100) {
+			System.out.println("Image lag, delaying commands...");
+			drone.hover();
+			MainDroneController.sleep(500);
+		}
         switch(command){
             case TakeOff: takeOff();
                 break;

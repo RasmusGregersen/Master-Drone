@@ -5,6 +5,7 @@ import com.google.zxing.ResultPoint;
 import controller.StateController.Command;
 import de.yadrone.base.IARDrone;
 import de.yadrone.base.command.LEDAnimation;
+import de.yadrone.base.video.ImageListener;
 import imgManagement.Circle;
 import imgManagement.CircleFinder;
 import imgManagement.CircleListener;
@@ -12,6 +13,7 @@ import imgManagement.TagListener;
 import org.opencv.core.Point;
 import utils.WallCoordinatesReader;
 
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -21,7 +23,7 @@ import java.util.HashMap;
  * @author Nichlas N. Pilemand
  *
  */
-public class MainDroneController extends AbstractController implements TagListener, CircleListener {
+public class MainDroneController extends AbstractController implements TagListener, CircleListener, ImageListener {
 
 	private final static int SPEED = 4;
 	private final static int SLEEP = 500;
@@ -41,6 +43,8 @@ public class MainDroneController extends AbstractController implements TagListen
 	private HashMap<String, Point> wallMarks;
 	private Circle[] circles;
 	private int nextPort = 1;
+	
+	protected double latestImgTime;
 
 	public StateController getSc() {
 		return sc;
@@ -133,5 +137,38 @@ public class MainDroneController extends AbstractController implements TagListen
 	@Override
 	public void circlesUpdated(Circle[] circles) {
 		this.circles = circles;		
+	}
+	
+	private Point getTagCenter(Result tag) {
+		ResultPoint[] points = tag.getResultPoints();
+		double dy = (points[0].getY() + points[1].getY()) / 2; // bottom-left, top-left
+		double dx = (points[1].getX() + points[2].getX()) / 2; // Top-left, top-right
+		return new Point(dx, dy);		
+	}
+	
+	/**
+	 * Guesstimates the angle to the QR from the center of the image.
+	 * @return double angle. The angle is negative if the QR is to the left of the image center.
+	 */
+	public double getQRRelativeAngle(Result tag) {
+		final double cameraAngle = 92;
+		final double imgCenterX = MasterDrone.IMAGE_WIDTH / 2;
+		double degPerPx = cameraAngle/MasterDrone.IMAGE_WIDTH; 
+		
+		synchronized(tag){
+			// TODO Consider if we should handle the Y offset
+			if (tag == null)
+				return 0.0;
+			Point qrCenter = getTagCenter(tag);
+			return (qrCenter.x - imgCenterX) * degPerPx;
+		}
+	}
+	public double getQRRelativeAngle() {
+		return getQRRelativeAngle(this.tag);
+	}
+
+	@Override
+	public void imageUpdated(BufferedImage image) {
+		this.latestImgTime = System.currentTimeMillis();		
 	}
 }
