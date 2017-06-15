@@ -10,7 +10,11 @@ import imgManagement.Circle;
  * Created by Dave on 07/06/2017..
  */
 public class StateController {
-
+	
+	private enum Mode {
+		Normal, Continous
+	}
+	private Mode currentMode;
 
     public enum Command {
         TakeOff,Hover,QRSearch, QRLost, QRValidate,QRCentralizing,SearchForCircle,Centralize,FlyThrough,UpdateGate, Finished
@@ -30,6 +34,7 @@ public class StateController {
     	this.controller = mc;
         this.cmd = cmd;
     	this.drone = drone;
+    	this.currentMode = Mode.Continous;
     }
 
 	public void commands(Command command) throws InterruptedException {
@@ -112,6 +117,7 @@ public class StateController {
         flyToHeight(1250);
         System.out.println("Spin right");
         cmd.spinRight(SPEEDSpin * 3).doFor(doFor);
+        spinRight(SPEEDSpin * 3, doFor);
         cmd.spinLeft(1).doFor(1);
         Thread.currentThread().sleep(500);
     }
@@ -321,18 +327,27 @@ private boolean firstTag = false;
     	System.out.print("State: updateGate: ");
         //Changing which QR tag to search for next
     	nextPort++;
-    	
-        System.out.println("Next port is " + nextPort);
 
         //Changing state to finishing or searching for next tag depending on port state
-        if(nextPort>maxPorts) {
-        	System.out.println("setting state to finish");
-        	this.state=Command.Finished;
+        if(nextPort > maxPorts) {
+        	switch(this.currentMode) {
+        	case Continous:
+        		System.out.println("\n  Starting over as mode is continous.");
+        		nextPort = 0;
+        		this.state = Command.Hover;
+			case Normal:
+				System.out.println("\n  Last port reached.");
+				this.state = Command.Finished;
+				break;
+			default:
+				this.state = Command.Hover; // Redundant
+				break;        		
+        	}
         }
         else {
-        	System.out.println("setting state hover");
-        	this.state=Command.Hover;
+        	this.state = Command.Hover;
         }
+        System.out.println("Next port is " + nextPort);
     }
 
     public void finish() {
@@ -360,5 +375,23 @@ private boolean firstTag = false;
     			return;
     		}
     	}
+    }
+    
+    /**
+     * Separate method for spinning to compensate for stability issues.
+     * @param speed Int 0 - 100: Percent of max speed
+     * @param doFor Integer: How long in ms to run the command
+     * @return {@link CommandManager} for chaining commands
+     * @see StateController#spinLeft spinLeft().
+     */
+    private CommandManager spinRight(int speed, int doFor) {
+    	return cmd.spinRight(speed).doFor(doFor).spinLeft(1);
+    }
+    /**
+     * SpinLeft
+     * @see StateController#spinRight(int, int) spinRight()
+     */
+    private CommandManager spinLeft(int speed, int doFor) {
+    	return cmd.spinLeft(speed).doFor(doFor).spinRight(1);
     }
 }
