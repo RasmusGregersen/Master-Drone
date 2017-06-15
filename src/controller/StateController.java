@@ -344,10 +344,10 @@ private boolean firstTag = false;
     	System.out.println("StateController: flyToHeight: " + height);
     	while(true) {
     		if (height - 100 < this.controller.getAltitude()){ // fly down
-    			drone.getCommandManager().down(30).doFor(30).hover();
+    			drone.getCommandManager().down(30).doFor(20).hover();
     			// Sleep maybe?
     		} else if (height + 100 > this.controller.getAltitude()) { // fly up
-    			drone.getCommandManager().up(30).doFor(30).hover();
+    			drone.getCommandManager().up(30).doFor(20).hover();
     		} else {
     			System.out.println("Reached height: " + this.controller.getAltitude()); // done
     			return;
