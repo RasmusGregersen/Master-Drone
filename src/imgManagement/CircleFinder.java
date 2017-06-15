@@ -25,7 +25,7 @@ public class CircleFinder implements ImageListener {
 	private static final int BLUR = 9; // Blur amount, removes noise - must be uneven
 	
 	private long imageCount = 0;
-	private final int frameSkip = 5; // Only check every n frames. Must be > 0. 1 == no skip.
+	private final int frameSkip = 4; // Only check every n frames. Must be > 0. 1 == no skip.
 	
 	private ArrayList<CircleListener> listeners = new ArrayList<CircleListener>();
 	
