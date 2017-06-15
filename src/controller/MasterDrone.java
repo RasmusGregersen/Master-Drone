@@ -31,7 +31,7 @@ public class MasterDrone {
 		drone = new ARDrone();
 		drone.start();
 		drone.getCommandManager().setVideoCodec(VideoCodec.H264_360P);
-		//drone.getCommandManager().setVideoBitrateControl(VideoBitRateMode.MANUAL);
+		drone.getCommandManager().setVideoBitrateControl(VideoBitRateMode.MANUAL);
 		drone.getCommandManager().setMaxVideoBitrate(4000);
 		drone.getCommandManager().setVideoBitrate(1400);
 		drone.getCommandManager().setVideoChannel(VideoChannel.HORI);
@@ -93,7 +93,7 @@ public class MasterDrone {
 	public void enableAutoControl(boolean enable) {
 		if (enable) {
 			scanner.addListener(droneController);
-			droneController.start();
+			new Thread(droneController).start();
 		} else {
 			droneController.stopController();
 			scanner.removeListener(droneController); // only auto autoController

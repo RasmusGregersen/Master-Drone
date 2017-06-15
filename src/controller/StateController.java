@@ -61,9 +61,9 @@ public class StateController {
         //Takeoff
         System.out.println("State: ReadyForTakeOff");
         drone.getCommandManager().takeOff();
-        Thread.currentThread().sleep(2000);
+        Thread.currentThread().sleep(4000);
         //MainDroneController.sleep(1250);
-        drone.getCommandManager().up(15).doFor(1250).hover();
+        drone.getCommandManager().up(15).doFor(1250);
         //MainDroneController.sleep(1250);
         //drone.getCommandManager().landing();
         //MainDroneController.sleep(3000);
@@ -77,7 +77,7 @@ public class StateController {
         //Hover method
         System.out.println("State: Hover");
         drone.getCommandManager().hover().doFor(5000);
-		Thread.currentThread().sleep(5000);
+//		Thread.currentThread().sleep(5000);
         //MainDroneController.sleep(550);
         //Check conditions and transit to next state
         state = Command.QRValidate;
@@ -103,6 +103,8 @@ public class StateController {
 
         System.out.println("Spin right");
         drone.getCommandManager().spinRight(SPEEDSpin * 3).doFor(doFor);
+        drone.getCommandManager().spinLeft(1).doFor(1);
+        Thread.currentThread().sleep(500 );
     }
 
     int lostMode = 0;
@@ -134,15 +136,21 @@ public class StateController {
                 break;
         }
     }
-
+private boolean firstTag = false;
     public void qRValidate() {
     	System.out.print("State: QRValidate: ");
     	Result tag = controller.getTag();
-        if (tag == null ) {
-            System.out.println("Tag found");
-            this.state = Command.QRLost;
+        if (tag == null) {
+            if (firstTag) {
+                System.out.println("Tag Lost");
+                this.state = Command.QRLost;
+                return;
+            }
+            this.state = Command.QRSearch;
             return;
+
         }
+        firstTag = true;
     	// The scanned QR is the next port we need
     	if (controller.getPorts().get(nextPort).equals(tag.getText())) {
     		System.out.println("Validated port: " + tag.getText());
@@ -226,6 +234,7 @@ public class StateController {
         }
         else {
         	// TODO Needs to actually FIND the circle
+            System.out.println("No circle found");
             int SPEEDSpin = 10;
             int SPEEDMove = 4;
             int doFor = 20;
@@ -236,6 +245,9 @@ public class StateController {
             this.state = Command.SearchForCircle;
         }
     }
+
+    String currentCorrect = "";
+    String midlertidlig = "";
 
     public void centralize() throws InterruptedException {
         //Centralize drone in front of circle
@@ -257,7 +269,16 @@ public class StateController {
 
                         float forwardSpeed = (float) ((c.r - 160) / 6 ) / 100.0f;
 
-        float upDownSpeed = (float) ((imgCenterY - c.y) / 10) / 100.0f;
+                        float upDownSpeed = (float) ((imgCenterY - c.y) / 10) / 100.0f;
+                        midlertidlig =leftRightSpeed +", " + forwardSpeed +", " + upDownSpeed;
+                        if (currentCorrect.equals(midlertidlig)) {
+                            System.out.println("Picture FUCKS");
+                            drone.getCommandManager().hover().doFor(500);
+                            return;
+                        }
+                        else
+                        currentCorrect = midlertidlig;
+
                         System.out.println("Correcting position, " + leftRightSpeed +", " + forwardSpeed +", " + upDownSpeed);
                         drone.getCommandManager().move(leftRightSpeed, forwardSpeed, upDownSpeed, 0f).doFor(30);
                         drone.hover();
@@ -276,8 +297,8 @@ public class StateController {
     public void flyThrough() throws InterruptedException {
     	System.out.print("State: flyThrough - ");
         System.out.println("AutoController: Going through port " + nextPort);
-        drone.getCommandManager().forward(16).doFor(1200).hover();
-        Thread.currentThread().sleep(1200);
+        drone.getCommandManager().forward(16).doFor(2500);
+//        Thread.currentThread().sleep(1200);
         drone.getCommandManager().hover();
         System.out.println("Returning to Hover State");
         state = Command.UpdateGate;

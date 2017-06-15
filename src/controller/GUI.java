@@ -2,6 +2,8 @@ package controller;
 import com.google.zxing.Result;
 import com.google.zxing.ResultPoint;
 import de.yadrone.base.IARDrone;
+import de.yadrone.base.navdata.Altitude;
+import de.yadrone.base.navdata.AltitudeListener;
 import de.yadrone.base.navdata.BatteryListener;
 import de.yadrone.base.video.ImageListener;
 import imgManagement.Circle;
@@ -25,7 +27,8 @@ public class GUI extends JFrame implements ImageListener, TagListener, CircleLis
 
 	private JPanel videoPanel;
 	private int batterypercentage;
-	private int imgScale = 1; // Scale the preset width/height with this factor
+	private int DroneAltitude;
+	private int imgScale = 2; // Scale the preset width/height with this factor
 
 	public GUI(final IARDrone drone, MasterDrone main) {
 		super("Master Drone");
@@ -34,6 +37,7 @@ public class GUI extends JFrame implements ImageListener, TagListener, CircleLis
 		this.drone = drone;
 
 		batteryListener();
+		altitudeListener();
 
 		createMenuBar();
 
@@ -60,7 +64,7 @@ public class GUI extends JFrame implements ImageListener, TagListener, CircleLis
 		this.drone = drone;
 
 		batteryListener();
-
+		altitudeListener();
 		createMenuBar();
 
 		setSize(MasterDrone.IMAGE_WIDTH, MasterDrone.IMAGE_HEIGHT);
@@ -129,6 +133,7 @@ public class GUI extends JFrame implements ImageListener, TagListener, CircleLis
 					}
 
 					g.drawString("Battery: "+batterypercentage+"%", 0, 15);
+					g.drawString("Altitude: "+DroneAltitude, 0, 35);
 
 					/*// draw current state
 					if (main.getDroneController().getSc() != null)
@@ -224,9 +229,27 @@ public class GUI extends JFrame implements ImageListener, TagListener, CircleLis
 		});
 	}
 
+
+	private void altitudeListener() {
+		drone.getNavDataManager().addAltitudeListener(new AltitudeListener() {
+
+			@Override
+			public void receivedAltitude(int altitude) {
+				DroneAltitude = altitude;
+			}
+
+			@Override
+			public void receivedExtendedAltitude(Altitude d) {
+
+			}
+		});
+	}
+
+
+
 	public void imageUpdated(BufferedImage newImage) {
-	/*	if ((++imageCount % 1) == 0)
-			return;*/
+		if ((++imageCount % 2) == 0)
+			return;
 		
     	image = newImage;
 		SwingUtilities.invokeLater(new Runnable() {
