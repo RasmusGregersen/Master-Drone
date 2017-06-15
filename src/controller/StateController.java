@@ -3,6 +3,7 @@ package controller;
 import com.google.zxing.Result;
 import com.google.zxing.ResultPoint;
 import de.yadrone.base.IARDrone;
+import de.yadrone.base.command.CommandManager;
 import imgManagement.Circle;
 
 /**
@@ -19,6 +20,7 @@ public class StateController {
     
     private IARDrone drone;
     private MainDroneController controller;
+    private CommandManager cmd;
     int strayModeCircle = 0;
     
     private int nextPort = 1; // Consider handling this in MainDronController
@@ -26,7 +28,9 @@ public class StateController {
     
     public StateController(MainDroneController mc, IARDrone drone) {
     	this.controller = mc;
-    	this.drone = drone;
+        this.drone = drone;
+        this.cmd = drone.getCommandManager();
+
     }
 
 	public void commands(Command command) throws InterruptedException {
@@ -65,10 +69,10 @@ public class StateController {
     public void takeOff() throws InterruptedException{
         //Takeoff
         System.out.println("State: ReadyForTakeOff");
-        drone.getCommandManager().takeOff();
+        cmd.takeOff();
         Thread.currentThread().sleep(4000);
         //MainDroneController.sleep(1250);
-        drone.getCommandManager().up(15).doFor(1250);
+        cmd.up(15).doFor(1250);
         //MainDroneController.sleep(1250);
         //drone.getCommandManager().landing();
         //MainDroneController.sleep(3000);
@@ -81,7 +85,7 @@ public class StateController {
     public void hover() throws InterruptedException {
         //Hover method
         System.out.println("State: Hover");
-        drone.getCommandManager().hover().doFor(5000);
+        cmd.hover().doFor(5000);
 //		Thread.currentThread().sleep(5000);
         //MainDroneController.sleep(550);
         //Check conditions and transit to next state
@@ -94,7 +98,7 @@ public class StateController {
 
         int SPEEDSpin = 10;
         int SPEEDMove = 4;
-        int doFor = 200;
+        int doFor = 50;
 
         //Searching method
         System.out.print("State: QRSearch - ");
@@ -107,14 +111,16 @@ public class StateController {
         }
 
         System.out.println("Spin right");
-        drone.getCommandManager().spinRight(SPEEDSpin * 3).doFor(doFor);
-        drone.getCommandManager().spinLeft(1).doFor(1);
-        Thread.currentThread().sleep(500 );
+        cmd.spinRight(SPEEDSpin * 3).doFor(doFor);
+        cmd.spinLeft(1).doFor(1);
+        Thread.currentThread().sleep(20);
+        cmd.spinLeft(SPEEDSpin * 3).doFor(doFor);
+        cmd.spinLeft(1).doFor(1);
     }
 
     int lostMode = 0;
 
-    public void qRLost() {
+    public void qRLost() throws InterruptedException {
         System.out.println("QR Lost");
         Result tag = controller.getTag();
         if (tag != null ) {
@@ -126,17 +132,20 @@ public class StateController {
             case 0:
 
                 System.out.println("Fly backwards");
-                drone.getCommandManager().backward(4).doFor(200);
+                cmd.backward(4).doFor(200);
                 lostMode = 1;
                 break;
             case 1:
                 System.out.println("Look right");
-                drone.getCommandManager().spinRight(10).doFor(200);
+                cmd.spinRight(10).doFor(200);
+                cmd.spinLeft(1).doFor(5);
+                //Thread.currentThread().sleep(50);
                 lostMode = 2;
                 break;
             case 2:
                 System.out.println("Look left");
-                drone.getCommandManager().spinLeft(10).doFor(200);
+                cmd.spinLeft(10).doFor(200);
+                cmd.spinRight(1).doFor(5);
                 lostMode = 1;
                 break;
         }
@@ -182,7 +191,6 @@ private boolean firstTag = false;
 		synchronized (tag) {
 			points = tag.getResultPoints();
 		}
-
 		int imgCenterX = MasterDrone.IMAGE_WIDTH / 2;
 		int imgCenterY = MasterDrone.IMAGE_HEIGHT / 2;
 
@@ -202,26 +210,26 @@ private boolean firstTag = false;
 //		} else
 		if (x < (imgCenterX - MasterDrone.TOLERANCE)) {
 			System.out.println("AutoController: Center Tag: Go left");
-			drone.getCommandManager().goLeft(SPEED).doFor(30).hover();
+            cmd.goLeft(SPEED).doFor(30).hover();
 			Thread.currentThread().sleep(SLEEP);
 		} else if (x > (imgCenterX + MasterDrone.TOLERANCE)) {
 			System.out.println("AutoController: Center Tag: Go right");
-			drone.getCommandManager().goRight(SPEED).doFor(30).hover();
+            cmd.goRight(SPEED).doFor(30).hover();
             Thread.currentThread().sleep(SLEEP);
 		} else if (y < (imgCenterY - MasterDrone.TOLERANCE)) {
 			System.out.println("AutoController: Center Tag: Go up");
-			drone.getCommandManager().up(SPEED * 2).doFor(60).hover();
+            cmd.up(SPEED * 2).doFor(60).hover();
             Thread.currentThread().sleep(SLEEP);
 		} else if (y > (imgCenterY + MasterDrone.TOLERANCE)) {
 			System.out.println("AutoController: Center Tag: Go down");
-			drone.getCommandManager().down(SPEED * 2).doFor(60).hover();
+            cmd.down(SPEED * 2).doFor(60).hover();
             Thread.currentThread().sleep(SLEEP);
 		} else {
 			System.out.println("AutoController: Tag centered");
 
 
             // ADJUSTING TO CIRCLE HEIGHT
-            drone.getCommandManager().up(SPEED * 2).doFor(200).hover();
+            cmd.up(SPEED * 2).doFor(200).hover();
             Thread.currentThread().sleep(200);
 
             this.state = Command.SearchForCircle;
@@ -244,6 +252,7 @@ private boolean firstTag = false;
             int SPEEDMove = 4;
             int doFor = 20;
 
+            cmd.up(20).doFor(30);
 
             Thread.currentThread().sleep(1500);
 
@@ -278,15 +287,15 @@ private boolean firstTag = false;
                         midlertidlig =leftRightSpeed +", " + forwardSpeed +", " + upDownSpeed;
                         if (currentCorrect.equals(midlertidlig)) {
                             System.out.println("Picture FUCKS");
-                            drone.getCommandManager().hover().doFor(500);
+                            cmd.hover().doFor(500);
                             return;
                         }
                         else
                         currentCorrect = midlertidlig;
 
                         System.out.println("Correcting position, " + leftRightSpeed +", " + forwardSpeed +", " + upDownSpeed);
-                        drone.getCommandManager().move(leftRightSpeed, forwardSpeed, upDownSpeed, 0f).doFor(30);
-                        drone.hover();
+                        cmd.move(leftRightSpeed, forwardSpeed, upDownSpeed, 0f).doFor(30);
+                        cmd.hover();
                         Thread.currentThread().sleep(300);
 
                         break;
@@ -302,9 +311,9 @@ private boolean firstTag = false;
     public void flyThrough() throws InterruptedException {
     	System.out.print("State: flyThrough - ");
         System.out.println("AutoController: Going through port " + nextPort);
-        drone.getCommandManager().forward(16).doFor(2500);
+        cmd.forward(16).doFor(2500);
 //        Thread.currentThread().sleep(1200);
-        drone.getCommandManager().hover();
+        cmd.hover();
         System.out.println("Returning to Hover State");
         state = Command.UpdateGate;
     }
@@ -329,7 +338,7 @@ private boolean firstTag = false;
 
     public void finish() {
         System.out.println("State: Finish");
-        drone.getCommandManager().landing();
+        cmd.landing();
         controller.stopController();
     }
 }
