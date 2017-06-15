@@ -4,6 +4,7 @@ import com.google.zxing.Result;
 import com.google.zxing.ResultPoint;
 import controller.StateController.Command;
 import de.yadrone.base.IARDrone;
+import de.yadrone.base.command.CommandManager;
 import de.yadrone.base.command.LEDAnimation;
 import de.yadrone.base.navdata.Altitude;
 import de.yadrone.base.navdata.AltitudeListener;
@@ -68,7 +69,7 @@ public class MainDroneController extends AbstractController implements TagListen
 
 	@Override
 	public void run() {
-		sc = new StateController(this, drone);
+		sc = new StateController(this, drone, drone.getCommandManager());
 		sc.state = Command.TakeOff;
 		while (!doStop) // control loop
 		{
