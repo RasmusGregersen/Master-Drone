@@ -31,10 +31,10 @@ public class MasterDrone {
 	public MasterDrone() {
 		
 		drone = new ARDrone();
-		KeyboardController keyboardController = new KeyboardController(this, drone);
 		droneController = new MainDroneController(drone);
+		KeyboardController keyboardController = new KeyboardController(this, drone);
 		drone.start();
-		new Thread(keyboardController).start();
+		keyboardController.start();
 		drone.getCommandManager().setVideoCodec(VideoCodec.H264_360P);
 		drone.getCommandManager().setVideoBitrateControl(VideoBitRateMode.MANUAL);
 		//drone.getCommandManager().setMaxVideoBitrate(4000);
@@ -67,27 +67,11 @@ public class MasterDrone {
 		drone.getCommandManager().setFlyingMode(FlyingMode.HOVER_ON_TOP_OF_ROUNDEL);
 		//drone.getCommandManager().setFlyingMode(FlyingMode.HOVER_ON_TOP_OF_ORIENTED_ROUNDEL);
 
-		Thread g = new Thread() {
-			public void run() {
-				drone.getVideoManager().addImageListener(gui);
-				drone.getVideoManager().addImageListener(droneController);
-			}
-		};
-		g.start();
-
-		Thread q = new Thread() {
-			public void run() {
-				drone.getVideoManager().addImageListener(scanner);
-			}
-		};
-		q.start();
-
-		Thread c = new Thread() {
-			public void run() {
-				drone.getVideoManager().addImageListener(cf);
-			}
-		};
-		c.start();
+		drone.getVideoManager().addImageListener(droneController);
+		drone.getVideoManager().addImageListener(gui);
+		drone.getVideoManager().addImageListener(cf);
+		drone.getVideoManager().addImageListener(scanner);
+		
 	}
 
 	public MainDroneController getDroneController() {
