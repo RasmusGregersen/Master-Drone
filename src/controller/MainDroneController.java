@@ -5,6 +5,9 @@ import com.google.zxing.ResultPoint;
 import controller.StateController.Command;
 import de.yadrone.base.IARDrone;
 import de.yadrone.base.command.LEDAnimation;
+import de.yadrone.base.exception.ARDroneException;
+import de.yadrone.base.exception.IExceptionListener;
+import de.yadrone.base.exception.VideoException;
 import de.yadrone.base.navdata.Altitude;
 import de.yadrone.base.navdata.AltitudeListener;
 import de.yadrone.base.video.ImageListener;
@@ -64,6 +67,8 @@ public class MainDroneController extends AbstractController implements TagListen
 			ports.add("P.0" + i);
 		wallMarks = WallCoordinatesReader.read();
 		setupAltitudeListener();
+		
+		drone.addExceptionListener(new ExeptionListener());
 	}
 
 	@Override
@@ -195,4 +200,20 @@ public class MainDroneController extends AbstractController implements TagListen
 	public int getAltitude() {
 		return this.altitude;
 	}
+	
+	/**
+	 * Class for catching and handling specific exceptions.
+	 * @author Nichlas N. Pilemand
+	 */
+	class ExeptionListener implements IExceptionListener {
+		@Override
+		public void exeptionOccurred(ARDroneException exc) {
+			if (exc.getClass().equals(VideoException.class)) {
+				System.out.println("Got VideoException, trying to restart");
+				drone.getVideoManager().reinitialize();
+			}
+		}
+	}
+	
+	
 }
