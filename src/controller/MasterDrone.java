@@ -25,6 +25,8 @@ public class MasterDrone {
 	private IARDrone drone = null;
 	private MainDroneController droneController;
 	private QRCodeScanner scanner = null;
+	
+	private boolean autoControlEnabled = false;
 
 	public MasterDrone() {
 		
@@ -50,7 +52,7 @@ public class MasterDrone {
 		});
 		GUI gui = new GUI(drone, this);
 
-		KeyboardController keyboardController = new KeyboardController(drone);
+		KeyboardController keyboardController = new KeyboardController(this, drone);
 		keyboardController.start();
 		droneController = new MainDroneController(drone);
 		
@@ -97,17 +99,20 @@ public class MasterDrone {
 			new Thread(droneController).start();
 		} else {
 			droneController.stopController();
-			scanner.removeListener(droneController); // only auto autoController
-													// registers as TagListener
+			scanner.removeListener(droneController);
 		}
 	}
 
 	// Main program start
 	public static void main(String[] args) throws FileNotFoundException {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME); // Load OpenCV
-		PrintStream out = new PrintStream(new FileOutputStream("output.txt"));
+		//PrintStream out = new PrintStream(new FileOutputStream("output.txt"));
 		//System.setOut(out);
 		new MasterDrone();
+	}
+
+	public boolean getAutoControlEnabled() {
+		return autoControlEnabled;
 	}
 
 }

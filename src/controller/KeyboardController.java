@@ -17,10 +17,12 @@ import java.awt.event.KeyEvent;
 public class KeyboardController extends AbstractController
 {
 	private KeyboardCommandManagerAlternative keyboardCommandManager;
+	private MasterDrone md;
 	
-	public KeyboardController(IARDrone drone)
+	public KeyboardController(MasterDrone main, IARDrone drone)
 	{
 		super(drone);
+		this.md = main;
 	}
 	
 	public void run()
@@ -39,17 +41,22 @@ public class KeyboardController extends AbstractController
 			if (e.getID() == KeyEvent.KEY_PRESSED) 
 			{
 				System.out.println("Key registered: " + e.getKeyChar());
-				if (e.getKeyCode() == KeyEvent.VK_C){
-					drone.getCommandManager().setCommand(new CalibrationCommand(Device.MAGNETOMETER));
-					System.out.println("AutoController: Calibrate");
-				} else if (e.getKeyCode() == KeyEvent.VK_H) {
-					drone.getCommandManager().move(-4/100.0f, -4/100.0f, 20/100.0f, 0).doFor(100);
-					System.out.println("Testing MoveCommand!!");
+				int key = e.getKeyCode();
+				switch(key) {
+					case KeyEvent.VK_C:
+						drone.getCommandManager().setCommand(new CalibrationCommand(Device.MAGNETOMETER));
+						System.out.println("AutoController: Calibrate");
+						break;
+					case KeyEvent.VK_H:
+						drone.getCommandManager().move(-4/100.0f, -4/100.0f, 20/100.0f, 0).doFor(100);
+						System.out.println("Testing MoveCommand!!");
+						break;
+					case KeyEvent.VK_Z:
+						md.enableAutoControl(!md.getAutoControlEnabled());
+						break;
+					default:
+						keyboardCommandManager.keyPressed(e);	
 				}
-				else
-					keyboardCommandManager.keyPressed(e);
-				// TODO For now any key command just kills the drone
-				//drone.reset();
             } 
 			else if (e.getID() == KeyEvent.KEY_RELEASED) 
             {
