@@ -25,6 +25,11 @@ public class KeyboardController extends AbstractController
 		this.md = main;
 	}
 	
+	// Used for testing purposes
+	public KeyboardController(IARDrone drone) {
+		super(drone);
+	}
+	
 	public void run()
 	{
         keyboardCommandManager = new KeyboardCommandManagerAlternative(drone);
