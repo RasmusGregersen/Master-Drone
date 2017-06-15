@@ -28,7 +28,7 @@ public class GUI extends JFrame implements ImageListener, TagListener, CircleLis
 	private JPanel videoPanel;
 	private int batterypercentage;
 	private int DroneAltitude;
-	private int imgScale = 2; // Scale the preset width/height with this factor
+	private int imgScale = 4; // Scale the preset width/height with this factor
 
 	public GUI(final IARDrone drone, MasterDrone main) {
 		super("Master Drone");

@@ -5,6 +5,7 @@ import com.google.zxing.ResultPoint;
 import controller.StateController.Command;
 import de.yadrone.base.IARDrone;
 import de.yadrone.base.command.LEDAnimation;
+import de.yadrone.base.video.ImageListener;
 import imgManagement.Circle;
 import imgManagement.CircleFinder;
 import imgManagement.CircleListener;
@@ -12,6 +13,7 @@ import imgManagement.TagListener;
 import org.opencv.core.Point;
 import utils.WallCoordinatesReader;
 
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -21,7 +23,7 @@ import java.util.HashMap;
  * @author Nichlas N. Pilemand
  *
  */
-public class MainDroneController extends AbstractController implements TagListener, CircleListener {
+public class MainDroneController extends AbstractController implements TagListener, CircleListener, ImageListener {
 
 	private final static int SPEED = 4;
 	private final static int SLEEP = 500;
@@ -41,6 +43,8 @@ public class MainDroneController extends AbstractController implements TagListen
 	private HashMap<String, Point> wallMarks;
 	private Circle[] circles;
 	private int nextPort = 1;
+	
+	protected double latestImgTime;
 
 	public StateController getSc() {
 		return sc;
@@ -61,7 +65,7 @@ public class MainDroneController extends AbstractController implements TagListen
 	@Override
 	public void run() {
 		sc = new StateController(this, drone);
-		sc.state = Command.Centralize;
+		sc.state = Command.TakeOff;
 		while (!doStop) // control loop
 		{
 			try {
@@ -162,5 +166,10 @@ public class MainDroneController extends AbstractController implements TagListen
 	}
 	public double getQRRelativeAngle() {
 		return getQRRelativeAngle(this.tag);
+	}
+
+	@Override
+	public void imageUpdated(BufferedImage image) {
+		this.latestImgTime = System.currentTimeMillis();		
 	}
 }
