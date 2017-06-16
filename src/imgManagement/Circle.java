@@ -38,4 +38,8 @@ public class Circle {
 	public double getRadius(){
 		return this.r;
 	}
+	
+	public String toString(){
+		return "("+(int)this.x+", "+(int) this.y + "), r = " + (int)this.r;
+	}
 }

@@ -41,6 +41,7 @@ public class MainDroneController extends AbstractController implements TagListen
 	private int altitude;
 
 	protected double latestImgTime;
+	protected int circleRadius = 170;
 
 	public StateController getSc() {
 		return sc;
@@ -52,7 +53,7 @@ public class MainDroneController extends AbstractController implements TagListen
 		super(drone);
 		// Init ports list
 		for (int i = 0; i <= 7; i++)
-			ports.add("P.0" + i);
+			ports.add("W02.0" + i);
 		wallMarks = WallCoordinatesReader.read();
 		setupAltitudeListener();
 
@@ -61,18 +62,19 @@ public class MainDroneController extends AbstractController implements TagListen
 
 	@Override
 	public void run() {
+		this.doStop = false;
 		sc = new StateController(this, drone, drone.getCommandManager());
 		sc.state = Command.TakeOff;
 		while (!doStop) // control loop
 		{
 			try {
 				// reset if too old (and not updated)
-				if ((tag != null) && (System.currentTimeMillis() - tag.getTimestamp() > 1000)) {
+				if ((tag != null) && (System.currentTimeMillis() - tag.getTimestamp() > 2000)) {
 					System.out.println("Resetting tag");
 					tag = null;
 				}
 				sc.commands(sc.state);
-				// Thread.currentThread().sleep(100);
+				this.sleep(200);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -114,12 +116,41 @@ public class MainDroneController extends AbstractController implements TagListen
 
 		if (circles.length > 0) // Same deal as centerCircle()
 			for (Circle c : circles)
-				if (c.getRadius() >= MasterDrone.IMAGE_HEIGHT / 10)
+				if (c.getRadius() >= MasterDrone.IMAGE_HEIGHT / 5)
 					return ret = ((c.x > (imgCenterX - MasterDrone.TOLERANCE))
 							&& (c.x < (imgCenterX + MasterDrone.TOLERANCE))
 							&& (c.y > (imgCenterY - MasterDrone.TOLERANCE))
-							&& (c.y < (imgCenterY + MasterDrone.TOLERANCE)) && (c.r >= 160));
+							&& (c.y < (imgCenterY + MasterDrone.TOLERANCE)) && (c.r >= circleRadius));
 		return ret;
+	}
+	
+	public boolean isTagCentered(){
+		if (tag == null)
+			return false;
+		
+		Point center = getTagCenter(this.tag);
+		
+		int imgCenterX = MasterDrone.IMAGE_WIDTH / 2;
+		int imgCenterY = MasterDrone.IMAGE_HEIGHT / 2;
+		
+		return (( center.x > (imgCenterX - MasterDrone.TOLERANCE))
+				&& (center.x < (imgCenterX + MasterDrone.TOLERANCE))
+				&& (center.y > (imgCenterY - MasterDrone.TOLERANCE))
+				&& (center.y < (imgCenterY + MasterDrone.TOLERANCE)));
+	}
+	
+	/**
+	 * Calculates the size of the current scanned QR, or 0.0 if not available.
+	 * The size is defined as the difference in x-values between the two top marks on the QR.
+	 * @return double The size.
+	 */
+	public double getTagSize() {
+		if (tag != null){
+			ResultPoint[] points = tag.getResultPoints();
+			return points[2].getX() - points[1].getX();
+		}			
+		else
+			return 0.0;
 	}
 
 	/**

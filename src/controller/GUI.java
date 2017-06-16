@@ -117,7 +117,7 @@ public class GUI extends JFrame implements ImageListener, TagListener, CircleLis
 							null);
 
 					// draw the battery percentage
-					if (batterypercentage > 50) {
+					if (batterypercentage > 30) {
 						g.setColor(Color.GREEN);
 						g.setFont(tagFont);
 					} else {
@@ -188,6 +188,7 @@ public class GUI extends JFrame implements ImageListener, TagListener, CircleLis
 							g.setColor(Color.BLUE);
 							g.drawOval((int) (c.x - c.r) * imgScale, (int) (c.y - c.r) * imgScale,
 									(int) (2 * c.r) * imgScale, (int) (2 * c.r) * imgScale);
+							g.drawString(c.toString(), (int) c.x * imgScale + 10, (int) c.y * imgScale + 10);
 						}
 				} else {
 					// draw "Waiting for video"

@@ -86,7 +86,6 @@ public class QRCodeScanner implements ImageListener {
 			// no code found.
 			scanResult = null;
 		}
-		
 		// inform all listeners
 		for (int i=0; i < listener.size(); i++)
 			listener.get(i).onTag(scanResult, (float)theta);

@@ -823,6 +823,7 @@ public class CommandManager extends AbstractManager
 					long t = System.currentTimeMillis();
 					dt = t - t0;
 				}
+				//dt = dt > 40 ? 40 : dt;
 				c = q.poll(dt, TimeUnit.MILLISECONDS);
 				// System.out.println(c);
 				if (c == null) {
@@ -832,7 +833,7 @@ public class CommandManager extends AbstractManager
 						c = cs;
 						t0 = System.currentTimeMillis();
 					}
-				}
+//				}
 				// The sticky commands would cause major video lag - 15/6-17 nnp
 //				} else {
 //					if (c.isSticky()) {
@@ -843,7 +844,7 @@ public class CommandManager extends AbstractManager
 //						// only some commands can clear sticky commands
 //						cs = null;
 //					}
-//				}
+				}
 				if (c.needControlAck()) {
 					waitForControlAck(false);
 					sendCommand(c);

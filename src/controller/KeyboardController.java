@@ -4,6 +4,8 @@ import de.yadrone.apps.controlcenter.plugins.keyboard.KeyboardCommandManagerAlte
 import de.yadrone.base.IARDrone;
 import de.yadrone.base.command.CalibrationCommand;
 import de.yadrone.base.command.Device;
+import imgManagement.Circle;
+
 import java.awt.*;
 import java.awt.event.KeyEvent;
 
@@ -59,6 +61,11 @@ public class KeyboardController extends AbstractController {
 					System.out.println("Manual landing.");
 					drone.landing();
 					md.enableAutoControl(false);
+					break;
+				case KeyEvent.VK_G:
+					Circle[] circles = md.getDroneController().getCircles();
+					System.out.println("Radius: " + circles[0].r);
+					break;
 				default:
 					keyboardCommandManager.keyPressed(e);
 				}

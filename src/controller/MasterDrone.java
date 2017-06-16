@@ -14,10 +14,10 @@ import java.io.FileNotFoundException;
 
 public class MasterDrone {
 
-	public final static int IMAGE_WIDTH = 1280 / 2;
-	public final static int IMAGE_HEIGHT = 720 / 2;
+	public final static int IMAGE_WIDTH = 1280 /2;
+	public final static int IMAGE_HEIGHT = 720/2;
 
-	public final static int TOLERANCE = 40;
+	public final static int TOLERANCE = 35;
 
 	private IARDrone drone = null;
 	private MainDroneController droneController;
@@ -35,7 +35,7 @@ public class MasterDrone {
 		drone.getCommandManager().setVideoCodec(VideoCodec.H264_360P);
 		drone.getCommandManager().setVideoBitrateControl(VideoBitRateMode.MANUAL);
 		// drone.getCommandManager().setMaxVideoBitrate(4000);
-		drone.getCommandManager().setVideoBitrate(1400);
+		drone.getCommandManager().setVideoBitrate(4000);
 		drone.getCommandManager().setVideoChannel(VideoChannel.HORI);
 		drone.getCommandManager().setVideoCodecFps(30);
 
@@ -74,6 +74,7 @@ public class MasterDrone {
 	}
 
 	public void enableAutoControl(boolean enable) {
+		System.out.println("MasterDrone enableAutoControler: " + enable);
 		if (enable) {
 			scanner.addListener(droneController);
 			new Thread(droneController).start();
