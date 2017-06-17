@@ -319,18 +319,21 @@ public class StateController {
 				if (c.getRadius() >= MasterDrone.IMAGE_HEIGHT / 5) {
 					if (controller.isCircleCentered()) {
 						System.out.println("CENTERED!");
-						cmd.hover().doFor(50);
+						cmd.hover().doFor(100);
 						this.state = Command.FlyThrough;
 						return;
 					}
-					float leftRightSpeed = (float) ((c.x - imgCenterX) / 30) / 100.0f;
+					float leftRightSpeed = (float) ((c.x - imgCenterX) / 10) / 100.0f;
 
-					float forwardSpeed = (float) ((c.r - controller.circleRadius) / 10) / 100.0f;
+					float forwardSpeed = (float) ((c.r - controller.circleRadius)) / 100.0f;
 
 					float upDownSpeed = (float) ((imgCenterY - c.y) / 10) / 100.0f;
 					leftRightSpeed = limit(leftRightSpeed, -0.15f, 0.15f);
 					forwardSpeed = limit(forwardSpeed, -0.15f, 0.15f);
 					upDownSpeed = limit(upDownSpeed, -0.15f, 0.15f);
+					double a = 92;
+					double degPerPx = a /MasterDrone.IMAGE_WIDTH;
+					double spin = ((c.x - imgCenterX) * degPerPx) / 2 / 100;
 					
 					midlertidlig = leftRightSpeed + ", " + forwardSpeed + ", " + upDownSpeed;
 					if (currentCorrect.equals(midlertidlig)) {
@@ -341,8 +344,16 @@ public class StateController {
 						currentCorrect = midlertidlig;
 
 					System.out.println(
-							"Correcting position, " + leftRightSpeed + ", " + forwardSpeed + ", " + upDownSpeed);
-					move(leftRightSpeed, forwardSpeed, upDownSpeed, 0f, 100);
+							"Correcting position, " + leftRightSpeed + ", " + forwardSpeed + ", " + upDownSpeed + ", " + spin);
+					spin = limit((float)spin, -0.15f, 0.15f);
+					if (spin < 0)
+						spin((float)(spin * 5), 50);
+					else
+						spin((float)spin, 50);
+					cmd.hover();
+					controller.sleep(400);
+					move(leftRightSpeed, forwardSpeed, upDownSpeed, 0f, 150);
+//					cmd.move(leftRightSpeed, forwardSpeed, upDownSpeed, 0f).doFor(30);
 					drone.hover();
 					controller.sleep(200);
 					break;
@@ -469,9 +480,8 @@ public class StateController {
 	}
 	
 	private CommandManager move(float lrtilt, float fbtilt, float vspeed, float aspeed, int doFor) throws InterruptedException {
-		for (int i = 1; i < doFor/10; i++) {
-			cmd.move(lrtilt, fbtilt, vspeed, aspeed);
-			controller.sleep(10);
+		for (int i = 1; i < doFor/7; i++) {
+			cmd.move(lrtilt, fbtilt, vspeed, aspeed).doFor(25);
 		}
 		return cmd.move(lrtilt, fbtilt, vspeed, aspeed);
 	}

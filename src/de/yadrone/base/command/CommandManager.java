@@ -823,7 +823,7 @@ public class CommandManager extends AbstractManager
 					long t = System.currentTimeMillis();
 					dt = t - t0;
 				}
-				//dt = dt > 40 ? 40 : dt;
+//				dt = dt > 20 ? 20 : dt;
 				c = q.poll(dt, TimeUnit.MILLISECONDS);
 				// System.out.println(c);
 				if (c == null) {
