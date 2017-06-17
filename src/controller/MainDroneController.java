@@ -41,7 +41,7 @@ public class MainDroneController extends AbstractController implements TagListen
 	private int altitude;
 
 	protected double latestImgTime;
-	protected int circleRadius = 170;
+	protected int circleRadius = 165;
 
 	public StateController getSc() {
 		return sc;
@@ -53,7 +53,7 @@ public class MainDroneController extends AbstractController implements TagListen
 		super(drone);
 		// Init ports list
 		for (int i = 0; i <= 7; i++)
-			ports.add("W02.0" + i);
+			ports.add("P.0" + i);
 		wallMarks = WallCoordinatesReader.read();
 		setupAltitudeListener();
 

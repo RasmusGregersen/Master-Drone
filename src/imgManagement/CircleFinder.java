@@ -18,7 +18,7 @@ import de.yadrone.base.video.ImageListener;
  */
 public class CircleFinder implements ImageListener {
 	
-	private static final double DP = 1.1; // Basicly tolerence
+	private static final double DP = 1.05; // Basicly tolerence
 	private static final int MIN_DIST = 50; // Minimum distance between center points
 	private static final int BLUR = 9; // Blur amount, removes noise - must be uneven
 	

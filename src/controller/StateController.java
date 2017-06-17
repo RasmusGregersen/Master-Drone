@@ -29,7 +29,7 @@ public class StateController {
 	int strayModeCircle = 0;
 
 
-	private int nextPort = 2; // Consider handling this in MainDronController
+	private int nextPort = 1; // Consider handling this in MainDronController
 	private final int maxPorts = 5;
 
 	public StateController(MainDroneController mc, IARDrone drone, CommandManager cmd) {
@@ -208,7 +208,8 @@ public class StateController {
 		if (!controller.isTagCentered()) { // Inverted for readability, lol.
 			ResultPoint[] points;
 			double a;
-			if (controller.getTagSize() > MasterDrone.IMAGE_WIDTH / 5) {
+			System.out.println("Tag size: " + controller.getTagSize());
+			if (controller.getTagSize() > MasterDrone.IMAGE_WIDTH / 7) {
 				// We don't want to get too close to the tag
 				System.out.println("too close, going back");
 				cmd.backward(6).doFor(30);
@@ -316,7 +317,7 @@ public class StateController {
 		if (controller.getCircles().length > 0) {
 			// We have more than one circle, figure out which one is correct
 			for (Circle c : controller.getCircles()) {
-				if (c.getRadius() >= MasterDrone.IMAGE_HEIGHT / 5) {
+				if (c.getRadius() >= MasterDrone.IMAGE_HEIGHT / 4) {
 					if (controller.isCircleCentered()) {
 						System.out.println("CENTERED!");
 						cmd.hover().doFor(100);
@@ -325,11 +326,11 @@ public class StateController {
 					}
 					float leftRightSpeed = (float) ((c.x - imgCenterX) / 10) / 100.0f;
 
-					float forwardSpeed = (float) ((c.r - controller.circleRadius)) / 100.0f;
+					int forwardSpeed =  (int) ((c.r - controller.circleRadius));
 
 					float upDownSpeed = (float) ((imgCenterY - c.y) / 10) / 100.0f;
 					leftRightSpeed = limit(leftRightSpeed, -0.15f, 0.15f);
-					forwardSpeed = limit(forwardSpeed, -0.15f, 0.15f);
+					forwardSpeed = limit(forwardSpeed, -15, 15);
 					upDownSpeed = limit(upDownSpeed, -0.15f, 0.15f);
 					double a = 92;
 					double degPerPx = a /MasterDrone.IMAGE_WIDTH;
@@ -350,9 +351,14 @@ public class StateController {
 						spin((float)(spin * 5), 50);
 					else
 						spin((float)spin, 50);
-					cmd.hover();
+//					cmd.hover();
 					controller.sleep(400);
-					move(leftRightSpeed, forwardSpeed, upDownSpeed, 0f, 150);
+					if (forwardSpeed < 0)
+						cmd.forward(-forwardSpeed).doFor(40);
+					else
+						cmd.backward(forwardSpeed).doFor(40);
+					controller.sleep(100);
+					move(leftRightSpeed, 0f, upDownSpeed, 0f, 150);
 //					cmd.move(leftRightSpeed, forwardSpeed, upDownSpeed, 0f).doFor(30);
 					drone.hover();
 					controller.sleep(200);
