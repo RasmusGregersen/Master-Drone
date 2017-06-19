@@ -34,14 +34,15 @@ public class MainDroneController extends AbstractController implements TagListen
 	 */
 	private ArrayList<String> tagVisitedList = new ArrayList<String>();
 
-	private Result tag;
-	private ArrayList<String> ports = new ArrayList<String>();
+	protected Result tag;
 	private HashMap<String, Point> wallMarks;
 	private Circle[] circles;
 	private int altitude;
 
 	protected double latestImgTime;
-	protected int circleRadius = 165;
+	protected int circleRadius = 160;
+	private ArrayList<String> ports = new ArrayList<String>();
+
 
 	public StateController getSc() {
 		return sc;
@@ -51,9 +52,18 @@ public class MainDroneController extends AbstractController implements TagListen
 
 	public MainDroneController(IARDrone drone) {
 		super(drone);
-		// Init ports list
+		// Init port names list
 		for (int i = 0; i <= 7; i++)
 			ports.add("P.0" + i);
+//			ports.add("W02.0" + i);
+//		ports.add("W02.02"); // Test room
+//		ports.add("P.01");
+//		ports.add("P.03");
+//		ports.add("P.00");
+//		ports.add("W01.00");
+//		ports.add("W01.01");
+//		ports.add("P.01");
+		
 		wallMarks = WallCoordinatesReader.read();
 		setupAltitudeListener();
 
@@ -74,7 +84,7 @@ public class MainDroneController extends AbstractController implements TagListen
 					tag = null;
 				}
 				sc.commands(sc.state);
-				this.sleep(200);
+				this.sleep(100);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -116,7 +126,7 @@ public class MainDroneController extends AbstractController implements TagListen
 
 		if (circles.length > 0) // Same deal as centerCircle()
 			for (Circle c : circles)
-				if (c.getRadius() >= MasterDrone.IMAGE_HEIGHT / 5)
+				if (c.getRadius() >= MasterDrone.IMAGE_HEIGHT / 4)
 					return ret = ((c.x > (imgCenterX - MasterDrone.TOLERANCE))
 							&& (c.x < (imgCenterX + MasterDrone.TOLERANCE))
 							&& (c.y > (imgCenterY - MasterDrone.TOLERANCE))
@@ -136,7 +146,8 @@ public class MainDroneController extends AbstractController implements TagListen
 		return (( center.x > (imgCenterX - MasterDrone.TOLERANCE))
 				&& (center.x < (imgCenterX + MasterDrone.TOLERANCE))
 				&& (center.y > (imgCenterY - MasterDrone.TOLERANCE))
-				&& (center.y < (imgCenterY + MasterDrone.TOLERANCE)));
+				&& (center.y < (imgCenterY + MasterDrone.TOLERANCE)
+				&& (getTagSize() < (MasterDrone.IMAGE_WIDTH / 14))));
 	}
 	
 	/**

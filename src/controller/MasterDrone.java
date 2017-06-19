@@ -15,7 +15,7 @@ import java.io.FileNotFoundException;
 public class MasterDrone {
 
 	public final static int IMAGE_WIDTH = 1280 /2;
-	public final static int IMAGE_HEIGHT = 720/2;
+	public final static int IMAGE_HEIGHT = 720 /2;
 
 	public final static int TOLERANCE = 35;
 
@@ -24,6 +24,7 @@ public class MasterDrone {
 	private QRCodeScanner scanner = null;
 
 	private boolean autoControlEnabled = false;
+	private Thread controllerThread;
 
 	public MasterDrone() {
 
@@ -66,6 +67,7 @@ public class MasterDrone {
 		drone.getVideoManager().addImageListener(gui);
 		drone.getVideoManager().addImageListener(cf);
 		drone.getVideoManager().addImageListener(scanner);
+		controllerThread = new Thread(droneController);
 
 	}
 
@@ -78,6 +80,7 @@ public class MasterDrone {
 		if (enable) {
 			scanner.addListener(droneController);
 			new Thread(droneController).start();
+//			controllerThread.start();
 		} else {
 			droneController.stopController();
 			scanner.removeListener(droneController);

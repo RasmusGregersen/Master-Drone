@@ -1,5 +1,8 @@
 package controller;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 import com.google.zxing.Result;
 import com.google.zxing.ResultPoint;
 import de.yadrone.base.IARDrone;
@@ -27,16 +30,19 @@ public class StateController {
 	private CommandManager cmd;
 	private MainDroneController controller;
 	int strayModeCircle = 0;
+	
+	private Timer timer;
 
 
-	private int nextPort = 1; // Consider handling this in MainDronController
+	private int nextPort = 0; // Consider handling this in MainDronController
 	private final int maxPorts = 5;
 
 	public StateController(MainDroneController mc, IARDrone drone, CommandManager cmd) {
 		this.controller = mc;
 		this.cmd = cmd;
 		this.drone = drone;
-		this.currentMode = Mode.Continous;
+		this.currentMode = Mode.Normal;
+		this.timer = new Timer();
 	}
 
 	public void commands(Command command) throws InterruptedException {
@@ -87,7 +93,7 @@ public class StateController {
 		System.out.println("State: ReadyForTakeOff");
 		cmd.takeOff();
 		flyToHeight(1000);
-		Thread.currentThread().sleep(500);
+//		Thread.currentThread().sleep(500);
 		// //MainDroneController.sleep(1250);
 		// cmd.up(15).doFor(1250);
 		// MainDroneController.sleep(1250);
@@ -101,7 +107,8 @@ public class StateController {
 	public void hover() throws InterruptedException {
 		// Hover method
 		System.out.println("State: Hover");
-		cmd.hover().doFor(500);
+		drone.hover();
+		controller.sleep(100);
 		// Thread.currentThread().sleep(5000);
 		// MainDroneController.sleep(550);
 		// Check conditions and transit to next state
@@ -137,7 +144,9 @@ public class StateController {
 		System.out.print("State: QR Lost: ");
 
 		int Speed = 5;
-		int doFor = 200;
+		int doFor = 150;
+		
+		flyToHeight(1000);
 
 		Result tag = controller.getTag();
 		if (tag != null) {
@@ -209,14 +218,7 @@ public class StateController {
 			ResultPoint[] points;
 			double a;
 			System.out.println("Tag size: " + controller.getTagSize());
-			if (controller.getTagSize() > MasterDrone.IMAGE_WIDTH / 7) {
-				// We don't want to get too close to the tag
-				System.out.println("too close, going back");
-				cmd.backward(6).doFor(30);
-				controller.sleep(100);
-				return;
-				
-			}
+		
 			synchronized (tag) {
 				points = tag.getResultPoints();
 				a = controller.getQRRelativeAngle(tag);
@@ -228,14 +230,14 @@ public class StateController {
 
 			float x = (points[1].getX() + points[2].getX()) / 2; // True middle
 			float y = points[1].getY();	
-			a = a / 2 / 100f;
-			
+			a = a / 3 / 100f;
 			
 			
 			float leftRightSpeed = (float) ((x - imgCenterX) / 45) / 100.0f;
 			float upDownSpeed = (float) ((imgCenterY - y) / 6) / 100.0f;
 			leftRightSpeed = limit(leftRightSpeed, -0.15f, 0.15f);
 			upDownSpeed = limit(upDownSpeed, -0.15f, 0.15f);
+			
 			System.out.println("adjusting: " + leftRightSpeed + ", 0f, " + upDownSpeed + ", " + (float)a);
 			// Left spin needs more speed
 			if (a < 0)
@@ -243,8 +245,32 @@ public class StateController {
 			else
 				spin((float)a, 50);
 			System.out.println("Spinning");
-			MainDroneController.sleep(500);
+			MainDroneController.sleep(300);
+			
+			if (controller.getTagSize() > MasterDrone.IMAGE_WIDTH / 14) {
+				// We don't want to get too close to the tag
+				System.out.println("too close, going back");
+				cmd.backward(6).doFor(150);
+				controller.sleep(100);
+				cmd.hover();
+				return;
+				
+			}
+//			cmd.move(0f, 0f, 0f, (float) a).doFor(50);
 			System.out.println("Correcting position");
+//			this.timer.schedule(new TimerTask() {
+//
+//				@Override
+//				public void run() {
+//					float leftRightSpeed = (float) ((x - imgCenterX) / 45) / 100.0f;
+//					float upDownSpeed = (float) ((imgCenterY - y) / 6) / 100.0f;
+//					leftRightSpeed = limit(leftRightSpeed, -0.15f, 0.15f);
+//					upDownSpeed = limit(upDownSpeed, -0.15f, 0.15f);
+//					double a = controller.getQRRelativeAngle(tag) / 2 / 100f;
+//				}
+//				
+//			}, 0);
+//			move(leftRightSpeed, 0f, upDownSpeed, 0f, 80);					
 			move(leftRightSpeed, 0f, upDownSpeed, 0f, 80).waitFor(20).hover();
 			MainDroneController.sleep(300);
 			
@@ -252,8 +278,8 @@ public class StateController {
 			System.out.println("AutoController: Tag centered");
 			cmd.hover();
 			// ADJUSTING TO CIRCLE HEIGHT
-			flyToHeight(1700);
-			Thread.currentThread().sleep(200);
+			flyToHeight(1750);
+			Thread.currentThread().sleep(800);
 
 			this.state = Command.SearchForCircle;
 		}
@@ -268,10 +294,11 @@ public class StateController {
 		System.out.print("State: SearchForCircle - ");
 		if (controller.getCircles().length >= 1) {
 			for (Circle c : controller.getCircles()) {
-				if (c.r > MasterDrone.IMAGE_HEIGHT / 10) {
+				if (c.r > MasterDrone.IMAGE_HEIGHT / 4) {
 					System.out.println("Circle found!");
 					this.state = Command.Centralize;
 					lastCircle = c;
+					lastCircleCount = 0;
 				}
 			}
 			
@@ -285,21 +312,25 @@ public class StateController {
 					return;
 				}
 				
-				System.out.println("Going back to last circle @ " + lastCircle);
-				if (lastCircle.r > controller.circleRadius) {
-					// We're probably too close to the circle, so fly back a bit
-					cmd.backward(6).doFor(30);
-				} else if (lastCircle.x > MasterDrone.IMAGE_WIDTH / 2){
-					// go right
-					cmd.goRight(5).doFor(80);
-						
-				} else {
-					cmd.goLeft(5).doFor(80);
-				}
-			} else
+//				System.out.println("Going back to last circle @ " + lastCircle);
+//				if (lastCircle.r > controller.circleRadius) {
+//					// We're probably too close to the circle, so fly back a bit
+//					cmd.backward(6).doFor(30);
+//				} else if (lastCircle.x > MasterDrone.IMAGE_WIDTH / 2){
+//					// go right
+//					cmd.goRight(5).doFor(80);
+//						
+//				} else {
+//					cmd.goLeft(5).doFor(80);
+//				}
+			} else {
 				System.out.println("No lastCircle?!");
+				this.state = Command.QRSearch;
+				controller.sleep(200);
+				return;
+			}
 
-			Thread.currentThread().sleep(500);
+			Thread.currentThread().sleep(200);
 
 			this.state = Command.SearchForCircle;
 		}
@@ -307,34 +338,54 @@ public class StateController {
 
 	String currentCorrect = "";
 	String midlertidlig = "";
+	int circleCentralizeState = 0;
+	int numCentralized = 0;
 
 	public void centralize() throws InterruptedException {
 		// Centralize drone in front of circle
 		System.out.print("State: Centralize - ");
 		int imgCenterX = MasterDrone.IMAGE_WIDTH / 2;
 		int imgCenterY = MasterDrone.IMAGE_HEIGHT / 2;
+		Circle[] circles = controller.getCircles();
 		// We have more than one circle, figure out which one is correct
-		if (controller.getCircles().length > 0) {
-			// We have more than one circle, figure out which one is correct
-			for (Circle c : controller.getCircles()) {
+		if (circles.length > 0) {
+			// We might have more than one circle, figure out which one is correct
+			for (Circle c : circles) {
 				if (c.getRadius() >= MasterDrone.IMAGE_HEIGHT / 4) {
 					if (controller.isCircleCentered()) {
-						System.out.println("CENTERED!");
-						cmd.hover().doFor(100);
-						this.state = Command.FlyThrough;
+						if (++numCentralized > 1) {
+							System.out.println("CENTERED!");
+							cmd.hover().doFor(100);
+							this.state = Command.FlyThrough;
+							numCentralized = 0;
+							return;
+						}
+						System.out.println("Centralized #" + numCentralized);
+					}
+					if (circleCentralizeState == 0) { //spin
+						circleCentralizeState = 1;
+						double a = 92;
+						double degPerPx = a /MasterDrone.IMAGE_WIDTH;
+						double spin = ((c.x - imgCenterX) * degPerPx) / 2 / 100;
+						spin = limit((float)spin, -0.15f, 0.15f);
+						if (spin < 0)
+							spin((float)(spin * 5), 30);
+						else
+							spin((float)spin, 30);
+						controller.sleep(300);
+						cmd.hover();
 						return;
 					}
-					float leftRightSpeed = (float) ((c.x - imgCenterX) / 10) / 100.0f;
+					circleCentralizeState = 0;
+					float leftRightSpeed = (float) ((c.x - imgCenterX) / 20) / 100.0f;
 
-					int forwardSpeed =  (int) ((c.r - controller.circleRadius));
+					int forwardSpeed =   (int) (((c.r - controller.circleRadius)) / 4);
 
-					float upDownSpeed = (float) ((imgCenterY - c.y) / 10) / 100.0f;
-					leftRightSpeed = limit(leftRightSpeed, -0.15f, 0.15f);
-					forwardSpeed = limit(forwardSpeed, -15, 15);
-					upDownSpeed = limit(upDownSpeed, -0.15f, 0.15f);
-					double a = 92;
-					double degPerPx = a /MasterDrone.IMAGE_WIDTH;
-					double spin = ((c.x - imgCenterX) * degPerPx) / 2 / 100;
+					float upDownSpeed = (float) ((imgCenterY - c.y) / 2) / 100.0f;
+					leftRightSpeed = limit(leftRightSpeed, -0.2f, 0.2f);
+					forwardSpeed = limit(forwardSpeed, -20, 20);
+					upDownSpeed = limit(upDownSpeed, -0.2f, 0.2f);
+					
 					
 					midlertidlig = leftRightSpeed + ", " + forwardSpeed + ", " + upDownSpeed;
 					if (currentCorrect.equals(midlertidlig)) {
@@ -345,27 +396,22 @@ public class StateController {
 						currentCorrect = midlertidlig;
 
 					System.out.println(
-							"Correcting position, " + leftRightSpeed + ", " + forwardSpeed + ", " + upDownSpeed + ", " + spin);
-					spin = limit((float)spin, -0.15f, 0.15f);
-					if (spin < 0)
-						spin((float)(spin * 5), 50);
-					else
-						spin((float)spin, 50);
-//					cmd.hover();
-					controller.sleep(400);
+							"Correcting position, " + leftRightSpeed + ", " + forwardSpeed + ", " + upDownSpeed );
+					
 					if (forwardSpeed < 0)
 						cmd.forward(-forwardSpeed).doFor(40);
 					else
 						cmd.backward(forwardSpeed).doFor(40);
-					controller.sleep(100);
-					move(leftRightSpeed, 0f, upDownSpeed, 0f, 150);
+					controller.sleep(300);
+					move(leftRightSpeed, 0f, upDownSpeed, 0f, 130);
 //					cmd.move(leftRightSpeed, forwardSpeed, upDownSpeed, 0f).doFor(30);
-					drone.hover();
-					controller.sleep(200);
+					cmd.hover().doFor(200);
+//					controller.sleep(200);
 					break;
 				}
 			}
 		} else {
+			System.out.println("No circles");
 			state = Command.SearchForCircle;
 		}
 	}
@@ -373,9 +419,11 @@ public class StateController {
 	public void flyThrough() throws InterruptedException {
 		System.out.print("State: flyThrough - ");
 		System.out.println("AutoController: Going through port " + nextPort);
-		cmd.forward(16).doFor(2500);
+		cmd.forward(16).doFor(1800);
 		// Thread.currentThread().sleep(1200);
 		System.out.println("Returning to Hover State");
+		controller.tag = null; // Reset to avoid reading while flying through
+		firstTag = false;
 		state = Command.UpdateGate;
 	}
 
@@ -414,7 +462,7 @@ public class StateController {
 
 	/**
 	 * Puts the drone to a specific height. This will run until the height is
-	 * reached. Has a tolerance of 10 cms in each direction.
+	 * reached. Has a tolerance of 5 cms in each direction.
 	 * 
 	 * @param height
 	 *            The requested height in millimeters.
@@ -422,13 +470,13 @@ public class StateController {
 	private void flyToHeight(int height) {
 		System.out.println("StateController: flyToHeight: " + height);
 		while (true) {
-			if (height + 100 < this.controller.getAltitude()) { // fly down
+			if (height + 50 < controller.getAltitude()) { // fly down
 				cmd.down(30).doFor(30).hover();
 				// Sleep maybe?
-			} else if (height - 100 > this.controller.getAltitude()) { // fly up
+			} else if (height - 50 > controller.getAltitude()) { // fly up
 				cmd.up(30).doFor(30).hover();
 			} else {
-				System.out.println("Reached height: " + this.controller.getAltitude()); // done
+				System.out.println("Reached height: " + controller.getAltitude()); // done
 				return;
 			}
 		}
