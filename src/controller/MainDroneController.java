@@ -33,7 +33,7 @@ public class MainDroneController extends AbstractController implements TagListen
 	private int altitude;
 
 	protected double latestImgTime;
-	protected int circleRadius = 160;
+	protected int circleRadius = (int) (MasterDrone.IMAGE_HEIGHT * 0.45); // The required radius to flythrough
 	private ArrayList<String> ports = new ArrayList<String>();
 	private StateController sc;
 
