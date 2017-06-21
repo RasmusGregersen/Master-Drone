@@ -835,15 +835,15 @@ public class CommandManager extends AbstractManager
 					}
 //				}
 				// The sticky commands would cause major video lag - 15/6-17 nnp
-//				} else {
-//					if (c.isSticky()) {
-//						// sticky commands replace previous sticky
-//						cs = c;
-//						t0 = System.currentTimeMillis();
-//					} else if (c.clearSticky()) {
-//						// only some commands can clear sticky commands
-//						cs = null;
-//					}
+				} else {
+					if (c.isSticky()) {
+						// sticky commands replace previous sticky
+						cs = c;
+						t0 = System.currentTimeMillis();
+					} else if (c.clearSticky()) {
+						// only some commands can clear sticky commands
+						cs = null;
+					}
 				}
 				if (c.needControlAck()) {
 					waitForControlAck(false);

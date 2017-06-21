@@ -23,7 +23,13 @@ import com.google.zxing.common.BitMatrix;
 import com.google.zxing.common.HybridBinarizer;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 
-class QRCode {
+/**
+ * QR Code creator/Reader
+ * Unused in final product...
+ * @author Nichlas N. Pilemand
+ *
+ */
+public class QRCode {
 
     public static void main(String[] args) throws WriterException, IOException,
             NotFoundException {

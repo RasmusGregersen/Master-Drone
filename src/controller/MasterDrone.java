@@ -24,7 +24,6 @@ public class MasterDrone {
 	private QRCodeScanner scanner = null;
 
 	private boolean autoControlEnabled = false;
-	private Thread controllerThread;
 
 	public MasterDrone() {
 
@@ -35,7 +34,6 @@ public class MasterDrone {
 		keyboardController.start();
 		drone.getCommandManager().setVideoCodec(VideoCodec.H264_360P);
 		drone.getCommandManager().setVideoBitrateControl(VideoBitRateMode.MANUAL);
-		// drone.getCommandManager().setMaxVideoBitrate(4000);
 		drone.getCommandManager().setVideoBitrate(4000);
 		drone.getCommandManager().setVideoChannel(VideoChannel.HORI);
 		drone.getCommandManager().setVideoCodecFps(30);
@@ -67,8 +65,6 @@ public class MasterDrone {
 		drone.getVideoManager().addImageListener(gui);
 		drone.getVideoManager().addImageListener(cf);
 		drone.getVideoManager().addImageListener(scanner);
-		controllerThread = new Thread(droneController);
-
 	}
 
 	public MainDroneController getDroneController() {
@@ -79,8 +75,7 @@ public class MasterDrone {
 		System.out.println("MasterDrone enableAutoControler: " + enable);
 		if (enable) {
 			scanner.addListener(droneController);
-			new Thread(droneController).start();
-//			controllerThread.start();
+			new Thread(droneController).start(); // Seems to be better to force a new thread
 		} else {
 			droneController.stopController();
 			scanner.removeListener(droneController);
@@ -91,9 +86,6 @@ public class MasterDrone {
 	// Main program start
 	public static void main(String[] args) throws FileNotFoundException {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME); // Load OpenCV
-		// PrintStream out = new PrintStream(new
-		// FileOutputStream("output.txt"));
-		// System.setOut(out);
 		new MasterDrone();
 	}
 

@@ -14,6 +14,11 @@ import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
+/**
+ * A currently nonfunctional test to find ellipses.
+ * @author Nichlas N. Pilemand
+ *
+ */
 public class EllipseFinderTest {
 
 	public static void main(String[] args) {

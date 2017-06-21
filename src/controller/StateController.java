@@ -46,7 +46,7 @@ public class StateController {
 	}
 
 	public void commands(Command command) throws InterruptedException {
-		if (System.currentTimeMillis() - this.controller.latestImgTime > 150) {
+		if (System.currentTimeMillis() - this.controller.latestImgTime > 10) {
 			System.out.println("Image lag, delaying commands...");
 			drone.hover();
 			MainDroneController.sleep(150);
@@ -93,14 +93,6 @@ public class StateController {
 		System.out.println("State: ReadyForTakeOff");
 		cmd.takeOff();
 		flyToHeight(1000);
-//		Thread.currentThread().sleep(500);
-		// //MainDroneController.sleep(1250);
-		// cmd.up(15).doFor(1250);
-		// MainDroneController.sleep(1250);
-		// cmd.landing();
-		// MainDroneController.sleep(3000);
-		// Check conditions and transit to next state
-
 		state = Command.Hover;
 	}
 
@@ -109,10 +101,8 @@ public class StateController {
 		System.out.println("State: Hover");
 		drone.hover();
 		controller.sleep(100);
-		// Thread.currentThread().sleep(5000);
-		// MainDroneController.sleep(550);
 		// Check conditions and transit to next state
-		state = Command.QRValidate;
+		state = Command.QRSearch;
 	}
 
 	int strayMode = 0;
@@ -162,13 +152,11 @@ public class StateController {
 			break;
 		case 1:
 			System.out.println("Look right");
-			//spinRight(Speed, doFor);
 			cmd.goRight(4).doFor(40);
 			lostMode = 2;
 			break;
 		case 2:
 			System.out.println("Look left");
-			//spinLeft(Speed*2, doFor);
 			cmd.goLeft(4).doFor(40);
 			lostMode = 1;
 			break;
@@ -256,21 +244,7 @@ public class StateController {
 				return;
 				
 			}
-//			cmd.move(0f, 0f, 0f, (float) a).doFor(50);
-			System.out.println("Correcting position");
-//			this.timer.schedule(new TimerTask() {
-//
-//				@Override
-//				public void run() {
-//					float leftRightSpeed = (float) ((x - imgCenterX) / 45) / 100.0f;
-//					float upDownSpeed = (float) ((imgCenterY - y) / 6) / 100.0f;
-//					leftRightSpeed = limit(leftRightSpeed, -0.15f, 0.15f);
-//					upDownSpeed = limit(upDownSpeed, -0.15f, 0.15f);
-//					double a = controller.getQRRelativeAngle(tag) / 2 / 100f;
-//				}
-//				
-//			}, 0);
-//			move(leftRightSpeed, 0f, upDownSpeed, 0f, 80);					
+			System.out.println("Correcting position");				
 			move(leftRightSpeed, 0f, upDownSpeed, 0f, 80).waitFor(20).hover();
 			MainDroneController.sleep(300);
 			
@@ -311,18 +285,6 @@ public class StateController {
 					lastCircleCount = 0;
 					return;
 				}
-				
-//				System.out.println("Going back to last circle @ " + lastCircle);
-//				if (lastCircle.r > controller.circleRadius) {
-//					// We're probably too close to the circle, so fly back a bit
-//					cmd.backward(6).doFor(30);
-//				} else if (lastCircle.x > MasterDrone.IMAGE_WIDTH / 2){
-//					// go right
-//					cmd.goRight(5).doFor(80);
-//						
-//				} else {
-//					cmd.goLeft(5).doFor(80);
-//				}
 			} else {
 				System.out.println("No lastCircle?!");
 				this.state = Command.QRSearch;
@@ -404,9 +366,7 @@ public class StateController {
 						cmd.backward(forwardSpeed).doFor(40);
 					controller.sleep(300);
 					move(leftRightSpeed, 0f, upDownSpeed, 0f, 130);
-//					cmd.move(leftRightSpeed, forwardSpeed, upDownSpeed, 0f).doFor(30);
 					cmd.hover().doFor(200);
-//					controller.sleep(200);
 					break;
 				}
 			}
@@ -420,7 +380,6 @@ public class StateController {
 		System.out.print("State: flyThrough - ");
 		System.out.println("AutoController: Going through port " + nextPort);
 		cmd.forward(16).doFor(1800);
-		// Thread.currentThread().sleep(1200);
 		System.out.println("Returning to Hover State");
 		controller.tag = null; // Reset to avoid reading while flying through
 		firstTag = false;
@@ -502,37 +461,39 @@ public class StateController {
 	 * @see StateController#spinRight(int, int) spinRight()
 	 */
 	private CommandManager spinLeft(int speed, int doFor) {
-		return cmd.spinLeft(speed).doFor(doFor);
+		return cmd.spinLeft(speed).doFor(doFor).spinRight(1);
 	}
 	
+	/**
+	 * A method to translate spins as a float into movements,
+	 * as the CommandManager's spin methods only takes integers.
+	 * @param speed Speed of the command, [-1, 1]
+	 * @param doFor How many milliseconds to run the command for
+	 * @return {@link CommandManager} for chaining commands
+	 */
 	private CommandManager spin(float speed, int doFor) {
-		return cmd.move(0f, 0f, 0f, speed);
+		return cmd.move(0f, 0f, 0f, speed).doFor(doFor);
 	}
 	
+	/**
+	 * A method to limit values.
+	 * @param i The value
+	 * @param min
+	 * @param max
+	 * @return The limited value.
+	 */
 	private int limit(int i, int min, int max) {
 		return (i > max ? max : (i < min ? min : i));
 	}
 
+	// See above
 	private float limit(float f, float min, float max) {
 		return (f > max ? max : (f < min ? min : f));
 	}
 	
-	private CommandManager goLeft(int speed, int doFor) throws InterruptedException {
-		for (int i = 1; i < doFor/10; i++) {
-			cmd.goLeft(speed);
-			controller.sleep(10);
-		}
-		return cmd.goLeft(speed);
-	}
-	
-	private CommandManager goRight(int speed, int doFor) throws InterruptedException {
-		for (int i = 1; i < doFor/10; i++) {
-			cmd.goRight(speed);
-			controller.sleep(10);
-		}
-		return cmd.goRight(speed);
-	}
-	
+	/**
+	 * Attempt at emulating sticky commands.
+	 */
 	private CommandManager move(float lrtilt, float fbtilt, float vspeed, float aspeed, int doFor) throws InterruptedException {
 		for (int i = 1; i < doFor/7; i++) {
 			cmd.move(lrtilt, fbtilt, vspeed, aspeed).doFor(25);

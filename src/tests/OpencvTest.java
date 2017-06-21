@@ -18,6 +18,11 @@ import org.opencv.imgproc.Imgproc;
 import imgManagement.Circle;
 import imgManagement.CircleFinder;
 
+/**
+ * Used for testing tolerances on OpenCV method on local images.
+ * @author Nichlas N. Pilemand
+ *
+ */
 public class OpencvTest {
 	private static final boolean testAll = true;
 	

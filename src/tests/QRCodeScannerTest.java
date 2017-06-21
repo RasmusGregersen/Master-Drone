@@ -30,6 +30,9 @@ class Controller implements TagListener {
 	}
 }
 
+/**
+ * @author Nichlas N. Pilemand
+ */
 public class QRCodeScannerTest {
 	
 	public static void main(String[] args) {

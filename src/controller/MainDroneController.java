@@ -22,18 +22,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
- * Main drone controller. Translates read tags into commands for the drone.
- * 
+ * Main drone controller.
  * @author Nichlas N. Pilemand
  *
  */
 public class MainDroneController extends AbstractController implements TagListener, CircleListener, ImageListener {
-
-	/*
-	 * This list holds tag-IDs for all tags which have successfully been visited
-	 */
-	private ArrayList<String> tagVisitedList = new ArrayList<String>();
-
 	protected Result tag;
 	private HashMap<String, Point> wallMarks;
 	private Circle[] circles;
@@ -42,27 +35,20 @@ public class MainDroneController extends AbstractController implements TagListen
 	protected double latestImgTime;
 	protected int circleRadius = 160;
 	private ArrayList<String> ports = new ArrayList<String>();
+	private StateController sc;
 
 
 	public StateController getSc() {
 		return sc;
 	}
 
-	private StateController sc;
 
 	public MainDroneController(IARDrone drone) {
 		super(drone);
 		// Init port names list
 		for (int i = 0; i <= 7; i++)
 			ports.add("P.0" + i);
-//			ports.add("W02.0" + i);
 //		ports.add("W02.02"); // Test room
-//		ports.add("P.01");
-//		ports.add("P.03");
-//		ports.add("P.00");
-//		ports.add("W01.00");
-//		ports.add("W01.01");
-//		ports.add("P.01");
 		
 		wallMarks = WallCoordinatesReader.read();
 		setupAltitudeListener();
@@ -74,7 +60,7 @@ public class MainDroneController extends AbstractController implements TagListen
 	public void run() {
 		this.doStop = false;
 		sc = new StateController(this, drone, drone.getCommandManager());
-		sc.state = Command.TakeOff;
+		sc.state = Command.Centralize;
 		while (!doStop) // control loop
 		{
 			try {
@@ -90,10 +76,6 @@ public class MainDroneController extends AbstractController implements TagListen
 			}
 		}
 
-	}
-
-	ArrayList<String> getTagVisitedList() {
-		return tagVisitedList;
 	}
 
 	Result getTag() {
@@ -119,6 +101,13 @@ public class MainDroneController extends AbstractController implements TagListen
 		tag = result;
 	}
 
+	/**
+	 * A circle is centered if it's within the tolerance of the center of the image,
+	 * and has a predefined {@link MainDroneController#circleRadius radius}. 
+	 * Of all the potential circles detected, only the first with a radius greater
+	 * than the image width / 4 is considered.
+	 * @return True if centered, otherwise false.
+	 */
 	Boolean isCircleCentered() {
 		Boolean ret = false;
 		int imgCenterX = MasterDrone.IMAGE_WIDTH / 2;
@@ -134,6 +123,12 @@ public class MainDroneController extends AbstractController implements TagListen
 		return ret;
 	}
 	
+	/**
+	 * A tag is centered if it's {@link MainDroneController#getTagCenter center} is within the tolerance 
+	 * of the center of the image, and it's {@link MainDroneController#getTagSize size} is at least the 
+	 * image width / 14.
+	 * @return True if tag is centered, otherwise false
+	 */
 	public boolean isTagCentered(){
 		if (tag == null)
 			return false;
@@ -148,6 +143,19 @@ public class MainDroneController extends AbstractController implements TagListen
 				&& (center.y > (imgCenterY - MasterDrone.TOLERANCE))
 				&& (center.y < (imgCenterY + MasterDrone.TOLERANCE)
 				&& (getTagSize() < (MasterDrone.IMAGE_WIDTH / 14))));
+	}
+	
+	@Override
+	public void imageUpdated(BufferedImage image) {
+		this.latestImgTime = System.currentTimeMillis();
+	}
+	
+	/**
+	 * Receives circles from {@link CircleFinder}.
+	 */
+	@Override
+	public void circlesUpdated(Circle[] circles) {
+		this.circles = circles;
 	}
 	
 	/**
@@ -165,13 +173,10 @@ public class MainDroneController extends AbstractController implements TagListen
 	}
 
 	/**
-	 * Takes circles from {@link CircleFinder}.
+	 * Calculates the center of the tag according to it's position on the image.
+	 * @param tag The tag to get the center from
+	 * @return The center point of the tag. 
 	 */
-	@Override
-	public void circlesUpdated(Circle[] circles) {
-		this.circles = circles;
-	}
-
 	private Point getTagCenter(Result tag) {
 		ResultPoint[] points = tag.getResultPoints();
 		double dy = (points[0].getY() + points[1].getY()) / 2; // bottom-left,
@@ -201,13 +206,12 @@ public class MainDroneController extends AbstractController implements TagListen
 		}
 	}
 
+	/**
+	 * Delivers the currently stored tag to the angle function:
+	 * @see controller.MainDroneController#getQRRelativeAngle(Result) getQRRelativeAngle(Result tag)
+	 */
 	public double getQRRelativeAngle() {
 		return getQRRelativeAngle(this.tag);
-	}
-
-	@Override
-	public void imageUpdated(BufferedImage image) {
-		this.latestImgTime = System.currentTimeMillis();
 	}
 
 	/**
@@ -226,6 +230,9 @@ public class MainDroneController extends AbstractController implements TagListen
 		});
 	}
 
+	/**
+	 * @return The drone's altitude
+	 */
 	public int getAltitude() {
 		return this.altitude;
 	}
