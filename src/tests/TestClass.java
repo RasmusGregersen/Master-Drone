@@ -1,4 +1,4 @@
-package controller;
+package tests;
 
 import de.yadrone.base.ARDrone;
 import de.yadrone.base.IARDrone;
@@ -10,6 +10,9 @@ import de.yadrone.base.navdata.AttitudeListener;
 import imgManagement.CircleFinder;
 import imgManagement.QRCodeScanner;
 import org.opencv.core.Core;
+
+import controller.GUI;
+import controller.KeyboardController;
 
 import java.io.IOException;
 

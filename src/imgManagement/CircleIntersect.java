@@ -1,9 +1,10 @@
-package cirkelgpsdarude;
+package imgManagement;
 
 import java.util.HashMap;
 
 /**
  * Created by LarsMyrup on 19/04/2017.
+ * Unused in final product...
  */
 public class CircleIntersect {
 

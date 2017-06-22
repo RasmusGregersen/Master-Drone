@@ -42,6 +42,12 @@ class Controller3 implements TagListener {
 	}
 }
 
+/**
+ * A currently non functioning class that tries to emulate a drone video stream
+ * in order to test various image methods locally.
+ * @author Nichlas N. Pilemand
+ *
+ */
 public class VideoTest extends Thread {
 	private static String source = "\\assets\\vid1.mp4";
 	private static String source2 = "C:/Users/evil_/git/Master-Drone/assets/vid1.mp4";

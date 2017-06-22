@@ -8,6 +8,7 @@ import de.yadrone.base.video.ImageListener;
 import imgManagement.Circle;
 import imgManagement.CircleListener;
 import imgManagement.TagListener;
+import tests.TestClass;
 
 import javax.swing.*;
 import java.awt.*;
@@ -25,7 +26,7 @@ public class GUI extends JFrame implements ImageListener, TagListener, CircleLis
 
 	private JPanel videoPanel;
 	private int batterypercentage;
-	private int imgScale = 4; // Scale the preset width/height with this factor
+	private int imgScale = 2; // Scale the preset width/height with this factor
 
 	public GUI(final IARDrone drone, MasterDrone main) {
 		super("Master Drone");
@@ -102,9 +103,6 @@ public class GUI extends JFrame implements ImageListener, TagListener, CircleLis
 	private JPanel createVideoPanel() {
 		videoPanel = new JPanel() {
 
-			/**
-			 *
-			 */
 			private static final long serialVersionUID = 1L;
 			private Font tagFont = new Font("SansSerif", Font.BOLD, 14 * imgScale / 2);
 
@@ -117,7 +115,7 @@ public class GUI extends JFrame implements ImageListener, TagListener, CircleLis
 							null);
 
 					// draw the battery percentage
-					if (batterypercentage > 50) {
+					if (batterypercentage > 30) {
 						g.setColor(Color.GREEN);
 						g.setFont(tagFont);
 					} else {
@@ -135,7 +133,7 @@ public class GUI extends JFrame implements ImageListener, TagListener, CircleLis
 						g.drawString("State: Waiting for AutoController...", 0, 50);
 
 					// draw circle status
-					g.drawString("Circles remaining: " + main.getDroneController().getPorts().size(), 0, 100);
+//					g.drawString("Circles remaining: " + main.getDroneController().getPorts().size(), 0, 100);
 
 					// draw tolerance field (rectangle)
 					g.setColor(Color.RED);
@@ -188,6 +186,7 @@ public class GUI extends JFrame implements ImageListener, TagListener, CircleLis
 							g.setColor(Color.BLUE);
 							g.drawOval((int) (c.x - c.r) * imgScale, (int) (c.y - c.r) * imgScale,
 									(int) (2 * c.r) * imgScale, (int) (2 * c.r) * imgScale);
+							g.drawString(c.toString(), (int) c.x * imgScale + 10, (int) c.y * imgScale + 10);
 						}
 				} else {
 					// draw "Waiting for video"
